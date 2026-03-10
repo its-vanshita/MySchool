@@ -56,7 +56,11 @@ export default function LoginScreen() {
     const account = demoAccounts[id];
     if (account && password === account.password) {
       enterDemoMode(account.role);
-      router.replace('/(drawer)/(tabs)');
+      if (account.role === 'parent') {
+        router.replace('/(parent-drawer)/(tabs)' as any);
+      } else {
+        router.replace('/(drawer)/(tabs)');
+      }
     } else {
       Alert.alert('Invalid Credentials', 'Use one of the demo credentials shown below the login button.');
     }

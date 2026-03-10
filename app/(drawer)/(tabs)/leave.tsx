@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,35 +6,127 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../../src/context/UserContext';
 import { useLeaveRequests, useAllLeaveRequests } from '../../../src/hooks/useLeaveRequests';
+import { useNotificationBadge } from '../../../src/context/NotificationContext';
 import { updateLeaveStatus } from '../../../src/services/supabaseService';
 import { colors } from '../../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { LeaveRequest, LeaveStatus } from '../../../src/types';
 
-const STATUS_CONFIG: Record<LeaveStatus, { color: string; bg: string; icon: string }> = {
-  pending: { color: colors.warning, bg: colors.warningLight, icon: 'time-outline' },
-  approved: { color: colors.success, bg: colors.successLight, icon: 'checkmark-circle-outline' },
-  rejected: { color: colors.danger, bg: colors.dangerLight, icon: 'close-circle-outline' },
+const STATUS_CONFIG: Record<LeaveStatus, { color: string; bg: string; border: string; icon: string; label: string }> = {
+  pending:  { color: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A', icon: 'time-outline',              label: 'Pending Approval' },
+  approved: { color: '#059669', bg: '#ECFDF5', border: '#A7F3D0', icon: 'checkmark-circle',          label: 'Approved' },
+  rejected: { color: '#DC2626', bg: '#FEF2F2', border: '#FECACA', icon: 'close-circle',              label: 'Rejected' },
 };
+
+function daysBetween(from: string, to: string): number {
+  const a = new Date(from);
+  const b = new Date(to);
+  return Math.round(Math.abs(b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+}
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function formatDateShort(dateStr: string): string {
+  const d = new Date(dateStr);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${d.getDate()} ${months[d.getMonth()]}`;
+}
+
+function timeAgo(dateStr: string): string {
+  const now = new Date();
+  const created = new Date(dateStr);
+  const diffMs = now.getTime() - created.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHrs = Math.floor(diffMins / 60);
+  if (diffHrs < 24) return `${diffHrs}h ago`;
+  const diffDays = Math.floor(diffHrs / 24);
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return formatDateShort(dateStr);
+}
 
 export default function LeaveScreen() {
   const router = useRouter();
   const { profile, permissions } = useUser();
+  const { addNotification } = useNotificationBadge();
 
-  // Teacher sees their own leaves; Principal sees all
-  const { leaves: myLeaves, loading: myLoading, applyLeave } = useLeaveRequests(profile?.id);
-  const { leaves: allLeaves, loading: allLoading } = useAllLeaveRequests();
+  const { leaves: myLeaves, loading: myLoading, refreshing: myRefreshing, refresh: myRefresh, statusChanges, clearStatusChanges } = useLeaveRequests(profile?.id);
+  const { leaves: allLeaves, loading: allLoading, refreshing: allRefreshing, refresh: allRefresh } = useAllLeaveRequests();
 
   const isApprover = permissions.canApproveLeave;
   const [tab, setTab] = useState<'my' | 'approvals'>(isApprover ? 'approvals' : 'my');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
   const leaves = tab === 'my' ? myLeaves : allLeaves;
   const loading = tab === 'my' ? myLoading : allLoading;
+  const refreshing = tab === 'my' ? myRefreshing : allRefreshing;
+  const pendingCount = useMemo(() => allLeaves.filter((l) => l.status === 'pending').length, [allLeaves]);
+
+  // Filter leaves by status
+  const filteredLeaves = useMemo(() => {
+    if (statusFilter === 'all') return leaves;
+    return leaves.filter((l) => l.status === statusFilter);
+  }, [leaves, statusFilter]);
+
+  // Refresh data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      myRefresh();
+      if (isApprover) allRefresh();
+    }, [myRefresh, allRefresh, isApprover])
+  );
+
+  const handleRefresh = () => {
+    if (tab === 'my') myRefresh();
+    else allRefresh();
+  };
+
+  // Generate notifications when leave status changes
+  useEffect(() => {
+    if (statusChanges.length > 0) {
+      statusChanges.forEach((change) => {
+        const statusLabel = change.status === 'approved' ? 'Approved' : 'Rejected';
+        addNotification({
+          title: `Leave ${statusLabel}`,
+          message: `Your leave from ${formatDateShort(change.from_date)} to ${formatDateShort(change.to_date)} has been ${change.status}.`,
+          type: 'leave',
+        });
+      });
+      clearStatusChanges();
+    }
+  }, [statusChanges, addNotification, clearStatusChanges]);
+
+  // Stats
+  const stats = useMemo(() => {
+    const source = tab === 'my' ? myLeaves : allLeaves;
+    const approved = source.filter((l) => l.status === 'approved');
+    const pending = source.filter((l) => l.status === 'pending');
+    const rejected = source.filter((l) => l.status === 'rejected');
+    const approvedDays = approved.reduce((sum, l) => sum + daysBetween(l.from_date, l.to_date), 0);
+    const pendingDays = pending.reduce((sum, l) => sum + daysBetween(l.from_date, l.to_date), 0);
+    return {
+      total: source.length,
+      approvedCount: approved.length,
+      pendingCount: pending.length,
+      rejectedCount: rejected.length,
+      approvedDays,
+      pendingDays,
+    };
+  }, [myLeaves, allLeaves, tab]);
 
   const handleApprove = (id: string) => {
     Alert.alert('Approve Leave', 'Approve this leave request?', [
@@ -59,43 +151,104 @@ export default function LeaveScreen() {
 
   const renderLeave = ({ item }: { item: LeaveRequest }) => {
     const config = STATUS_CONFIG[item.status];
+    const days = daysBetween(item.from_date, item.to_date);
+    const ago = item.created_at ? timeAgo(item.created_at) : '';
+
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, { borderLeftColor: config.color }]}>
+        {/* Header: teacher name (approvals) + status */}
         <View style={styles.cardHeader}>
-          {tab === 'approvals' && item.teacher_name && (
-            <Text style={styles.teacherName}>{item.teacher_name}</Text>
-          )}
-          <View style={[styles.statusBadge, { backgroundColor: config.bg }]}>
+          <View style={styles.cardHeaderLeft}>
+            {tab === 'approvals' && item.teacher_name ? (
+              <View style={styles.nameRow}>
+                <View style={[styles.avatarCircle, { backgroundColor: config.color + '20' }]}>
+                  <Text style={[styles.avatarText, { color: config.color }]}>
+                    {item.teacher_name.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                <View>
+                  <Text style={styles.teacherName}>{item.teacher_name}</Text>
+                  <Text style={styles.agoText}>{ago}</Text>
+                </View>
+              </View>
+            ) : (
+              <View>
+                <Text style={styles.cardTitle}>Leave Request</Text>
+                <Text style={styles.agoText}>Applied {ago}</Text>
+              </View>
+            )}
+          </View>
+          <View style={[styles.statusChip, { backgroundColor: config.bg, borderColor: config.border }]}>
             <Ionicons name={config.icon as any} size={14} color={config.color} />
-            <Text style={[styles.statusText, { color: config.color }]}>
-              {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-            </Text>
+            <Text style={[styles.statusLabel, { color: config.color }]}>{config.label}</Text>
           </View>
         </View>
-        <View style={styles.dateRow}>
-          <Ionicons name="calendar-outline" size={16} color={colors.textSecondary} />
-          <Text style={styles.dateText}>
-            {item.from_date} → {item.to_date}
-          </Text>
+
+        {/* Date range */}
+        <View style={styles.dateSection}>
+          <View style={styles.dateCol}>
+            <Text style={styles.dateMeta}>FROM</Text>
+            <Text style={styles.dateMain}>{formatDateShort(item.from_date)}</Text>
+          </View>
+          <View style={styles.dateArrow}>
+            <View style={styles.arrowLine} />
+            <View style={styles.daysPill}>
+              <Text style={styles.daysPillText}>{days} {days === 1 ? 'day' : 'days'}</Text>
+            </View>
+            <View style={styles.arrowLine} />
+          </View>
+          <View style={[styles.dateCol, { alignItems: 'flex-end' }]}>
+            <Text style={styles.dateMeta}>TO</Text>
+            <Text style={styles.dateMain}>{formatDateShort(item.to_date)}</Text>
+          </View>
         </View>
-        <Text style={styles.reason}>{item.reason}</Text>
+
+        {/* Reason */}
+        <View style={styles.reasonSection}>
+          <Ionicons name="chatbox-ellipses-outline" size={14} color={colors.textLight} style={{ marginTop: 2 }} />
+          <Text style={styles.reasonText} numberOfLines={2}>{item.reason}</Text>
+        </View>
+
+        {/* Status detail for teacher's own leaves */}
+        {tab === 'my' && item.status === 'pending' && (
+          <View style={styles.pendingNote}>
+            <Ionicons name="information-circle-outline" size={15} color="#D97706" />
+            <Text style={styles.pendingNoteText}>Waiting for approval from the Principal</Text>
+          </View>
+        )}
+        {tab === 'my' && item.status === 'approved' && (
+          <View style={[styles.pendingNote, { backgroundColor: '#ECFDF5' }]}>
+            <Ionicons name="checkmark-done" size={15} color="#059669" />
+            <Text style={[styles.pendingNoteText, { color: '#059669' }]}>
+              Leave approved — {days} day{days !== 1 ? 's' : ''} deducted from your balance
+            </Text>
+          </View>
+        )}
+        {tab === 'my' && item.status === 'rejected' && (
+          <View style={[styles.pendingNote, { backgroundColor: '#FEF2F2' }]}>
+            <Ionicons name="ban-outline" size={15} color="#DC2626" />
+            <Text style={[styles.pendingNoteText, { color: '#DC2626' }]}>
+              Leave request was rejected
+            </Text>
+          </View>
+        )}
 
         {/* Approval buttons for principal */}
         {tab === 'approvals' && item.status === 'pending' && isApprover && (
           <View style={styles.actionRow}>
             <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: colors.successLight }]}
+              style={[styles.actionBtn, styles.approveBtn]}
               onPress={() => handleApprove(item.id)}
             >
-              <Ionicons name="checkmark" size={18} color={colors.success} />
-              <Text style={[styles.actionBtnText, { color: colors.success }]}>Approve</Text>
+              <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
+              <Text style={styles.approveBtnText}>Approve</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: colors.dangerLight }]}
+              style={[styles.actionBtn, styles.rejectBtn]}
               onPress={() => handleReject(item.id)}
             >
-              <Ionicons name="close" size={18} color={colors.danger} />
-              <Text style={[styles.actionBtnText, { color: colors.danger }]}>Reject</Text>
+              <Ionicons name="close-circle" size={18} color="#DC2626" />
+              <Text style={styles.rejectBtnText}>Reject</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -103,42 +256,160 @@ export default function LeaveScreen() {
     );
   };
 
+  const ListHeader = () => (
+    <View style={styles.headerSection}>
+      {/* Stats grid */}
+      <View style={styles.statsGrid}>
+        <View style={[styles.statBox, styles.statBoxApproved]}>
+          <View style={[styles.statIconCircle, { backgroundColor: '#ECFDF5' }]}>
+            <Ionicons name="checkmark-circle" size={20} color="#059669" />
+          </View>
+          <Text style={[styles.statBoxNum, { color: '#059669' }]}>{stats.approvedCount}</Text>
+          <Text style={styles.statBoxLabel}>Approved</Text>
+        </View>
+        <View style={[styles.statBox, styles.statBoxPending]}>
+          <View style={[styles.statIconCircle, { backgroundColor: '#FFFBEB' }]}>
+            <Ionicons name="time" size={20} color="#D97706" />
+          </View>
+          <Text style={[styles.statBoxNum, { color: '#D97706' }]}>{stats.pendingCount}</Text>
+          <Text style={styles.statBoxLabel}>Pending</Text>
+        </View>
+        <View style={[styles.statBox, styles.statBoxRejected]}>
+          <View style={[styles.statIconCircle, { backgroundColor: '#FEF2F2' }]}>
+            <Ionicons name="close-circle" size={20} color="#DC2626" />
+          </View>
+          <Text style={[styles.statBoxNum, { color: '#DC2626' }]}>{stats.rejectedCount}</Text>
+          <Text style={styles.statBoxLabel}>Rejected</Text>
+        </View>
+      </View>
+
+      {/* Total balance bar */}
+      {tab === 'my' && (
+        <View style={styles.balanceBar}>
+          <View style={styles.balanceLeft}>
+            <View style={styles.balanceIcon}>
+              <Ionicons name="calendar" size={18} color={colors.white} />
+            </View>
+            <View>
+              <Text style={styles.balanceTitle}>Total Leave Taken</Text>
+              <Text style={styles.balanceSub}>Approved leaves only</Text>
+            </View>
+          </View>
+          <Text style={styles.balanceValue}>{stats.approvedDays} Days</Text>
+        </View>
+      )}
+
+      {/* Status filter chips */}
+      <View style={styles.filterRow}>
+        {(['all', 'pending', 'approved', 'rejected'] as const).map((f) => {
+          const active = statusFilter === f;
+          const count = f === 'all' ? stats.total : f === 'pending' ? stats.pendingCount : f === 'approved' ? stats.approvedCount : stats.rejectedCount;
+          const chipColor = f === 'pending' ? '#D97706' : f === 'approved' ? '#059669' : f === 'rejected' ? '#DC2626' : colors.primary;
+          return (
+            <TouchableOpacity
+              key={f}
+              style={[styles.filterChip, active && { backgroundColor: chipColor }]}
+              onPress={() => setStatusFilter(f)}
+            >
+              <Text style={[styles.filterChipText, active && { color: '#fff' }]}>
+                {f.charAt(0).toUpperCase() + f.slice(1)}
+              </Text>
+              {count > 0 && (
+                <View style={[styles.filterChipBadge, active && { backgroundColor: 'rgba(255,255,255,0.3)' }]}>
+                  <Text style={[styles.filterChipBadgeText, active && { color: '#fff' }]}>{count}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {/* Requests title */}
+      <View style={styles.requestsTitleRow}>
+        <Text style={styles.requestsTitle}>
+          {tab === 'my' ? 'My Leave Requests' : 'All Leave Requests'}
+        </Text>
+        <Text style={styles.requestsCount}>{filteredLeaves.length} showing</Text>
+      </View>
+    </View>
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* Tab bar for principal */}
+      {/* Tab bar for approver */}
       {isApprover && (
         <View style={styles.tabBar}>
           <TouchableOpacity
             style={[styles.tab, tab === 'approvals' && styles.tabActive]}
             onPress={() => setTab('approvals')}
           >
-            <Text style={[styles.tabText, tab === 'approvals' && styles.tabTextActive]}>
+            <Text style={[styles.tabLabel, tab === 'approvals' && styles.tabLabelActive]}>
               All Requests
             </Text>
+            {pendingCount > 0 && (
+              <View style={styles.tabBadge}>
+                <Text style={styles.tabBadgeText}>{pendingCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, tab === 'my' && styles.tabActive]}
             onPress={() => setTab('my')}
           >
-            <Text style={[styles.tabText, tab === 'my' && styles.tabTextActive]}>My Leaves</Text>
+            <Text style={[styles.tabLabel, tab === 'my' && styles.tabLabelActive]}>My Leaves</Text>
           </TouchableOpacity>
         </View>
       )}
 
       <FlatList
-        data={leaves}
+        data={filteredLeaves}
         keyExtractor={(item) => item.id}
         renderItem={renderLeave}
+        ListHeaderComponent={ListHeader}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="airplane-outline" size={50} color={colors.textLight} />
-            <Text style={styles.emptyText}>No leave requests</Text>
+            <View style={styles.emptyIconCircle}>
+              {statusFilter !== 'all' ? (
+                <Ionicons name="filter-outline" size={40} color={colors.textLight} />
+              ) : (
+                <Ionicons name="document-text-outline" size={40} color={colors.textLight} />
+              )}
+            </View>
+            <Text style={styles.emptyTitle}>
+              {statusFilter !== 'all'
+                ? `No ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)} Requests`
+                : tab === 'my' ? 'No Leave Requests Yet' : 'No Requests to Review'}
+            </Text>
+            <Text style={styles.emptySubtext}>
+              {statusFilter !== 'all'
+                ? `You don't have any ${statusFilter} leave requests. Try a different filter.`
+                : tab === 'my'
+                  ? 'When you apply for leave, your requests and their status will appear here.'
+                  : 'Leave requests from teachers will appear here for your review.'}
+            </Text>
           </View>
         }
       />
 
-      {/* FAB for applying leave */}
+      {/* FAB for applying leave — always visible for teachers */}
       {permissions.canRequestLeave && (
         <TouchableOpacity style={styles.fab} onPress={() => router.push('/apply-leave')}>
           <Ionicons name="add" size={28} color={colors.white} />
@@ -149,7 +420,10 @@ export default function LeaveScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: '#F5F7FA' },
+  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+
+  // Tab bar
   tabBar: {
     flexDirection: 'row',
     backgroundColor: colors.white,
@@ -158,54 +432,330 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.md,
+    justifyContent: 'center',
+    paddingVertical: 14,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
+    gap: 6,
   },
   tabActive: { borderBottomColor: colors.primary },
-  tabText: { fontSize: fontSize.md, fontWeight: '600', color: colors.textLight },
-  tabTextActive: { color: colors.primary },
-  list: { padding: spacing.lg },
+  tabLabel: { fontSize: fontSize.md, fontWeight: '600', color: colors.textLight },
+  tabLabelActive: { color: colors.primary },
+  tabBadge: {
+    backgroundColor: '#EF4444',
+    borderRadius: 10,
+    minWidth: 20,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    alignItems: 'center',
+  },
+  tabBadgeText: { color: '#fff', fontSize: 10, fontWeight: '800' },
+
+  list: { paddingBottom: 100 },
+
+  // ── Header / Stats ──
+  headerSection: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  statBox: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  statBoxApproved: { borderBottomWidth: 3, borderBottomColor: '#059669' },
+  statBoxPending:  { borderBottomWidth: 3, borderBottomColor: '#D97706' },
+  statBoxRejected: { borderBottomWidth: 3, borderBottomColor: '#DC2626' },
+  statIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  statBoxNum: {
+    fontSize: 24,
+    fontWeight: '800',
+    marginTop: 2,
+  },
+  statBoxLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    marginTop: 2,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+
+  balanceBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.md,
+  },
+  balanceLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  balanceIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  balanceTitle: {
+    fontSize: fontSize.sm,
+    fontWeight: '700',
+    color: colors.white,
+  },
+  balanceSub: {
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 1,
+  },
+  balanceValue: {
+    fontSize: fontSize.xl,
+    fontWeight: '800',
+    color: colors.white,
+  },
+
+  // Filter chips
+  filterRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    gap: 5,
+    borderWidth: 1,
+    borderColor: colors.border,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  filterChipBadge: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    minWidth: 18,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    alignItems: 'center',
+  },
+  filterChipBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.textSecondary,
+  },
+
+  requestsTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  requestsTitle: {
+    fontSize: fontSize.md,
+    fontWeight: '800',
+    color: colors.textPrimary,
+  },
+  requestsCount: {
+    fontSize: fontSize.xs,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+
+  // ── Card ──
   card: {
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
+    marginHorizontal: spacing.lg,
     marginBottom: spacing.md,
-    elevation: 1,
+    borderLeftWidth: 4,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
+    alignItems: 'flex-start',
+    marginBottom: spacing.md,
   },
-  teacherName: { fontSize: fontSize.md, fontWeight: '700', color: colors.textPrimary },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    gap: spacing.xs,
+  cardHeaderLeft: {
+    flex: 1,
+    marginRight: spacing.sm,
   },
-  statusText: { fontSize: fontSize.xs, fontWeight: '700' },
-  dateRow: {
+  nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+  },
+  avatarCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: colors.white,
+    fontSize: fontSize.sm,
+    fontWeight: '800',
+  },
+  teacherName: {
+    fontSize: fontSize.md,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  cardTitle: {
+    fontSize: fontSize.md,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    marginBottom: 1,
+  },
+  agoText: {
+    fontSize: fontSize.xs,
+    color: colors.textLight,
+    marginTop: 1,
+  },
+  statusChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    gap: 4,
+    borderWidth: 1,
+  },
+  statusLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+
+  // Date section
+  dateSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8F9FB',
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  dateCol: {
+    flex: 1,
+  },
+  dateMeta: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: colors.textLight,
+    letterSpacing: 1,
+    marginBottom: 3,
+  },
+  dateMain: {
+    fontSize: fontSize.md,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  dateArrow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: spacing.xs,
+  },
+  arrowLine: {
+    width: 12,
+    height: 1.5,
+    backgroundColor: colors.border,
+  },
+  daysPill: {
+    backgroundColor: colors.primaryLight,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  daysPillText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: colors.primary,
+  },
+
+  // Reason
+  reasonSection: {
+    flexDirection: 'row',
+    gap: spacing.sm,
     marginBottom: spacing.sm,
   },
-  dateText: { fontSize: fontSize.sm, fontWeight: '600', color: colors.textPrimary },
-  reason: { fontSize: fontSize.sm, color: colors.textSecondary, lineHeight: 20 },
+  reasonText: {
+    flex: 1,
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    lineHeight: 20,
+  },
+
+  // Status notes
+  pendingNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFFBEB',
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  pendingNoteText: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#D97706',
+  },
+
+  // Actions
   actionRow: {
     flexDirection: 'row',
-    gap: spacing.md,
-    marginTop: spacing.lg,
+    gap: spacing.sm,
+    marginTop: spacing.md,
   },
   actionBtn: {
     flex: 1,
@@ -213,12 +763,65 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: borderRadius.md,
-    paddingVertical: spacing.md,
-    gap: spacing.xs,
+    paddingVertical: 10,
+    gap: 6,
   },
-  actionBtnText: { fontSize: fontSize.sm, fontWeight: '700' },
-  emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingTop: 80 },
-  emptyText: { color: colors.textLight, fontSize: fontSize.md, marginTop: spacing.md },
+  approveBtn: {
+    backgroundColor: '#059669',
+  },
+  approveBtnText: { fontSize: fontSize.sm, fontWeight: '700', color: '#FFFFFF' },
+  rejectBtn: {
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  rejectBtnText: { fontSize: fontSize.sm, fontWeight: '700', color: '#DC2626' },
+
+  // Empty
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 60,
+    paddingHorizontal: spacing.xxl,
+  },
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+  },
+  emptyTitle: {
+    color: colors.textPrimary,
+    fontSize: fontSize.lg,
+    fontWeight: '700',
+    marginBottom: spacing.xs,
+  },
+  emptySubtext: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: spacing.xl,
+  },
+  emptyApplyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.md,
+  },
+  emptyApplyBtnText: {
+    color: colors.white,
+    fontSize: fontSize.md,
+    fontWeight: '700',
+  },
+
+  // FAB
   fab: {
     position: 'absolute',
     right: spacing.xl,
@@ -226,13 +829,13 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.purple,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 6,
-    shadowColor: colors.purple,
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    elevation: 8,
+    shadowColor: colors.primary,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
   },
 });

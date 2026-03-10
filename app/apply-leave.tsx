@@ -195,8 +195,9 @@ export default function ApplyLeaveScreen() {
       Alert.alert('Success', 'Leave request submitted!', [
         { text: 'OK', onPress: () => router.back() },
       ]);
-    } catch {
-      Alert.alert('Error', 'Failed to submit. Please try again.');
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to submit. Please try again.';
+      Alert.alert('Error', msg);
     } finally {
       setSubmitting(false);
     }

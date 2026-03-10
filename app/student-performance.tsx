@@ -7,7 +7,6 @@ import {
   ScrollView,
   Image,
   Modal,
-  DimensionValue,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -203,42 +202,6 @@ export default function StudentPerformanceScreen() {
     );
   }, [currentExamResult, isClassTeacher, teacherSubjects]);
 
-  // Growth data: avg marks per exam for visible subjects
-  const growthData = useMemo(() => {
-    return EXAM_OPTIONS.map((exam) => {
-      const result = allExamResults.find((r) => r.examId === exam.id);
-      if (!result) return { exam: exam.label.split(' ')[0], avg: 0 };
-      const filtered = isClassTeacher
-        ? result.subjects
-        : result.subjects.filter((s) =>
-            teacherSubjects.some((ts) => s.subject.toLowerCase().includes(ts.toLowerCase()))
-          );
-      const avg = filtered.length > 0
-        ? Math.round(filtered.reduce((sum, s) => sum + s.marks, 0) / filtered.length)
-        : 0;
-      return { exam: exam.label.split(' ').slice(0, 2).join(' '), avg };
-    });
-  }, [allExamResults, isClassTeacher, teacherSubjects]);
-
-  // Per-subject growth for graph
-  const subjectGrowth = useMemo(() => {
-    const subjectsToShow = isClassTeacher
-      ? ['Mathematics', 'Science', 'English', 'Hindi', 'Social Science']
-      : teacherSubjects;
-
-    return subjectsToShow.map((sub) => ({
-      subject: sub,
-      color: SUBJECT_COLORS[sub] ?? colors.primary,
-      data: EXAM_OPTIONS.map((exam) => {
-        const result = allExamResults.find((r) => r.examId === exam.id);
-        const subResult = result?.subjects.find((s) =>
-          s.subject.toLowerCase().includes(sub.toLowerCase())
-        );
-        return subResult?.marks ?? 0;
-      }),
-    }));
-  }, [allExamResults, isClassTeacher, teacherSubjects]);
-
   const totalMarks = visibleSubjects.reduce((s, sub) => s + sub.marks, 0);
   const totalMax = visibleSubjects.reduce((s, sub) => s + sub.maxMarks, 0);
   const overallPct = totalMax > 0 ? Math.round((totalMarks / totalMax) * 100) : 0;
@@ -376,70 +339,6 @@ export default function StudentPerformanceScreen() {
               </View>
             );
           })}
-        </View>
-
-        {/* ══════════ 3. GROWTH GRAPH ══════════ */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="trending-up" size={20} color={colors.success} />
-            <Text style={styles.sectionTitle}>Growth Trend</Text>
-          </View>
-
-          <Text style={styles.chartSubtitle}>
-            {isClassTeacher ? 'All subjects across exams' : `${teacherSubjects.join(', ')} across exams`}
-          </Text>
-
-          {/* Per-subject line chart (simplified bar representation) */}
-          {subjectGrowth.map((sg) => (
-            <View key={sg.subject} style={styles.growthSubject}>
-              <View style={styles.growthSubjectHeader}>
-                <View style={[styles.subjectDot, { backgroundColor: sg.color }]} />
-                <Text style={styles.growthSubjectName}>{sg.subject}</Text>
-              </View>
-              <View style={styles.growthBars}>
-                {sg.data.map((marks, i) => {
-                  const barWidth = (marks > 0 ? `${marks}%` : '0%') as DimensionValue;
-                  const examLabel = EXAM_OPTIONS[i].label.split(' ').slice(0, 2).join(' ');
-                  return (
-                    <View key={i} style={styles.growthBarRow}>
-                      <Text style={styles.growthExamLabel}>{examLabel}</Text>
-                      <View style={styles.growthBarBg}>
-                        <View style={[styles.growthBarFill, {
-                          width: barWidth,
-                          backgroundColor: sg.color,
-                        }]} />
-                      </View>
-                      <Text style={[styles.growthBarValue, { color: sg.color }]}>{marks}</Text>
-                    </View>
-                  );
-                })}
-              </View>
-            </View>
-          ))}
-
-          {/* Overall trend summary */}
-          <View style={styles.trendSummary}>
-            <Text style={styles.trendLabel}>Average Score Trend</Text>
-            <View style={styles.trendRow}>
-              {growthData.map((g, i) => {
-                const prev = i > 0 ? growthData[i - 1].avg : g.avg;
-                const trending = g.avg > prev ? 'up' : g.avg < prev ? 'down' : 'same';
-                return (
-                  <View key={i} style={styles.trendItem}>
-                    <Text style={styles.trendValue}>{g.avg}%</Text>
-                    {i > 0 && (
-                      <Ionicons
-                        name={trending === 'up' ? 'arrow-up' : trending === 'down' ? 'arrow-down' : 'remove'}
-                        size={14}
-                        color={trending === 'up' ? colors.success : trending === 'down' ? colors.danger : colors.textLight}
-                      />
-                    )}
-                    <Text style={styles.trendExam}>{g.exam}</Text>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
         </View>
       </ScrollView>
 
@@ -695,89 +594,6 @@ const styles = StyleSheet.create({
   gradePillText: {
     fontSize: 10,
     fontWeight: '700',
-  },
-
-  // Growth
-  chartSubtitle: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    marginBottom: spacing.lg,
-  },
-  growthSubject: {
-    marginBottom: spacing.lg,
-  },
-  growthSubjectHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  growthSubjectName: {
-    fontSize: fontSize.sm,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  growthBars: {
-    gap: spacing.xs,
-  },
-  growthBarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  growthExamLabel: {
-    width: 70,
-    fontSize: 10,
-    color: colors.textLight,
-    fontWeight: '500',
-  },
-  growthBarBg: {
-    flex: 1,
-    height: 10,
-    backgroundColor: colors.divider,
-    borderRadius: 5,
-    overflow: 'hidden',
-  },
-  growthBarFill: {
-    height: 10,
-    borderRadius: 5,
-  },
-  growthBarValue: {
-    width: 30,
-    fontSize: 10,
-    fontWeight: '700',
-    textAlign: 'right',
-  },
-
-  // Trend
-  trendSummary: {
-    backgroundColor: colors.background,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginTop: spacing.sm,
-  },
-  trendLabel: {
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginBottom: spacing.sm,
-  },
-  trendRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  trendItem: {
-    alignItems: 'center',
-    gap: 2,
-  },
-  trendValue: {
-    fontSize: fontSize.md,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  trendExam: {
-    fontSize: 9,
-    color: colors.textLight,
-    fontWeight: '500',
   },
 
   // Modal

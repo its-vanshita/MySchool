@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -7,107 +7,58 @@ import {
   StyleSheet,
   RefreshControl,
   Image,
-  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../src/context/AuthContext';
 import { useUser } from '../../../src/context/UserContext';
-import { useTimetable } from '../../../src/hooks/useTimetable';
-// Announcements removed from dashboard (available via bell notifications)
 import { useHomework } from '../../../src/hooks/useHomework';
 import { colors } from '../../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
-import type { ScheduleItem, ScheduleStatus, Homework } from '../../../src/types';
+import type { Homework } from '../../../src/types';
 
-const STATUS_COLORS: Record<ScheduleStatus, string> = {
-  upcoming: colors.info,
-  ongoing: colors.success,
-  completed: colors.textLight,
+// Demo child info for parent
+const DEMO_CHILD = {
+  name: 'Arjun Sharma',
+  class: 'Class 10-A',
+  rollNumber: '12',
+  attendance: 92,
+  totalPresent: 184,
+  totalDays: 200,
 };
 
-// Dummy schedule for demo mode
-const DUMMY_SCHEDULE: ScheduleItem[] = [
-  {
-    id: '1',
-    teacher_id: 'demo-teacher',
-    subject: 'Mathematics',
-    class_name: 'Class 10A',
-    room: '204',
-    start_time: '09:00',
-    end_time: '09:45',
-    day: 'monday',
-    school_id: 'demo-school',
-    status: 'completed',
-  },
-  {
-    id: '2',
-    teacher_id: 'demo-teacher',
-    subject: 'Science',
-    class_name: 'Class 9C',
-    room: 'Lab 02',
-    start_time: '11:30',
-    end_time: '12:15',
-    day: 'monday',
-    school_id: 'demo-school',
-    status: 'ongoing',
-  },
-  {
-    id: '3',
-    teacher_id: 'demo-teacher',
-    subject: 'Lunch Break',
-    class_name: 'Staff Room',
-    room: '',
-    start_time: '01:30',
-    end_time: '02:00',
-    day: 'monday',
-    school_id: 'demo-school',
-    status: 'upcoming',
-  },
-  {
-    id: '4',
-    teacher_id: 'demo-teacher',
-    subject: 'English',
-    class_name: 'Class 10A',
-    room: '204',
-    start_time: '02:00',
-    end_time: '02:45',
-    day: 'monday',
-    school_id: 'demo-school',
-    status: 'upcoming',
-  },
+// Demo attendance summary
+type AttendanceDayStatus = 'present' | 'absent' | 'late' | 'excused';
+
+const DEMO_ATTENDANCE_WEEKLY: { day: string; status: AttendanceDayStatus }[] = [
+  { day: 'Mon', status: 'present' },
+  { day: 'Tue', status: 'present' },
+  { day: 'Wed', status: 'absent' },
+  { day: 'Thu', status: 'present' },
+  { day: 'Fri', status: 'present' },
+  { day: 'Sat', status: 'present' },
 ];
 
-// Dummy student counts per subject
-const STUDENT_COUNTS: Record<string, number> = {
-  Mathematics: 42,
-  Science: 38,
-  English: 40,
+const STATUS_DOT_COLORS: Record<string, string> = {
+  present: colors.success,
+  absent: colors.danger,
+  late: colors.warning,
+  excused: colors.info,
 };
 
-export default function DashboardScreen() {
+export default function ParentDashboardScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { profile, role, permissions, isDemo } = useUser();
-  const { todaySchedule, loading: scheduleLoading } = useTimetable(profile?.id);
-
-  const { homework: recentHomework } = useHomework(
-    role === 'parent' ? undefined : profile?.id,
-    role === 'parent'
-  );
+  const { profile, isDemo } = useUser();
+  const { homework: recentHomework } = useHomework(undefined, true);
 
   const [refreshing, setRefreshing] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!user && !isDemo) {
       router.replace('/login');
-      return;
     }
-    // Redirect parents to their dedicated dashboard
-    if (role === 'parent') {
-      router.replace('/(parent-drawer)/(tabs)' as any);
-    }
-  }, [user, isDemo, role]);
+  }, [user, isDemo]);
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -120,56 +71,39 @@ export default function DashboardScreen() {
     const d = new Date();
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `Today is ${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+    return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
   };
 
-  const schedule = isDemo ? DUMMY_SCHEDULE : todaySchedule;
-
-  const formatTime12 = (time: string) => {
-    const [hStr, mStr] = time.split(':');
-    let h = parseInt(hStr, 10);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    if (h > 12) h -= 12;
-    if (h === 0) h = 12;
-    return { time: `${h.toString().padStart(2, '0')}:${mStr}`, ampm };
-  };
-
-  // Quick actions based on role
   const quickActions = [
     {
       icon: 'checkmark-circle' as const,
-      label: 'Mark\nAttendance',
-      color: colors.primary,
-      bgColor: '#E3F2FD',
-      route: '/(drawer)/(tabs)/attendance',
-      visible: permissions.canMarkAttendance,
+      label: 'Attendance',
+      color: colors.success,
+      bgColor: colors.successLight,
+      onPress: () => router.push('/(parent-drawer)/(tabs)/attendance'),
     },
     {
       icon: 'book' as const,
-      label: 'Add\nHomework',
+      label: 'Homework',
       color: colors.purple,
-      bgColor: '#EDE9FE',
-      route: '/add-homework',
-      visible: permissions.canAssignHomework,
+      bgColor: colors.purpleLight,
+      onPress: () => router.push('/(parent-drawer)/(tabs)/homework'),
     },
     {
-      icon: 'chatbubbles' as const,
-      label: 'Announce',
-      subtitle: 'Teachers',
+      icon: 'megaphone' as const,
+      label: 'Notices',
       color: colors.info,
-      bgColor: '#E8EAF6',
-      route: '/create-announcement',
-      visible: permissions.canPublishAnnouncement,
+      bgColor: colors.infoLight,
+      onPress: () => router.push('/(parent-drawer)/(tabs)/notices'),
     },
     {
-      icon: 'today' as const,
-      label: 'Academic\nCalendar',
-      color: colors.success,
-      bgColor: '#D1FAE5',
-      route: '/(drawer)/calendar',
-      visible: true,
+      icon: 'clipboard' as const,
+      label: 'Exams',
+      color: colors.warning,
+      bgColor: colors.warningLight,
+      onPress: () => router.push('/(parent-drawer)/(tabs)/datesheet'),
     },
-  ].filter((a) => a.visible);
+  ];
 
   return (
     <ScrollView
@@ -187,33 +121,42 @@ export default function DashboardScreen() {
         />
       }
     >
-      {/* Profile / Greeting Section */}
+      {/* Greeting Section */}
       <View style={styles.greetingSection}>
         <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80' }}
+          source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80' }}
           style={styles.profileImage}
         />
         <View style={styles.greetingTextContainer}>
           <Text style={styles.greetingText}>
-            {greeting()}, {profile?.name?.split(' ').pop() || 'Teacher'}
+            {greeting()}, {profile?.name?.split(' ')[0] || 'Parent'}
           </Text>
-          <Text style={styles.roleSubtitle}>
-            {role === 'teacher'
-              ? 'Class Teacher - 10A'
-              : role === 'admin'
-              ? 'School Administrator'
-              : role === 'parent'
-              ? 'Parent'
-              : role.charAt(0).toUpperCase() + role.slice(1)}
-          </Text>
+          <Text style={styles.roleSubtitle}>Parent</Text>
           <View style={styles.todayPill}>
             <Text style={styles.todayPillText}>{todayString()}</Text>
           </View>
         </View>
       </View>
 
-      {/* Separator */}
       <View style={styles.separator} />
+
+      {/* Child Info Card */}
+      <Text style={styles.sectionTitle}>Your Child</Text>
+      <View style={styles.childCard}>
+        <View style={styles.childAvatarContainer}>
+          <View style={styles.childAvatar}>
+            <Ionicons name="person" size={28} color={colors.primary} />
+          </View>
+        </View>
+        <View style={styles.childInfo}>
+          <Text style={styles.childName}>{DEMO_CHILD.name}</Text>
+          <Text style={styles.childClass}>{DEMO_CHILD.class} • Roll #{DEMO_CHILD.rollNumber}</Text>
+        </View>
+        <View style={styles.attendanceBadge}>
+          <Text style={styles.attendancePercent}>{DEMO_CHILD.attendance}%</Text>
+          <Text style={styles.attendanceLabel}>Attendance</Text>
+        </View>
+      </View>
 
       {/* Quick Actions */}
       <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -222,55 +165,76 @@ export default function DashboardScreen() {
           <TouchableOpacity
             key={action.label}
             style={styles.actionCard}
-            onPress={() => router.push(action.route as any)}
+            onPress={action.onPress}
           >
             <View style={[styles.actionIcon, { backgroundColor: action.bgColor }]}>
               <Ionicons name={action.icon} size={24} color={action.color} />
             </View>
             <Text style={styles.actionLabel}>{action.label}</Text>
-            {action.subtitle && (
-              <Text style={styles.actionSub}>{action.subtitle}</Text>
-            )}
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Today's Schedule */}
+      {/* This Week's Attendance */}
+      <Text style={styles.sectionTitle}>This Week's Attendance</Text>
+      <View style={styles.weeklyCard}>
+        <View style={styles.weeklyRow}>
+          {DEMO_ATTENDANCE_WEEKLY.map((d) => (
+            <View key={d.day} style={styles.weeklyDay}>
+              <View style={[styles.weeklyDot, { backgroundColor: STATUS_DOT_COLORS[d.status] }]} />
+              <Text style={styles.weeklyDayText}>{d.day}</Text>
+              <Text style={[styles.weeklyStatus, { color: STATUS_DOT_COLORS[d.status] }]}>
+                {d.status === 'present' ? 'P' : d.status === 'absent' ? 'A' : d.status === 'late' ? 'L' : 'E'}
+              </Text>
+            </View>
+          ))}
+        </View>
+        <View style={styles.weeklyLegend}>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: colors.success }]} />
+            <Text style={styles.legendText}>Present</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: colors.danger }]} />
+            <Text style={styles.legendText}>Absent</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Attendance Summary Stats */}
+      <View style={styles.statsRow}>
+        <View style={[styles.statCard, { borderLeftColor: colors.success }]}>
+          <Text style={styles.statNumber}>{DEMO_CHILD.totalPresent}</Text>
+          <Text style={styles.statLabel}>Days Present</Text>
+        </View>
+        <View style={[styles.statCard, { borderLeftColor: colors.danger }]}>
+          <Text style={styles.statNumber}>{DEMO_CHILD.totalDays - DEMO_CHILD.totalPresent}</Text>
+          <Text style={styles.statLabel}>Days Absent</Text>
+        </View>
+        <View style={[styles.statCard, { borderLeftColor: colors.primary }]}>
+          <Text style={styles.statNumber}>{DEMO_CHILD.totalDays}</Text>
+          <Text style={styles.statLabel}>Total Days</Text>
+        </View>
+      </View>
+
+      {/* Recent Homework */}
       <View style={styles.scheduleTitleRow}>
-        <Text style={styles.sectionTitle}>Today's Schedule</Text>
-        <TouchableOpacity onPress={() => router.push('/(drawer)/timetable')}>
+        <Text style={styles.sectionTitle}>Homework</Text>
+        <TouchableOpacity onPress={() => router.push('/(parent-drawer)/(tabs)/homework')}>
           <Text style={styles.viewAllText}>View All</Text>
         </TouchableOpacity>
       </View>
 
-      {scheduleLoading && !isDemo ? (
+      {recentHomework.length === 0 ? (
         <View style={styles.emptyCard}>
-          <Text style={styles.emptyText}>Loading schedule...</Text>
-        </View>
-      ) : schedule.length === 0 ? (
-        <View style={styles.emptyCard}>
-          <Ionicons name="calendar-outline" size={40} color={colors.textLight} />
-          <Text style={styles.emptyText}>No classes scheduled today</Text>
-          <Text style={styles.emptySubText}>Enjoy your free day!</Text>
+          <Ionicons name="book-outline" size={40} color={colors.textLight} />
+          <Text style={styles.emptyText}>No homework assigned</Text>
+          <Text style={styles.emptySubText}>Your child is all caught up!</Text>
         </View>
       ) : (
-        schedule.map((item, idx) => (
-          <ScheduleCard key={item.id || idx} item={item} isLast={idx === schedule.length - 1} />
+        recentHomework.slice(0, 4).map((hw) => (
+          <HomeworkCard key={hw.id} hw={hw} />
         ))
-      )}
-
-
-
-      {/* Recent Homework */}
-      {recentHomework.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>
-            {role === 'parent' ? 'Homework Assigned' : 'Recent Homework'}
-          </Text>
-          {recentHomework.slice(0, 5).map((hw) => (
-            <HomeworkCard key={hw.id} hw={hw} />
-          ))}
-        </>
       )}
 
       <View style={{ height: 30 }} />
@@ -332,66 +296,10 @@ function HomeworkCard({ hw }: { hw: Homework }) {
   );
 }
 
-function ScheduleCard({ item, isLast }: { item: ScheduleItem; isLast: boolean }) {
-  const formatTime12 = (time: string) => {
-    const [hStr, mStr] = time.split(':');
-    let h = parseInt(hStr, 10);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    if (h > 12) h -= 12;
-    if (h === 0) h = 12;
-    return { time: `${h.toString().padStart(2, '0')}:${mStr}`, ampm };
-  };
-
-  const { time, ampm } = formatTime12(item.start_time);
-  const students = STUDENT_COUNTS[item.subject];
-  const isBreak = item.subject.toLowerCase().includes('break') || item.subject.toLowerCase().includes('lunch');
-
-  return (
-    <View style={[styles.scheduleCard, isLast && { marginBottom: spacing.md }]}>
-      {/* Time Column */}
-      <View style={styles.timeColumn}>
-        <Text style={styles.timeText}>{time}</Text>
-        <Text style={styles.ampmText}>{ampm}</Text>
-      </View>
-
-      {/* Timeline dot & line */}
-      <View style={styles.timelineColumn}>
-        <View style={[styles.timelineDot, isBreak && { backgroundColor: colors.textLight }]} />
-        {!isLast && <View style={styles.timelineLine} />}
-      </View>
-
-      {/* Content Card */}
-      <View style={[styles.scheduleContent, isBreak && styles.scheduleContentBreak]}>
-        <View style={styles.scheduleContentInner}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.scheduleSubject, isBreak && { color: colors.textSecondary }]}>
-              {item.subject}
-            </Text>
-            <Text style={styles.scheduleClass}>
-              {item.class_name}
-              {item.room ? ` • ${item.room.startsWith('Room') || item.room.startsWith('Lab') ? item.room : `Room ${item.room}`}` : ''}
-            </Text>
-            {students && (
-              <View style={styles.studentsRow}>
-                <Ionicons name="people-outline" size={13} color={colors.textLight} />
-                <Text style={styles.studentsText}>{students} Students</Text>
-              </View>
-            )}
-          </View>
-          <TouchableOpacity style={styles.moreBtn}>
-            <Ionicons name="ellipsis-vertical" size={18} color={colors.textLight} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.white },
   content: { paddingBottom: spacing.xxxl },
 
-  // Greeting Section
   greetingSection: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -408,9 +316,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     marginRight: spacing.lg,
   },
-  greetingTextContainer: {
-    flex: 1,
-  },
+  greetingTextContainer: { flex: 1 },
   greetingText: {
     fontSize: fontSize.xl,
     fontWeight: '800',
@@ -435,7 +341,6 @@ const styles = StyleSheet.create({
     color: '#2E7D32',
   },
 
-  // Separator
   separator: {
     height: 1,
     backgroundColor: colors.border,
@@ -443,7 +348,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
 
-  // Section
   sectionTitle: {
     fontSize: fontSize.lg,
     fontWeight: '700',
@@ -453,21 +357,56 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
 
-  // Schedule Title Row
-  scheduleTitleRow: {
+  // Child card
+  childCard: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingRight: spacing.xl,
+    backgroundColor: colors.primaryLight,
+    marginHorizontal: spacing.lg,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.primary + '30',
   },
-  viewAllText: {
+  childAvatarContainer: { marginRight: spacing.md },
+  childAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  childInfo: { flex: 1 },
+  childName: {
+    fontSize: fontSize.md,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  childClass: {
     fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.primary,
-    marginTop: spacing.xl,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  attendanceBadge: {
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  attendancePercent: {
+    fontSize: fontSize.lg,
+    fontWeight: '800',
+    color: colors.success,
+  },
+  attendanceLabel: {
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+    marginTop: 1,
   },
 
-  // Quick Actions
+  // Quick actions
   actionsRow: {
     flexDirection: 'row',
     paddingHorizontal: spacing.lg,
@@ -500,61 +439,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: colors.textPrimary,
     textAlign: 'center',
-    lineHeight: 15,
-  },
-  actionSub: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    marginTop: 1,
   },
 
-  // Schedule Timeline
-  scheduleCard: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.xl,
-    minHeight: 80,
-  },
-  timeColumn: {
-    width: 46,
-    alignItems: 'center',
-    paddingTop: 4,
-  },
-  timeText: {
-    fontSize: fontSize.sm,
-    fontWeight: '700',
-    color: colors.textSecondary,
-  },
-  ampmText: {
-    fontSize: fontSize.xs,
-    color: colors.textLight,
-    fontWeight: '600',
-  },
-  timelineColumn: {
-    width: 24,
-    alignItems: 'center',
-    marginHorizontal: spacing.sm,
-  },
-  timelineDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.primary,
-    marginTop: 6,
-    borderWidth: 2,
-    borderColor: colors.primaryLight,
-  },
-  timelineLine: {
-    flex: 1,
-    width: 2,
-    backgroundColor: colors.border,
-    marginTop: 4,
-  },
-  scheduleContent: {
-    flex: 1,
+  // Weekly attendance
+  weeklyCard: {
     backgroundColor: colors.white,
+    marginHorizontal: spacing.lg,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
-    marginBottom: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
     elevation: 1,
@@ -563,38 +455,95 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 1 },
   },
-  scheduleContentBreak: {
-    backgroundColor: colors.background,
-    borderColor: colors.divider,
-    elevation: 0,
-    shadowOpacity: 0,
-  },
-  scheduleContentInner: {
+  weeklyRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    justifyContent: 'space-around',
   },
-  scheduleSubject: {
-    fontSize: fontSize.md,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: 2,
+  weeklyDay: { alignItems: 'center', gap: 6 },
+  weeklyDot: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  scheduleClass: {
-    fontSize: fontSize.sm,
+  weeklyDayText: {
+    fontSize: fontSize.xs,
+    fontWeight: '600',
     color: colors.textSecondary,
   },
-  studentsRow: {
+  weeklyStatus: {
+    fontSize: fontSize.xs,
+    fontWeight: '800',
+  },
+  weeklyLegend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.xl,
+    marginTop: spacing.md,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.divider,
+  },
+  legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: spacing.xs,
-    gap: 4,
+    gap: 6,
   },
-  studentsText: {
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  legendText: {
     fontSize: fontSize.xs,
-    color: colors.textLight,
+    color: colors.textSecondary,
   },
-  moreBtn: {
-    padding: spacing.xs,
+
+  // Stats row
+  statsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.lg,
+    gap: spacing.sm,
+    marginTop: spacing.xl,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    borderLeftWidth: 3,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  statNumber: {
+    fontSize: fontSize.xl,
+    fontWeight: '800',
+    color: colors.textPrimary,
+  },
+  statLabel: {
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+
+  // Schedule title row
+  scheduleTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: spacing.xl,
+  },
+  viewAllText: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    color: colors.primary,
+    marginTop: spacing.xl,
   },
 
   // Empty
@@ -635,9 +584,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     alignItems: 'center',
   },
-  homeworkLeft: {
-    marginRight: spacing.md,
-  },
+  homeworkLeft: { marginRight: spacing.md },
   homeworkSubjectBadge: {
     width: 36,
     height: 36,
@@ -645,9 +592,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  homeworkContent: {
-    flex: 1,
-  },
+  homeworkContent: { flex: 1 },
   homeworkTitle: {
     fontSize: fontSize.md,
     fontWeight: '700',

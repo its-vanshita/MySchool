@@ -16,28 +16,28 @@ import type { DayOfWeek, TimetableEntry } from '../../src/types';
 
 // ── Day config ──
 const DAY_LABELS: { key: DayOfWeek; short: string; full: string }[] = [
-  { key: 'monday', short: 'M', full: 'Monday' },
-  { key: 'tuesday', short: 'T', full: 'Tuesday' },
-  { key: 'wednesday', short: 'W', full: 'Wednesday' },
-  { key: 'thursday', short: 'T', full: 'Thursday' },
-  { key: 'friday', short: 'F', full: 'Friday' },
-  { key: 'saturday', short: 'S', full: 'Saturday' },
+  { key: 'monday', short: 'MON', full: 'Monday' },
+  { key: 'tuesday', short: 'TUE', full: 'Tuesday' },
+  { key: 'wednesday', short: 'WED', full: 'Wednesday' },
+  { key: 'thursday', short: 'THU', full: 'Thursday' },
+  { key: 'friday', short: 'FRI', full: 'Friday' },
+  { key: 'saturday', short: 'SAT', full: 'Saturday' },
 ];
 
 // ── Subject color palette ──
-const SUBJECT_COLORS: Record<string, { bg: string; accent: string; text: string }> = {
-  Mathematics: { bg: '#EEF2FF', accent: '#6366F1', text: '#4338CA' },
-  Science:     { bg: '#ECFDF5', accent: '#10B981', text: '#047857' },
-  English:     { bg: '#FFF7ED', accent: '#F97316', text: '#C2410C' },
-  Hindi:       { bg: '#FDF2F8', accent: '#EC4899', text: '#BE185D' },
-  History:     { bg: '#FFFBEB', accent: '#F59E0B', text: '#B45309' },
-  Geography:   { bg: '#F0FDFA', accent: '#14B8A6', text: '#0F766E' },
-  Physics:     { bg: '#EFF6FF', accent: '#3B82F6', text: '#1D4ED8' },
-  Chemistry:   { bg: '#FEF2F2', accent: '#EF4444', text: '#B91C1C' },
-  Biology:     { bg: '#F0FDF4', accent: '#22C55E', text: '#15803D' },
-  Computer:    { bg: '#F5F3FF', accent: '#8B5CF6', text: '#6D28D9' },
+const SUBJECT_COLORS: Record<string, { bg: string; accent: string; text: string; badge: string; badgeText: string }> = {
+  Mathematics: { bg: '#FFFFFF', accent: '#F97316', text: '#1F2937', badge: '#FFF7ED', badgeText: '#EA580C' },
+  Science:     { bg: '#FFFFFF', accent: '#10B981', text: '#1F2937', badge: '#ECFDF5', badgeText: '#059669' },
+  English:     { bg: '#FFFFFF', accent: '#7C3AED', text: '#1F2937', badge: '#F5F3FF', badgeText: '#7C3AED' },
+  Hindi:       { bg: '#FFFFFF', accent: '#EC4899', text: '#1F2937', badge: '#FDF2F8', badgeText: '#DB2777' },
+  History:     { bg: '#FFFFFF', accent: '#F59E0B', text: '#1F2937', badge: '#FFFBEB', badgeText: '#D97706' },
+  Geography:   { bg: '#FFFFFF', accent: '#14B8A6', text: '#1F2937', badge: '#F0FDFA', badgeText: '#0D9488' },
+  Physics:     { bg: '#FFFFFF', accent: '#3B82F6', text: '#1F2937', badge: '#EFF6FF', badgeText: '#2563EB' },
+  Chemistry:   { bg: '#FFFFFF', accent: '#EF4444', text: '#1F2937', badge: '#FEF2F2', badgeText: '#DC2626' },
+  Biology:     { bg: '#FFFFFF', accent: '#22C55E', text: '#1F2937', badge: '#F0FDF4', badgeText: '#16A34A' },
+  Computer:    { bg: '#FFFFFF', accent: '#8B5CF6', text: '#1F2937', badge: '#F5F3FF', badgeText: '#7C3AED' },
 };
-const DEFAULT_COLOR = { bg: '#F3F4F6', accent: '#6B7280', text: '#374151' };
+const DEFAULT_COLOR = { bg: '#FFFFFF', accent: '#6B7280', text: '#1F2937', badge: '#F3F4F6', badgeText: '#4B5563' };
 
 function getSubjectColor(subject: string) {
   for (const key of Object.keys(SUBJECT_COLORS)) {
@@ -48,15 +48,30 @@ function getSubjectColor(subject: string) {
   return DEFAULT_COLOR;
 }
 
+/** Compute duration label from HH:mm strings */
+function getDuration(start: string, end: string): string {
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  const mins = (eh * 60 + em) - (sh * 60 + sm);
+  if (mins <= 0) return '';
+  return `${mins} mins`;
+}
+
+/** Format HH:mm (24h) to 12h display without leading zero */
+function formatTime12(time: string): string {
+  const [h, m] = time.split(':').map(Number);
+  const suffix = h >= 12 ? 'PM' : 'AM';
+  const hr = h % 12 || 12;
+  return `${hr}:${m.toString().padStart(2, '0')}`;
+}
+
 // ── Holidays / Occasions per day ──
-// Maps day-of-week to special occasions. In production this would come from the calendar API.
 interface Occasion {
   title: string;
   type: 'holiday' | 'event';
 }
 
 function getOccasionsForDay(day: DayOfWeek, weekOffset: number): Occasion[] {
-  // Demo: derive a date for the selected week and check against known occasions
   const today = new Date();
   const currentDayIdx = today.getDay(); // 0=Sun
   const dayIdx = DAY_LABELS.findIndex((d) => d.key === day) + 1; // 1=Mon
@@ -65,7 +80,6 @@ function getOccasionsForDay(day: DayOfWeek, weekOffset: number): Occasion[] {
   targetDate.setDate(today.getDate() + diff + weekOffset * 7);
   const dateStr = targetDate.toISOString().split('T')[0];
 
-  // Demo occasion data — matching calendar events
   const OCCASIONS: Record<string, Occasion[]> = {
     '2026-03-10': [{ title: 'Holi Holiday 🎨', type: 'holiday' }],
     '2026-04-03': [{ title: 'Good Friday', type: 'holiday' }],
@@ -87,6 +101,18 @@ function getDateForDay(day: DayOfWeek, weekOffset: number): Date {
   const target = new Date(today);
   target.setDate(today.getDate() + diff + weekOffset * 7);
   return target;
+}
+
+/** Check if there's a break/recess gap between two consecutive entries */
+function hasBreakBetween(a: TimetableEntry, b: TimetableEntry): { has: boolean; label: string; time: string } {
+  const [aeh, aem] = a.end_time.split(':').map(Number);
+  const [bsh, bsm] = b.start_time.split(':').map(Number);
+  const gapMins = (bsh * 60 + bsm) - (aeh * 60 + aem);
+  if (gapMins >= 10) {
+    const label = gapMins >= 30 ? 'LUNCH BREAK' : 'RECESS / BREAK';
+    return { has: true, label, time: formatTime12(a.end_time) };
+  }
+  return { has: false, label: '', time: '' };
 }
 
 export default function TimetableScreen() {
@@ -120,69 +146,75 @@ export default function TimetableScreen() {
 
   return (
     <View style={styles.container}>
-      {/* ── Week Navigation ── */}
-      <View style={styles.weekNav}>
-        <TouchableOpacity onPress={() => setWeekOffset(weekOffset - 1)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
-        </TouchableOpacity>
-        <View style={styles.weekCenter}>
+      {/* ── Day Selector Strip ── */}
+      <View style={styles.dayStrip}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayStripScroll}>
+          {DAY_LABELS.map((d) => {
+            const isActive = d.key === selectedDay;
+            const date = getDateForDay(d.key, weekOffset);
+            const dayNum = date.getDate();
+            const dayIsHoliday = getOccasionsForDay(d.key, weekOffset).some((o) => o.type === 'holiday');
+            const hasOccasion = getOccasionsForDay(d.key, weekOffset).length > 0;
+
+            return (
+              <TouchableOpacity
+                key={d.key}
+                style={[styles.dayCol, isActive && styles.dayColActive]}
+                onPress={() => setSelectedDay(d.key)}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.dayAbbr,
+                  isActive && styles.dayAbbrActive,
+                  dayIsHoliday && !isActive && { color: colors.danger },
+                ]}>
+                  {d.short}
+                </Text>
+                <View style={[styles.dayNumCircle, isActive && styles.dayNumCircleActive]}>
+                  <Text style={[
+                    styles.dayNum,
+                    isActive && styles.dayNumActive,
+                    dayIsHoliday && !isActive && { color: colors.danger },
+                  ]}>
+                    {dayNum}
+                  </Text>
+                </View>
+                {hasOccasion && !isActive && (
+                  <View style={[
+                    styles.dayDot,
+                    dayIsHoliday ? { backgroundColor: colors.danger } : { backgroundColor: colors.primary },
+                  ]} />
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {/* Week nav arrows */}
+        <View style={styles.weekNavRow}>
+          <TouchableOpacity onPress={() => setWeekOffset(weekOffset - 1)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="chevron-back" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
           <Text style={styles.weekLabel}>{weekLabel}</Text>
-          {weekOffset === 0 && <Text style={styles.thisWeekBadge}>This Week</Text>}
+          <TouchableOpacity onPress={() => setWeekOffset(weekOffset + 1)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => setWeekOffset(weekOffset + 1)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="chevron-forward" size={22} color={colors.textPrimary} />
-        </TouchableOpacity>
       </View>
 
-      {/* ── Day Selector ── */}
-      <View style={styles.dayBar}>
-        {DAY_LABELS.map((d) => {
-          const isActive = d.key === selectedDay;
-          const date = getDateForDay(d.key, weekOffset);
-          const dayNum = date.getDate();
-          const hasOccasion = getOccasionsForDay(d.key, weekOffset).length > 0;
-          const dayIsHoliday = getOccasionsForDay(d.key, weekOffset).some((o) => o.type === 'holiday');
-          const isToday = weekOffset === 0 && new Date().getDay() === DAY_LABELS.indexOf(d) + 1;
-
-          return (
-            <TouchableOpacity
-              key={d.key}
-              style={[styles.dayTab, isActive && styles.dayTabActive]}
-              onPress={() => setSelectedDay(d.key)}
-            >
-              <Text style={[styles.dayShort, isActive && styles.dayShortActive]}>
-                {d.short}
-              </Text>
-              <Text style={[
-                styles.dayNum,
-                isActive && styles.dayNumActive,
-                dayIsHoliday && !isActive && styles.dayNumHoliday,
-              ]}>
-                {dayNum}
-              </Text>
-              {hasOccasion && !isActive && (
-                <View style={[
-                  styles.dayIndicator,
-                  dayIsHoliday ? { backgroundColor: colors.danger } : { backgroundColor: colors.primary },
-                ]} />
-              )}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {/* ── Day Header ── */}
-      <View style={styles.dayHeader}>
-        <Text style={styles.dayHeaderTitle}>
-          {DAY_LABELS.find((d) => d.key === selectedDay)?.full},{' '}
-          {SHORT_MONTHS[selectedDate.getMonth()]} {selectedDate.getDate()}
+      {/* ── Section Header ── */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>
+          {isHoliday ? "Holiday" : "Today's Schedule"}
         </Text>
-        <Text style={styles.dayHeaderCount}>
-          {isHoliday ? 'Holiday' : `${entries.length} Class${entries.length !== 1 ? 'es' : ''}`}
+        <Text style={styles.sectionCount}>
+          {isHoliday
+            ? occasions[0]?.title ?? 'Holiday'
+            : `${entries.length} Class${entries.length !== 1 ? 'es' : ''}`}
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* ── Occasion Banners ── */}
         {occasions.map((occ, i) => (
           <View
@@ -192,11 +224,16 @@ export default function TimetableScreen() {
               occ.type === 'holiday' ? styles.occasionHoliday : styles.occasionEvent,
             ]}
           >
-            <Ionicons
-              name={occ.type === 'holiday' ? 'sunny' : 'calendar'}
-              size={20}
-              color={occ.type === 'holiday' ? colors.danger : colors.primary}
-            />
+            <View style={[
+              styles.occasionIcon,
+              { backgroundColor: occ.type === 'holiday' ? '#FEE2E2' : '#DBEAFE' },
+            ]}>
+              <Ionicons
+                name={occ.type === 'holiday' ? 'sunny' : 'calendar'}
+                size={22}
+                color={occ.type === 'holiday' ? colors.danger : colors.primary}
+              />
+            </View>
             <View style={styles.occasionTextWrap}>
               <Text style={[
                 styles.occasionTitle,
@@ -211,53 +248,74 @@ export default function TimetableScreen() {
           </View>
         ))}
 
-        {/* ── Class Timeline ── */}
+        {/* ── Class Cards ── */}
         {!isHoliday && entries.length > 0 && (
-          <View style={styles.timeline}>
+          <View style={styles.scheduleList}>
             {entries.map((entry, idx) => {
               const sc = getSubjectColor(entry.subject);
-              const isLast = idx === entries.length - 1;
+              const duration = getDuration(entry.start_time, entry.end_time);
+              const subjectLabel = entry.subject.split(' ')[0].toUpperCase();
+
+              // Check if there's a break before this entry
+              const brk = idx > 0 ? hasBreakBetween(entries[idx - 1], entry) : { has: false, label: '', time: '' };
+
               return (
-                <View key={entry.id || idx} style={styles.timelineItem}>
-                  {/* Time column */}
-                  <View style={styles.timeCol}>
-                    <Text style={styles.timeStart}>{entry.start_time}</Text>
-                    <Text style={styles.timeEnd}>{entry.end_time}</Text>
-                  </View>
+                <React.Fragment key={entry.id || idx}>
+                  {brk.has && (
+                    <View style={styles.breakRow}>
+                      <Text style={styles.breakTime}>{brk.time}</Text>
+                      <View style={styles.breakLine} />
+                      <Text style={styles.breakLabel}>{brk.label}</Text>
+                      <View style={styles.breakLine} />
+                    </View>
+                  )}
+                  <View style={styles.classRow}>
+                    {/* Time label */}
+                    <Text style={styles.classTime}>{formatTime12(entry.start_time)}</Text>
 
-                  {/* Dot & line */}
-                  <View style={styles.dotCol}>
-                    <View style={[styles.dot, { backgroundColor: sc.accent }]} />
-                    {!isLast && <View style={styles.connector} />}
-                  </View>
-
-                  {/* Card */}
-                  <View style={[styles.classCard, { backgroundColor: sc.bg, borderLeftColor: sc.accent }]}>
-                    <Text style={[styles.classSubject, { color: sc.text }]}>{entry.subject}</Text>
-                    <View style={styles.classDetails}>
-                      <View style={styles.classDetail}>
-                        <Ionicons name="people-outline" size={13} color={sc.accent} />
-                        <Text style={[styles.classDetailText, { color: sc.text }]}>{entry.class_name}</Text>
-                      </View>
-                      {entry.room ? (
-                        <View style={styles.classDetail}>
-                          <Ionicons name="location-outline" size={13} color={sc.accent} />
-                          <Text style={[styles.classDetailText, { color: sc.text }]}>Room {entry.room}</Text>
+                    {/* Card */}
+                    <View style={[styles.classCard, { borderLeftColor: sc.accent }]}>
+                      {/* Top row: badge + duration */}
+                      <View style={styles.cardTopRow}>
+                        <View style={[styles.subjectBadge, { backgroundColor: sc.badge }]}>
+                          <Text style={[styles.subjectBadgeText, { color: sc.badgeText }]}>
+                            {subjectLabel}
+                          </Text>
                         </View>
-                      ) : null}
+                        <Text style={styles.durationText}>{duration}</Text>
+                      </View>
+
+                      {/* Subject name */}
+                      <Text style={styles.subjectName}>{entry.subject}</Text>
+
+                      {/* Details row */}
+                      <View style={styles.detailsRow}>
+                        <View style={styles.detailItem}>
+                          <Ionicons name="people-outline" size={14} color={colors.textSecondary} />
+                          <Text style={styles.detailText}>{entry.class_name}</Text>
+                        </View>
+                        {entry.room ? (
+                          <View style={styles.detailItem}>
+                            <Ionicons name="business-outline" size={14} color={colors.textSecondary} />
+                            <Text style={styles.detailText}>{entry.room}</Text>
+                          </View>
+                        ) : null}
+                      </View>
                     </View>
                   </View>
-                </View>
+                </React.Fragment>
               );
             })}
           </View>
         )}
 
-        {/* ── Empty (non-holiday, no classes) ── */}
+        {/* ── Empty: No classes (non-holiday) ── */}
         {!isHoliday && entries.length === 0 && occasions.length === 0 && (
           <View style={styles.emptyContainer}>
-            <Ionicons name="cafe-outline" size={50} color={colors.textLight} />
-            <Text style={styles.emptyTitle}>No Classes</Text>
+            <View style={styles.emptyIconCircle}>
+              <Ionicons name="cafe-outline" size={44} color={colors.textLight} />
+            </View>
+            <Text style={styles.emptyTitle}>No Classes Scheduled</Text>
             <Text style={styles.emptySubtext}>Enjoy your free day!</Text>
           </View>
         )}
@@ -267,99 +325,104 @@ export default function TimetableScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: '#F8F9FB' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
-  // Week nav
-  weekNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  // ── Day strip ──
+  dayStrip: {
     backgroundColor: colors.white,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    paddingBottom: spacing.sm,
   },
-  weekCenter: {
-    alignItems: 'center',
-  },
-  weekLabel: {
-    fontSize: fontSize.md,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  thisWeekBadge: {
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-    color: colors.primary,
-    marginTop: 2,
-  },
-
-  // Day bar
-  dayBar: {
+  dayStripScroll: {
     flexDirection: 'row',
-    backgroundColor: colors.white,
-    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
-    gap: spacing.xs,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xs,
   },
-  dayTab: {
-    flex: 1,
+  dayCol: {
     alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    marginHorizontal: 2,
   },
-  dayTabActive: {
-    backgroundColor: colors.primary,
+  dayColActive: {
+    // active column gets highlighted circle on number
   },
-  dayShort: {
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-    color: colors.textLight,
+  dayAbbr: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.textSecondary,
+    letterSpacing: 0.5,
+    marginBottom: 6,
   },
-  dayShortActive: {
-    color: 'rgba(255,255,255,0.7)',
+  dayAbbrActive: {
+    color: colors.primary,
+  },
+  dayNumCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayNumCircleActive: {
+    backgroundColor: '#F97316',
   },
   dayNum: {
     fontSize: fontSize.lg,
     fontWeight: '700',
     color: colors.textPrimary,
-    marginTop: 2,
   },
   dayNumActive: {
     color: colors.white,
   },
-  dayNumHoliday: {
-    color: colors.danger,
-  },
-  dayIndicator: {
+  dayDot: {
     width: 5,
     height: 5,
     borderRadius: 3,
     marginTop: 4,
   },
+  weekNavRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: spacing.xs,
+    gap: spacing.md,
+  },
+  weekLabel: {
+    fontSize: fontSize.xs,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
 
-  // Day header
-  dayHeader: {
+  // ── Section header ──
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
   },
-  dayHeaderTitle: {
-    fontSize: fontSize.md,
-    fontWeight: '700',
+  sectionTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: '800',
     color: colors.textPrimary,
   },
-  dayHeaderCount: {
+  sectionCount: {
     fontSize: fontSize.sm,
     fontWeight: '600',
     color: colors.textSecondary,
   },
 
-  // Occasion banner
+  // ── Content ──
+  content: {
+    paddingBottom: 40,
+  },
+
+  // ── Occasion banners ──
   occasionBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -370,14 +433,21 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   occasionHoliday: {
-    backgroundColor: colors.dangerLight,
+    backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
   },
   occasionEvent: {
-    backgroundColor: colors.primaryLight,
+    backgroundColor: '#EFF6FF',
     borderWidth: 1,
     borderColor: '#BFDBFE',
+  },
+  occasionIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   occasionTextWrap: {
     flex: 1,
@@ -392,96 +462,124 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Content
-  content: {
-    paddingBottom: spacing.xxl,
-  },
-
-  // Timeline
-  timeline: {
+  // ── Schedule list ──
+  scheduleList: {
     paddingHorizontal: spacing.lg,
   },
-  timelineItem: {
+
+  // ── Break / Recess row ──
+  breakRow: {
     flexDirection: 'row',
-    marginBottom: spacing.md,
-  },
-  timeCol: {
-    width: 50,
-    alignItems: 'flex-end',
-    paddingRight: spacing.sm,
-    paddingTop: spacing.sm,
-  },
-  timeStart: {
-    fontSize: fontSize.xs,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  timeEnd: {
-    fontSize: fontSize.xs,
-    color: colors.textLight,
-    marginTop: 2,
-  },
-  dotCol: {
-    width: 24,
     alignItems: 'center',
+    marginVertical: spacing.md,
+    paddingLeft: 60,
+    gap: spacing.sm,
   },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginTop: spacing.md,
-    borderWidth: 2,
-    borderColor: colors.white,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 1 },
+  breakTime: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.textLight,
   },
-  connector: {
-    width: 2,
+  breakLine: {
     flex: 1,
+    height: 1,
     backgroundColor: colors.border,
-    marginTop: 4,
+  },
+  breakLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.textLight,
+    letterSpacing: 1,
   },
 
-  // Class card
+  // ── Class row ──
+  classRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: spacing.md,
+  },
+  classTime: {
+    width: 52,
+    fontSize: fontSize.md,
+    fontWeight: '800',
+    color: colors.textPrimary,
+    marginTop: spacing.lg,
+  },
+
+  // ── Class card ──
   classCard: {
     flex: 1,
+    backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     borderLeftWidth: 4,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
   },
-  classSubject: {
-    fontSize: fontSize.md,
+  cardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
+  subjectBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  subjectBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  durationText: {
+    fontSize: fontSize.xs,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  subjectName: {
+    fontSize: fontSize.lg,
     fontWeight: '700',
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
   },
-  classDetails: {
+  detailsRow: {
     flexDirection: 'row',
     gap: spacing.lg,
-    marginTop: spacing.sm,
   },
-  classDetail: {
+  detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: 5,
   },
-  classDetailText: {
+  detailText: {
     fontSize: fontSize.xs,
     fontWeight: '500',
+    color: colors.textSecondary,
   },
 
-  // Empty
+  // ── Empty state ──
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 80,
   },
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
   emptyTitle: {
     color: colors.textSecondary,
     fontSize: fontSize.lg,
     fontWeight: '700',
-    marginTop: spacing.md,
   },
   emptySubtext: {
     color: colors.textLight,

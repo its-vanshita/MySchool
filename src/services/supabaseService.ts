@@ -251,30 +251,33 @@ export function subscribeAnnouncements(callback: (items: Announcement[]) => void
 // ═══════════════════════════════════════════════════════════════
 
 export async function getLeaveRequests(teacherId: string): Promise<LeaveRequest[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('ms_leave_requests')
     .select('*')
     .eq('teacher_id', teacherId)
     .order('created_at', { ascending: false });
+  if (error) console.warn('getLeaveRequests error:', error.message);
   return (data ?? []) as LeaveRequest[];
 }
 
 export async function getAllLeaveRequests(): Promise<LeaveRequest[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('ms_leave_requests')
     .select('*')
     .order('created_at', { ascending: false });
+  if (error) console.warn('getAllLeaveRequests error:', error.message);
   return (data ?? []) as LeaveRequest[];
 }
 
 export async function createLeaveRequest(
   request: Omit<LeaveRequest, 'id' | 'created_at' | 'approved_by' | 'status'>
 ): Promise<LeaveRequest | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('ms_leave_requests')
     .insert({ ...request, status: 'pending', approved_by: null })
     .select()
     .single();
+  if (error) throw error;
   return data as LeaveRequest | null;
 }
 

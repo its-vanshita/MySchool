@@ -8,7 +8,7 @@ import { fontSize, spacing } from '../../src/theme/spacing';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 
-function CustomDrawerContent(props: any) {
+function ParentDrawerContent(props: any) {
   const { profile, role } = useUser();
   const { signOut } = useAuth();
   const router = useRouter();
@@ -19,7 +19,7 @@ function CustomDrawerContent(props: any) {
   };
 
   const handleHomePress = () => {
-    router.replace('/(drawer)/(tabs)');
+    router.replace('/(parent-drawer)/(tabs)' as any);
     props.navigation.closeDrawer();
   };
 
@@ -28,14 +28,14 @@ function CustomDrawerContent(props: any) {
       {/* User Header */}
       <View style={drawerStyles.header}>
         <View style={drawerStyles.avatar}>
-          <Ionicons name="person" size={32} color={colors.primary} />
+          <Ionicons name="people" size={32} color={colors.primary} />
         </View>
-        <Text style={drawerStyles.name}>{profile?.name ?? 'User'}</Text>
-        <Text style={drawerStyles.role}>{role.charAt(0).toUpperCase() + role.slice(1)}</Text>
+        <Text style={drawerStyles.name}>{profile?.name ?? 'Parent'}</Text>
+        <Text style={drawerStyles.role}>Parent</Text>
         <Text style={drawerStyles.email}>{profile?.email ?? ''}</Text>
       </View>
 
-      {/* Home button (custom to ensure it navigates to index tab) */}
+      {/* Home button */}
       <TouchableOpacity style={drawerStyles.homeBtn} onPress={handleHomePress}>
         <Ionicons name="home" size={22} color={colors.white} />
         <Text style={drawerStyles.homeBtnText}>Home</Text>
@@ -120,10 +120,10 @@ const drawerStyles = StyleSheet.create({
   },
 });
 
-export default function DrawerLayout() {
+export default function ParentDrawerLayout() {
   return (
     <Drawer
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      drawerContent={(props) => <ParentDrawerContent {...props} />}
       screenOptions={{
         headerStyle: { backgroundColor: colors.primary },
         headerTintColor: colors.white,
@@ -152,31 +152,9 @@ export default function DrawerLayout() {
         }}
       />
       <Drawer.Screen
-        name="timetable"
-        options={{
-          title: 'Timetable',
-          drawerIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
-        }}
-      />
-      <Drawer.Screen
-        name="lesson-plans"
-        options={{
-          title: 'Lesson Plans',
-          drawerIcon: ({ color, size }) => <Ionicons name="document-text" size={size} color={color} />,
-        }}
-      />
-      <Drawer.Screen
-        name="datesheet"
-        options={{
-          title: 'Datesheet',
-          drawerIcon: ({ color, size }) => <Ionicons name="clipboard" size={size} color={color} />,
-        }}
-      />
-      <Drawer.Screen
         name="calendar"
         options={{
           title: 'Calendar',
-          drawerItemStyle: { display: 'none' },
           drawerIcon: ({ color, size }) => <Ionicons name="today" size={size} color={color} />,
         }}
       />

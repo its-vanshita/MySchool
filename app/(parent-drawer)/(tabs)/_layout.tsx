@@ -2,7 +2,6 @@ import { Tabs } from 'expo-router';
 import { View, TouchableOpacity, Image, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../../src/theme/colors';
-import { useUser } from '../../../src/context/UserContext';
 import { useNotificationBadge } from '../../../src/context/NotificationContext';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
@@ -22,10 +21,10 @@ function HeaderRight() {
       </TouchableOpacity>
       <TouchableOpacity
         style={{ marginLeft: 10 }}
-        onPress={() => router.push('/(drawer)/profile')}
+        onPress={() => router.push('/(parent-drawer)/profile')}
       >
         <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80' }}
+          source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80' }}
           style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1.5, borderColor: colors.white }}
         />
       </TouchableOpacity>
@@ -33,9 +32,7 @@ function HeaderRight() {
   );
 }
 
-export default function TabsLayout() {
-  const { permissions } = useUser();
-
+export default function ParentTabsLayout() {
   return (
     <Tabs
       screenOptions={{
@@ -59,25 +56,24 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'My School',
-          tabBarIcon: ({ color, size }) => <Ionicons name="grid" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="attendance"
         options={{
           title: 'Attendance',
-          href: null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="checkmark-circle" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="myclass"
+        name="homework"
         options={{
-          title: 'My Class',
+          title: 'Homework',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="school" size={size} color={color} />
+            <Ionicons name="book" size={size} color={color} />
           ),
         }}
       />
@@ -85,30 +81,18 @@ export default function TabsLayout() {
         name="notices"
         options={{
           title: 'Notices',
-          href: null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="megaphone" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="marks"
+        name="datesheet"
         options={{
-          title: 'Marks',
+          title: 'Exams',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="create" size={size} color={color} />
+            <Ionicons name="clipboard" size={size} color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="leave"
-        options={{
-          title: 'Leave',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" size={size} color={color} />
-          ),
-          // Hide for admin who can't request leave
-          href: permissions.canRequestLeave || permissions.canApproveLeave ? undefined : null,
         }}
       />
     </Tabs>

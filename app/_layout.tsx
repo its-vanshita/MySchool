@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { AuthProvider } from '../src/context/AuthContext';
 import { UserProvider } from '../src/context/UserContext';
+import { NotificationProvider } from '../src/context/NotificationContext';
 import { StatusBar } from 'expo-status-bar';
 import { colors } from '../src/theme/colors';
 
@@ -8,6 +9,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <UserProvider>
+        <NotificationProvider>
         <StatusBar style="light" />
         <Stack
           screenOptions={{
@@ -17,6 +19,7 @@ export default function RootLayout() {
         >
           <Stack.Screen name="login" options={{ headerShown: false }} />
           <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
+          <Stack.Screen name="(parent-drawer)" options={{ headerShown: false }} />
           <Stack.Screen
             name="mark-attendance"
             options={{
@@ -120,7 +123,18 @@ export default function RootLayout() {
               headerRight: () => null,
             }}
           />
+          <Stack.Screen
+            name="exam-datesheet"
+            options={{
+              presentation: 'card',
+              headerShown: true,
+              headerTitle: 'Exam Datesheet',
+              headerStyle: { backgroundColor: colors.primary },
+              headerTintColor: colors.white,
+            }}
+          />
         </Stack>
+        </NotificationProvider>
       </UserProvider>
     </AuthProvider>
   );

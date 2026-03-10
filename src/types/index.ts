@@ -155,6 +155,8 @@ export interface LessonPlan {
 }
 
 // ────────── Datesheet / Exams ──────────
+export type ExamType = 'half-yearly' | 'annual' | 'unit-test' | 'pre-board' | 'practical' | 'other';
+
 export interface ExamEntry {
   id: string;
   class_name: string;
@@ -164,6 +166,32 @@ export interface ExamEntry {
   end_time: string;
   room: string;
   school_id: string;
+  exam_type?: ExamType;
+}
+
+/** Teacher's invigilation/duty assignment for an exam day */
+export interface ExamDuty {
+  id: string;
+  teacher_id: string;
+  exam_date: string;
+  room: string;
+  start_time: string;
+  end_time: string;
+  class_name: string;
+  exam_type?: ExamType;
+  school_id: string;
+}
+
+/** Grouping for datesheet listing */
+export interface ExamGroup {
+  exam_type: ExamType;
+  label: string;
+  classes: string[];
+  startDate: string;
+  endDate: string;
+  totalSubjects: number;
+  entries: ExamEntry[];
+  duties: ExamDuty[];
 }
 
 // ────────── Calendar Events ──────────
