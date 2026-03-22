@@ -64,51 +64,63 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async () => {
-    if (isDemo) {
-      setProfile(DEMO_USERS[demoRole] ?? DEMO_USERS.teacher);
-      setLoading(false);
-      return;
-    }
-    if (!user) {
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
+    try {
+      if (isDemo) {
+        setProfile(DEMO_USERS[demoRole] ?? DEMO_USERS.teacher);
+        setLoading(false);
+        return;
+      }
+      if (!user) {
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
 
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    if (error || !data) {
-      // Auto-create profile for new users
-      const newProfile: Partial<AppUser> = {
-        id: user.id,
-        email: user.email ?? '',
-        name: user.email?.split('@')[0] ?? 'User',
-        phone: '',
-        role: 'teacher',
-        subjects: [],
-        avatar_url: '',
-        school_id: '',
-      };
-      const { data: created } = await supabase
+      setLoading(true);
+      const { data, error } = await supabase
         .from('users')
-        .upsert(newProfile)
-        .select()
+        .select('*')
+        .eq('id', user.id)
         .single();
 
-      setProfile(created as AppUser | null);
-    } else {
-      setProfile(data as AppUser);
+      if (error || !data) {
+        // Auto-create profile for new users
+        const newProfile: Partial<AppUser> = {
+          id: user.id,
+          email: user.email ?? '',
+          name: user.email?.split('@')[0] ?? 'User',
+          phone: '',
+          role: 'teacher',
+          subjects: [],
+          avatar_url: '',
+          school_id: '',
+        };
+        const { data: created } = await supabase
+          .from('users')
+          .upsert(newProfile)
+          .select()
+          .single();
+
+        setProfile(created as AppUser | null);
+      } else {
+        setProfile(data as AppUser);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.warn('Failed to fetch profile:', err);
+      // Set default profile in case of error
+      setProfile(DEMO_USERS[isDemo ? demoRole : 'teacher']);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    fetchProfile();
+    try {
+      fetchProfile();
+    } catch (err) {
+      console.error('Profile initialization error:', err);
+      setLoading(false);
+    }
   }, [user, isDemo, demoRole]);
 
   const role: UserRole = profile?.role ?? 'teacher';

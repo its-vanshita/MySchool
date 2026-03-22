@@ -171,6 +171,7 @@ export function useAllLeaveRequests() {
 
     // Initial load of demo leaves
     if (demoLeaves.length > 0) update();
+    setLoading(false); // Set loading to false even if no real data initially
 
     return () => {
       demoListeners = demoListeners.filter((fn) => fn !== update);
@@ -183,6 +184,10 @@ export function useAllLeaveRequests() {
     try {
       const data = await getAllLeaveRequests();
       setLeaves([...demoLeaves, ...data]);
+    } catch (error) {
+      // Network error or unauthenticated - just show demo data
+      console.warn('Failed to fetch leave requests:', error);
+      setLeaves([...demoLeaves]);
     } finally {
       setRefreshing(false);
     }

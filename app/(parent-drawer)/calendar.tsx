@@ -7,36 +7,136 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../../src/context/UserContext';
-import { useCalendar } from '../../src/hooks/useCalendar';
 import { colors } from '../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
-import type { CalendarEvent, CalendarEventType } from '../../src/types';
 
-const TYPE_CONFIG: Record<CalendarEventType, { color: string; icon: string; bg: string; label: string }> = {
-  holiday: { color: '#EF4444', icon: 'sunny', bg: '#FEE2E2', label: 'Holiday' },
-  event: { color: '#10B981', icon: 'star', bg: '#D1FAE5', label: 'School Event' },
-  exam: { color: '#F59E0B', icon: 'school', bg: '#FEF3C7', label: 'Exam' },
-  meeting: { color: '#7C3AED', icon: 'people', bg: '#EDE9FE', label: 'Meeting' },
+// Student-centric event types only (no meetings)
+type StudentEventType = 'exam' | 'holiday' | 'event';
+
+interface StudentEvent {
+  id: string;
+  title: string;
+  type: StudentEventType;
+  date: string;
+  endDate?: string;
+  description: string;
+  time?: string;
+  venue?: string;
+}
+
+const EVENT_TYPE_CONFIG: Record<StudentEventType, { color: string; bg: string; label: string }> = {
+  exam: { color: '#1565C0', bg: '#E3F2FD', label: 'Exams' },
+  holiday: { color: '#EF4444', bg: '#FEE2E2', label: 'Holidays' },
+  event: { color: '#10B981', bg: '#D1FAE5', label: 'School Events' },
 };
 
-// Parent-relevant demo events (holidays, exams, parent events)
-const DEMO_EVENTS: CalendarEvent[] = [
-  { id: '1', title: 'Holi Holiday', type: 'holiday', date: '2026-03-10', end_date: '2026-03-10', description: 'School closed for Holi festival.', school_id: 'demo-school', created_at: '' },
-  { id: '2', title: 'Science Exhibition', type: 'event', date: '2026-03-14', end_date: '2026-03-14', description: 'Annual science exhibition – students to present projects.', school_id: 'demo-school', created_at: '' },
-  { id: '3', title: 'Class 10 Pre-Board Exams', type: 'exam', date: '2026-03-17', end_date: '2026-03-22', description: 'Pre-board examinations for Class 10.', school_id: 'demo-school', created_at: '' },
-  { id: '4', title: 'Parent-Teacher Meeting', type: 'meeting', date: '2026-03-25', end_date: '2026-03-25', description: 'Discuss student progress with teachers.', school_id: 'demo-school', created_at: '' },
-  { id: '5', title: 'Annual Day Function', type: 'event', date: '2026-04-02', end_date: '2026-04-02', description: 'Annual day celebration.', school_id: 'demo-school', created_at: '' },
-  { id: '6', title: 'Good Friday', type: 'holiday', date: '2026-04-03', end_date: '2026-04-03', description: 'School closed.', school_id: 'demo-school', created_at: '' },
-  { id: '7', title: 'Sports Day', type: 'event', date: '2026-04-18', end_date: '2026-04-18', description: 'Annual sports day.', school_id: 'demo-school', created_at: '' },
-  { id: '8', title: 'Final Exams Begin', type: 'exam', date: '2026-05-04', end_date: '2026-05-15', description: 'Annual final examinations.', school_id: 'demo-school', created_at: '' },
-  { id: '9', title: 'Summer Vacation Begins', type: 'holiday', date: '2026-05-25', end_date: '2026-06-30', description: 'Summer vacation for students.', school_id: 'demo-school', created_at: '' },
+// Demo student-centric events
+const STUDENT_EVENTS: StudentEvent[] = [
+  {
+    id: '1',
+    title: 'Gandhi Jayanti',
+    type: 'holiday',
+    date: '2026-10-02',
+    description: 'Public Holiday - School Closed',
+  },
+  {
+    id: '2',
+    title: 'Annual Sports Day',
+    type: 'event',
+    date: '2026-10-06',
+    description: '08:00 AM - 02:00 PM',
+    venue: 'Main Ground',
+  },
+  {
+    id: '3',
+    title: 'Mid-Term Exams Begin',
+    type: 'exam',
+    date: '2026-10-13',
+    endDate: '2026-10-22',
+    description: 'Standard I to XII',
+    venue: 'Respective Classes',
+  },
+  {
+    id: '4',
+    title: 'Diwali Break Starts',
+    type: 'holiday',
+    date: '2026-10-23',
+    endDate: '2026-10-31',
+    description: 'Autumn Vacation until Oct 31st',
+  },
+  {
+    id: '5',
+    title: 'Republic Day',
+    type: 'holiday',
+    date: '2026-01-26',
+    description: 'National Holiday - School Closed',
+  },
+  {
+    id: '6',
+    title: 'Science Exhibition',
+    type: 'event',
+    date: '2026-03-14',
+    description: '09:00 AM - 01:00 PM',
+    venue: 'School Auditorium',
+  },
+  {
+    id: '7',
+    title: 'Pre-Board Exams Begin',
+    type: 'exam',
+    date: '2026-03-17',
+    endDate: '2026-03-22',
+    description: 'Class 8-B',
+    venue: 'Exam Hall',
+  },
+  {
+    id: '8',
+    title: 'Holi Holiday',
+    type: 'holiday',
+    date: '2026-03-10',
+    description: 'Festival Holiday - School Closed',
+  },
+  {
+    id: '9',
+    title: 'Annual Day Function',
+    type: 'event',
+    date: '2026-04-02',
+    description: '10:00 AM - 04:00 PM',
+    venue: 'School Auditorium',
+  },
+  {
+    id: '10',
+    title: 'Good Friday',
+    type: 'holiday',
+    date: '2026-04-03',
+    description: 'Public Holiday - School Closed',
+  },
+  {
+    id: '11',
+    title: 'Final Exams Begin',
+    type: 'exam',
+    date: '2026-05-04',
+    endDate: '2026-05-15',
+    description: 'All Classes',
+    venue: 'Exam Halls',
+  },
+  {
+    id: '12',
+    title: 'Summer Vacation Begins',
+    type: 'holiday',
+    date: '2026-05-25',
+    endDate: '2026-06-30',
+    description: 'Summer Break for all students',
+  },
 ];
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
+];
+const MONTH_SHORT = [
+  'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+  'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
 ];
 
 function getDaysInMonth(year: number, month: number) {
@@ -51,14 +151,7 @@ function toDateStr(y: number, m: number, d: number) {
   return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
-export default function ParentCalendarScreen() {
-  const { profile } = useUser();
-  const { events: dbEvents } = useCalendar(profile?.school_id);
-
-  const allEvents = useMemo(() => {
-    return dbEvents.length > 0 ? dbEvents : DEMO_EVENTS;
-  }, [dbEvents]);
-
+export default function ParentAcademicCalendarScreen() {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -66,11 +159,12 @@ export default function ParentCalendarScreen() {
     toDateStr(today.getFullYear(), today.getMonth(), today.getDate())
   );
 
+  // Build a map of dates to event types for calendar dots
   const eventsByDate = useMemo(() => {
-    const map: Record<string, { types: Set<CalendarEventType>; events: CalendarEvent[] }> = {};
-    allEvents.forEach((ev) => {
+    const map: Record<string, { types: Set<StudentEventType>; events: StudentEvent[] }> = {};
+    STUDENT_EVENTS.forEach((ev) => {
       const start = ev.date;
-      const end = ev.end_date || ev.date;
+      const end = ev.endDate || ev.date;
       const s = new Date(start + 'T00:00:00');
       const e = new Date(end + 'T00:00:00');
       for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
@@ -81,7 +175,15 @@ export default function ParentCalendarScreen() {
       }
     });
     return map;
-  }, [allEvents]);
+  }, []);
+
+  // Upcoming events from current month onwards
+  const upcomingEvents = useMemo(() => {
+    const monthStart = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-01`;
+    return STUDENT_EVENTS
+      .filter((ev) => ev.date >= monthStart)
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [viewYear, viewMonth]);
 
   const daysInMonth = getDaysInMonth(viewYear, viewMonth);
   const firstDay = getFirstDayOfWeek(viewYear, viewMonth);
@@ -90,8 +192,6 @@ export default function ParentCalendarScreen() {
   const calendarCells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) calendarCells.push(null);
   for (let d = 1; d <= daysInMonth; d++) calendarCells.push(d);
-
-  const selectedEvents = eventsByDate[selectedDate]?.events ?? [];
 
   const goMonth = (dir: number) => {
     let m = viewMonth + dir;
@@ -104,26 +204,29 @@ export default function ParentCalendarScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Month Navigation */}
-      <View style={styles.monthNav}>
-        <TouchableOpacity onPress={() => goMonth(-1)} style={styles.navBtn}>
-          <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.monthTitle}>
-          {MONTH_NAMES[viewMonth]} {viewYear}
-        </Text>
-        <TouchableOpacity onPress={() => goMonth(1)} style={styles.navBtn}>
-          <Ionicons name="chevron-forward" size={22} color={colors.textPrimary} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Calendar Grid */}
+      {/* Calendar Card */}
       <View style={styles.calendarCard}>
+        {/* Month Navigation */}
+        <View style={styles.monthNav}>
+          <TouchableOpacity onPress={() => goMonth(-1)} style={styles.navBtn}>
+            <Ionicons name="chevron-back" size={18} color={colors.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.monthTitle}>
+            {MONTH_NAMES[viewMonth]} {viewYear}
+          </Text>
+          <TouchableOpacity onPress={() => goMonth(1)} style={styles.navBtn}>
+            <Ionicons name="chevron-forward" size={18} color={colors.textPrimary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Weekday Headers */}
         <View style={styles.weekdayRow}>
           {WEEKDAYS.map((d) => (
             <Text key={d} style={styles.weekdayText}>{d}</Text>
           ))}
         </View>
+
+        {/* Days Grid */}
         <View style={styles.daysGrid}>
           {calendarCells.map((day, idx) => {
             if (day === null) {
@@ -133,7 +236,9 @@ export default function ParentCalendarScreen() {
             const isToday = dateStr === todayStr;
             const isSelected = dateStr === selectedDate;
             const entry = eventsByDate[dateStr];
-            const eventTypes = entry ? Array.from(entry.types) : [];
+            const hasExam = entry?.types.has('exam');
+            const hasHoliday = entry?.types.has('holiday');
+            const hasEvent = entry?.types.has('event');
 
             return (
               <TouchableOpacity
@@ -144,25 +249,34 @@ export default function ParentCalendarScreen() {
                   isToday && !isSelected && styles.dayCellToday,
                 ]}
                 onPress={() => setSelectedDate(dateStr)}
+                activeOpacity={0.6}
               >
                 <Text style={[
                   styles.dayText,
-                  isSelected && { color: colors.white, fontWeight: '800' },
-                  isToday && !isSelected && { color: colors.primary, fontWeight: '800' },
+                  isSelected && styles.dayTextSelected,
+                  isToday && !isSelected && styles.dayTextToday,
+                  hasHoliday && !isSelected && !isToday && styles.dayTextHoliday,
                 ]}>
                   {day}
                 </Text>
-                {eventTypes.length > 0 && (
+                {/* Event dots */}
+                {(hasExam || hasHoliday || hasEvent) && (
                   <View style={styles.dotsRow}>
-                    {eventTypes.slice(0, 3).map((t) => (
-                      <View
-                        key={t}
-                        style={[
-                          styles.eventDot,
-                          { backgroundColor: isSelected ? colors.white : TYPE_CONFIG[t].color },
-                        ]}
-                      />
-                    ))}
+                    {hasExam && (
+                      <View style={[styles.eventDot, {
+                        backgroundColor: isSelected ? '#fff' : EVENT_TYPE_CONFIG.exam.color,
+                      }]} />
+                    )}
+                    {hasHoliday && (
+                      <View style={[styles.eventDot, {
+                        backgroundColor: isSelected ? '#fff' : EVENT_TYPE_CONFIG.holiday.color,
+                      }]} />
+                    )}
+                    {hasEvent && (
+                      <View style={[styles.eventDot, {
+                        backgroundColor: isSelected ? '#fff' : EVENT_TYPE_CONFIG.event.color,
+                      }]} />
+                    )}
                   </View>
                 )}
               </TouchableOpacity>
@@ -172,50 +286,58 @@ export default function ParentCalendarScreen() {
       </View>
 
       {/* Legend */}
-      <View style={styles.legendRow}>
-        {Object.entries(TYPE_CONFIG).map(([key, config]) => (
-          <View key={key} style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: config.color }]} />
-            <Text style={styles.legendText}>{config.label}</Text>
-          </View>
-        ))}
+      <View style={styles.legendCard}>
+        <Text style={styles.legendLabel}>LEGEND</Text>
+        <View style={styles.legendRow}>
+          {Object.entries(EVENT_TYPE_CONFIG).map(([key, config]) => (
+            <View key={key} style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: config.color }]} />
+              <Text style={styles.legendText}>{config.label}</Text>
+            </View>
+          ))}
+        </View>
       </View>
 
-      {/* Events for selected date */}
-      <Text style={styles.sectionTitle}>
-        Events for {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })}
-      </Text>
+      {/* Upcoming Events */}
+      <Text style={styles.sectionTitle}>Upcoming Events</Text>
 
-      {selectedEvents.length === 0 ? (
+      {upcomingEvents.length === 0 ? (
         <View style={styles.emptyCard}>
-          <Ionicons name="calendar-outline" size={36} color={colors.textLight} />
-          <Text style={styles.emptyText}>No events on this day</Text>
+          <Ionicons name="calendar-outline" size={40} color={colors.textLight} />
+          <Text style={styles.emptyText}>No upcoming events this month</Text>
         </View>
       ) : (
-        selectedEvents.map((ev) => {
-          const config = TYPE_CONFIG[ev.type];
+        upcomingEvents.map((ev) => {
+          const evDate = new Date(ev.date + 'T00:00:00');
+          const config = EVENT_TYPE_CONFIG[ev.type];
+          const isExam = ev.type === 'exam';
+
           return (
-            <View key={ev.id} style={styles.eventCard}>
-              <View style={[styles.eventIcon, { backgroundColor: config.bg }]}>
-                <Ionicons name={config.icon as any} size={20} color={config.color} />
+            <TouchableOpacity key={ev.id} style={styles.eventCard} activeOpacity={0.7}>
+              {/* Date Column */}
+              <View style={[styles.eventDateCol, isExam && { borderColor: config.color }]}>
+                <Text style={[styles.eventDateMonth, { color: config.color }]}>
+                  {MONTH_SHORT[evDate.getMonth()]}
+                </Text>
+                <Text style={styles.eventDateDay}>
+                  {String(evDate.getDate()).padStart(2, '0')}
+                </Text>
               </View>
-              <View style={{ flex: 1 }}>
+
+              {/* Event Details */}
+              <View style={styles.eventContent}>
                 <Text style={styles.eventTitle}>{ev.title}</Text>
-                <View style={[styles.typePill, { backgroundColor: config.bg }]}>
-                  <Text style={[styles.typePillText, { color: config.color }]}>{config.label}</Text>
-                </View>
-                {ev.description ? (
-                  <Text style={styles.eventDesc} numberOfLines={2}>{ev.description}</Text>
-                ) : null}
-                {ev.end_date && ev.end_date !== ev.date && (
-                  <Text style={styles.eventRange}>
-                    {new Date(ev.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                    {' – '}
-                    {new Date(ev.end_date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                  </Text>
-                )}
+                <Text style={styles.eventDesc}>
+                  {ev.description}
+                  {ev.venue ? ` • ${ev.venue}` : ''}
+                </Text>
               </View>
-            </View>
+
+              {/* Arrow */}
+              <View style={styles.eventArrow}>
+                <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
+              </View>
+            </TouchableOpacity>
           );
         })
       )}
@@ -226,178 +348,245 @@ export default function ParentCalendarScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: spacing.xxxl },
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F7FA',
+  },
+  content: {
+    paddingBottom: 32,
+  },
 
+  // Calendar Card
+  calendarCard: {
+    backgroundColor: colors.white,
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 3 },
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+
+  // Month Navigation
   monthNav: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.lg,
+    paddingHorizontal: 8,
+    marginBottom: 16,
   },
   navBtn: {
-    padding: spacing.sm,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.border,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#F5F7FA',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   monthTitle: {
-    fontSize: fontSize.lg,
+    fontSize: 17,
     fontWeight: '800',
     color: colors.textPrimary,
   },
 
-  calendarCard: {
-    backgroundColor: colors.white,
-    marginHorizontal: spacing.lg,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
+  // Weekday headers
   weekdayRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: spacing.sm,
+    marginBottom: 8,
   },
   weekdayText: {
-    width: 40,
+    flex: 1,
     textAlign: 'center',
-    fontSize: fontSize.xs,
+    fontSize: 11,
     fontWeight: '700',
     color: colors.textLight,
+    letterSpacing: 0.3,
   },
+
+  // Days grid
   daysGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   dayCell: {
-    width: `${100 / 7}%`,
+    width: `${100 / 7}%` as any,
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: borderRadius.md,
+    marginVertical: 1,
   },
   dayCellSelected: {
     backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
+    borderRadius: 12,
   },
   dayCellToday: {
-    backgroundColor: colors.primaryLight,
-    borderRadius: borderRadius.md,
+    backgroundColor: '#E3F2FD',
+    borderRadius: 12,
   },
   dayText: {
-    fontSize: fontSize.sm,
+    fontSize: 14,
     fontWeight: '500',
     color: colors.textPrimary,
   },
+  dayTextSelected: {
+    color: '#fff',
+    fontWeight: '800',
+  },
+  dayTextToday: {
+    color: colors.primary,
+    fontWeight: '800',
+  },
+  dayTextHoliday: {
+    color: '#EF4444',
+  },
   dotsRow: {
     flexDirection: 'row',
-    gap: 2,
+    gap: 3,
     marginTop: 2,
+    position: 'absolute',
+    bottom: 6,
   },
   eventDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
   },
 
+  // Legend
+  legendCard: {
+    backgroundColor: colors.white,
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  legendLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.textLight,
+    letterSpacing: 0.8,
+    marginBottom: 10,
+  },
   legendRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-    paddingHorizontal: spacing.xl,
-    marginTop: spacing.md,
+    gap: 20,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
   legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
   legendText: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-  },
-
-  sectionTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '600',
     color: colors.textPrimary,
-    paddingHorizontal: spacing.xl,
-    marginTop: spacing.xl,
-    marginBottom: spacing.md,
   },
 
-  emptyCard: {
-    backgroundColor: colors.white,
-    marginHorizontal: spacing.lg,
-    borderRadius: borderRadius.lg,
-    padding: spacing.xxl,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  emptyText: {
-    color: colors.textLight,
-    fontSize: fontSize.md,
-    marginTop: spacing.sm,
+  // Section Title
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: colors.textPrimary,
+    paddingHorizontal: 20,
+    marginTop: 24,
+    marginBottom: 14,
   },
 
+  // Event Card
   eventCard: {
     flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.white,
-    marginHorizontal: spacing.lg,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
+    marginHorizontal: 16,
+    marginBottom: 10,
+    borderRadius: 16,
+    padding: 14,
     elevation: 1,
     shadowColor: '#000',
     shadowOpacity: 0.04,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
   },
-  eventIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  eventDateCol: {
+    width: 52,
+    height: 56,
+    borderRadius: 12,
+    backgroundColor: '#F5F7FA',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing.md,
+    marginRight: 14,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  eventDateMonth: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  eventDateDay: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.textPrimary,
+    marginTop: -1,
+  },
+  eventContent: {
+    flex: 1,
   },
   eventTitle: {
-    fontSize: fontSize.md,
+    fontSize: 15,
     fontWeight: '700',
     color: colors.textPrimary,
-    marginBottom: 4,
-  },
-  typePill: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: borderRadius.full,
-    marginBottom: 4,
-  },
-  typePillText: {
-    fontSize: fontSize.xs,
-    fontWeight: '700',
+    marginBottom: 3,
   },
   eventDesc: {
-    fontSize: fontSize.sm,
+    fontSize: 12,
     color: colors.textSecondary,
-    lineHeight: 18,
+    lineHeight: 17,
   },
-  eventRange: {
-    fontSize: fontSize.xs,
+  eventArrow: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: '#F5F7FA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+
+  // Empty
+  emptyCard: {
+    backgroundColor: colors.white,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  emptyText: {
     color: colors.textLight,
-    marginTop: 4,
+    fontSize: 14,
+    marginTop: 10,
   },
 });

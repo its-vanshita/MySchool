@@ -63,24 +63,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setError = (val: string | null) => setErrorRaw(val ? sanitizeError(val) : null);
 
   useEffect(() => {
-    supabase.auth
-      .getSession()
-      .then(({ data: { session: s } }) => {
+    try {
+      supabase.auth
+        .getSession()
+        .then(({ data: { session: s } }) => {
+          setSession(s);
+          setUser(s?.user ?? null);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.warn('Failed to get session:', err);
+          setLoading(false);
+        });
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, s) => {
         setSession(s);
         setUser(s?.user ?? null);
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setUser(s?.user ?? null);
+      return () => subscription.unsubscribe();
+    } catch (err) {
+      console.error('Auth initialization error:', err);
       setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    }
   }, []);
 
   const signIn = async (uniqueId: string, password: string): Promise<{ isFirstLogin: boolean }> => {

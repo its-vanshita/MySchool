@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "backgroundColor": "#1565C0"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.itsvanshita.MySchool"
     },
     "web": {
       "output": "static",
@@ -36,6 +37,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "68f221f2-f831-43cc-a506-e9b4792ba2a2"
+      }
     }
   }
 }

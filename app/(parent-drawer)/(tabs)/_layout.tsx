@@ -6,6 +6,14 @@ import { useNotificationBadge } from '../../../src/context/NotificationContext';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 
+function HeaderTitle() {
+  return (
+    <Text style={{ fontSize: 18, fontWeight: '800', color: colors.white, letterSpacing: 0.5 }}>
+      Viddarpan
+    </Text>
+  );
+}
+
 function HeaderRight() {
   const router = useRouter();
   const { unreadCount } = useNotificationBadge();
@@ -37,15 +45,24 @@ export default function ParentTabsLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textLight,
+        tabBarInactiveTintColor: '#9CA3AF',
         tabBarStyle: {
           backgroundColor: colors.white,
-          borderTopColor: colors.border,
-          height: 60,
+          borderTopColor: '#F0F0F0',
+          height: 62,
           paddingBottom: 8,
-          paddingTop: 4,
+          paddingTop: 6,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: -2 },
         },
-        headerStyle: { backgroundColor: colors.primary },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
+        headerStyle: { backgroundColor: colors.primary, elevation: 0, shadowOpacity: 0 },
         headerTintColor: colors.white,
         headerTitleStyle: { fontWeight: '700' },
         headerLeft: () => <DrawerToggleButton tintColor={colors.white} />,
@@ -55,44 +72,72 @@ export default function ParentTabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'My School',
+          title: 'Home',
+          headerTitle: () => <HeaderTitle />,
           tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
+        name="documents"
+        options={{
+          title: 'Documents',
+          headerTitle: () => <HeaderTitle />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="documents" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="marks"
+        options={{
+          title: 'Marks',
+          headerTitle: () => <HeaderTitle />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="stats-chart" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="fee"
+        options={{
+          title: 'Fee',
+          headerTitle: () => <HeaderTitle />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="card" size={size} color={color} />
+          ),
+        }}
+      />
+      {/* Hidden existing tabs - kept for routing but not shown in tab bar */}
+      <Tabs.Screen
         name="attendance"
         options={{
           title: 'Attendance',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="checkmark-circle" size={size} color={color} />
-          ),
+          headerTitle: () => <HeaderTitle />,
+          href: null,
         }}
       />
       <Tabs.Screen
         name="homework"
         options={{
           title: 'Homework',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="book" size={size} color={color} />
-          ),
+          headerTitle: () => <HeaderTitle />,
+          href: null,
         }}
       />
       <Tabs.Screen
         name="notices"
         options={{
           title: 'Notices',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="megaphone" size={size} color={color} />
-          ),
+          headerTitle: () => <HeaderTitle />,
+          href: null,
         }}
       />
       <Tabs.Screen
         name="datesheet"
         options={{
           title: 'Exams',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="clipboard" size={size} color={color} />
-          ),
+          headerTitle: () => <HeaderTitle />,
+          href: null,
         }}
       />
     </Tabs>
