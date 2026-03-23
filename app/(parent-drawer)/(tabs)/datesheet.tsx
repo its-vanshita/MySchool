@@ -5,9 +5,11 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDatesheet } from '../../../src/hooks/useDatesheet';
+import { useSharedUploadedDatesheets } from '../../../src/hooks/useSharedUploadedDatesheets';
 import { colors } from '../../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { ExamEntry, ExamGroup } from '../../../src/types';
@@ -36,8 +38,10 @@ const SUBJECT_COLORS: Record<string, string> = {
 
 export default function ParentDatesheetScreen() {
   const { examGroups, loading } = useDatesheet('demo-school', true);
+  const { datesheets } = useSharedUploadedDatesheets();
   const [showDemo, setShowDemo] = useState(true);
 
+  const studentDatesheets = datesheets.filter(d => d.target === 'student' || d.target === 'both');
   const exams = showDemo ? DEMO_EXAMS : [];
 
   return (
@@ -53,10 +57,25 @@ export default function ParentDatesheetScreen() {
         </View>
       </View>
 
+      {studentDatesheets.length > 0 && (
+        <View style={styles.uploadedContainer}>
+          <Text style={styles.sectionHeader}>Official Announcements</Text>
+          {studentDatesheets.map(d => (
+            <View key={d.id} style={styles.uploadedCard}>
+              <Image source={{ uri: d.imageUrl }} style={styles.uploadedImage} />
+              <View style={styles.uploadedInfo}>
+                <Text style={styles.uploadedTitle}>{d.title}</Text>
+                <Text style={styles.uploadedDate}>Posted: {new Date(d.datePosted).toLocaleDateString()}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+
       {/* Exam Type Banner */}
       <View style={styles.examTypeBanner}>
         <Ionicons name="school" size={18} color={colors.white} />
-        <Text style={styles.examTypeText}>Annual Examination 2026</Text>
+        <Text style={styles.examTypeText}>Upcoming Tracked Exams</Text>
       </View>
 
       {exams.length === 0 ? (
@@ -298,4 +317,16 @@ const styles = StyleSheet.create({
     color: colors.textLight,
     marginTop: spacing.xs,
   },
+
+  uploadedContainer: { marginHorizontal: spacing.lg, marginTop: spacing.xl },
+  sectionHeader: { fontSize: fontSize.md, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', marginBottom: spacing.sm },
+  uploadedCard: {
+    flexDirection: 'row', backgroundColor: colors.white, 
+    borderRadius: borderRadius.md, marginBottom: spacing.sm, padding: spacing.sm,
+    borderWidth: 1, borderColor: colors.border
+  },
+  uploadedImage: { width: 50, height: 50, borderRadius: 8, backgroundColor: '#E5E7EB', marginRight: spacing.md },
+  uploadedInfo: { flex: 1, justifyContent: 'center' },
+  uploadedTitle: { fontSize: 13, fontWeight: '700', color: colors.textPrimary, marginBottom: 2 },
+  uploadedDate: { fontSize: 11, color: colors.textLight }
 });

@@ -32,9 +32,6 @@ export default function AdminLessonPlansScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.headerTitle}>Syllabus Tracking</Text>
-        <Text style={styles.subTitle}>Monitor teacher progress and coverage.</Text>
-
         {/* Teacher Selector */}
         <Text style={styles.sectionLabel}>Select Teacher</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.teacherScroll}>

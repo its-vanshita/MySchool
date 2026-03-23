@@ -68,7 +68,7 @@ export default function AdminAttendanceListScreen() {
             <Image source={{ uri: item.avatar }} style={styles.avatar} />
             <View style={styles.itemInfo}>
               <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemSub}>{item.roleOrClass}</Text>
+              <Text style={styles.itemSub}>{type === 'teachers' ? (item as any).role : (item as any).class}</Text>
             </View>
             <View style={[styles.statusBadge, item.status === 'present' ? styles.statusPresent : styles.statusAbsent]}>
               <Text style={[styles.statusText, item.status === 'present' ? styles.statusTextPresent : styles.statusTextAbsent]}>

@@ -11,7 +11,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useUser } from '../../src/context/UserContext';
 import { useDatesheet } from '../../src/hooks/useDatesheet';
+import { useSharedUploadedDatesheets } from '../../src/hooks/useSharedUploadedDatesheets';
 import { colors } from '../../src/theme/colors';
+import { Image } from 'react-native';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { ExamGroup, ExamType } from '../../src/types';
 
@@ -99,6 +101,8 @@ function ExamTypeCard({ group }: { group: ExamGroup }) {
 export default function DatesheetScreen() {
   const { profile, isDemo } = useUser();
   const { examGroups, loading } = useDatesheet(profile?.school_id, isDemo);
+  const { datesheets } = useSharedUploadedDatesheets();
+  const teacherDatesheets = datesheets.filter(d => d.target === 'teacher' || d.target === 'both');
 
   if (loading) {
     return (
@@ -118,7 +122,7 @@ export default function DatesheetScreen() {
         </Text>
       </View>
 
-      {examGroups.length === 0 ? (
+      {examGroups.length === 0 && teacherDatesheets.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="clipboard-outline" size={50} color={colors.textLight} />
           <Text style={styles.emptyText}>No exams scheduled yet</Text>
@@ -129,6 +133,23 @@ export default function DatesheetScreen() {
           keyExtractor={(item) => item.exam_type}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            teacherDatesheets.length > 0 ? (
+              <View style={styles.uploadedContainer}>
+                <Text style={styles.sectionHeader}>Official Announcements</Text>
+                {teacherDatesheets.map(d => (
+                  <View key={d.id} style={styles.uploadedCard}>
+                    <Image source={{ uri: d.imageUrl }} style={styles.uploadedImage} />
+                    <View style={styles.uploadedInfo}>
+                      <Text style={styles.uploadedTitle}>{d.title}</Text>
+                      <Text style={styles.uploadedDate}>Posted: {new Date(d.datePosted).toLocaleDateString()}</Text>
+                    </View>
+                  </View>
+                ))}
+                <Text style={[styles.sectionHeader, { marginTop: spacing.md }]}>Upcoming Tracked Exams</Text>
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => <ExamTypeCard group={item} />}
         />
       )}
@@ -219,4 +240,16 @@ const styles = StyleSheet.create({
 
   emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   emptyText: { color: colors.textLight, fontSize: fontSize.md, marginTop: spacing.md },
+
+  uploadedContainer: { marginBottom: spacing.md },
+  sectionHeader: { fontSize: fontSize.md, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', marginBottom: spacing.sm },
+  uploadedCard: {
+    flexDirection: 'row', backgroundColor: colors.white, 
+    borderRadius: borderRadius.md, marginBottom: spacing.sm, padding: spacing.sm,
+    borderWidth: 1, borderColor: colors.border
+  },
+  uploadedImage: { width: 50, height: 50, borderRadius: 8, backgroundColor: '#E5E7EB', marginRight: spacing.md },
+  uploadedInfo: { flex: 1, justifyContent: 'center' },
+  uploadedTitle: { fontSize: 13, fontWeight: '700', color: colors.textPrimary, marginBottom: 2 },
+  uploadedDate: { fontSize: 11, color: colors.textLight }
 });

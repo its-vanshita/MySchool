@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../../src/context/AuthContext';
 import { useUser } from '../../../src/context/UserContext';
 import { useSharedUsers } from '../../../src/hooks/useSharedUsers';
 import { colors } from '../../../src/theme/colors';
@@ -11,6 +10,7 @@ import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 export default function AdminDashboardScreen() {
   const router = useRouter();
   const { profile } = useUser();
+  const { teachers, students } = useSharedUsers();
   const [refreshing, setRefreshing] = React.useState(false);
 
   const greeting = () => {
@@ -74,7 +74,6 @@ export default function AdminDashboardScreen() {
   ];
 
   // Daily changing pseudo-metrics
-  const { students, teachers } = useSharedUsers();
   const dailyStats = React.useMemo(() => {
     const d = new Date();
     const seed = d.getFullYear() * 1000 + d.getMonth() * 100 + d.getDate();

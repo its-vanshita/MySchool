@@ -57,7 +57,7 @@ export default function RootLayout() {
             <Stack.Screen name="(parent-drawer)" options={{ headerShown: false }} />
             <Stack.Screen name="(admin-drawer)" options={{ headerShown: false }} />
             <Stack.Screen
-              name="assign-notice"
+              name="(teacher)/assign-notice"
               options={{
                 presentation: 'modal',
                 headerShown: true,
@@ -67,7 +67,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="admin-leave-approvals"
+              name="(admin)/admin-leave-approvals"
               options={{
                 presentation: 'card',
                 headerShown: true,
@@ -77,7 +77,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="admin-manage-timetable"
+              name="(admin)/admin-manage-timetable"
               options={{
                 presentation: 'card',
                 headerShown: true,
@@ -87,7 +87,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="admin-manage-calendar"
+              name="(admin)/admin-manage-calendar"
               options={{
                 presentation: 'card',
                 headerShown: true,
@@ -97,7 +97,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="admin-lesson-plans"
+              name="(admin)/admin-lesson-plans"
               options={{
                 presentation: 'card',
                 headerShown: true,
@@ -107,7 +107,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="admin-analytics"
+              name="(admin)/admin-analytics"
               options={{
                 presentation: 'card',
                 headerShown: true,
@@ -117,14 +117,14 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="admin-attendance-list"
+              name="(admin)/admin-attendance-list"
               options={{
                 presentation: 'card',
                 headerShown: false,
               }}
             />
             <Stack.Screen
-              name="mark-attendance"
+              name="(teacher)/mark-attendance"
               options={{
                 presentation: 'card',
                 headerShown: true,
@@ -134,7 +134,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="create-notice"
+              name="(teacher)/create-notice"
               options={{
                 presentation: 'modal',
                 headerShown: true,
@@ -144,7 +144,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="create-announcement"
+              name="(teacher)/create-announcement"
               options={{
                 presentation: 'modal',
                 headerShown: true,
@@ -154,7 +154,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="apply-leave"
+              name="(teacher)/apply-leave"
               options={{
                 presentation: 'card',
                 headerShown: true,
@@ -165,7 +165,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="add-lesson-plan"
+              name="(teacher)/add-lesson-plan"
               options={{
                 presentation: 'card',
                 headerShown: true,
@@ -176,7 +176,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="leave-approvals"
+              name="(teacher)/leave-approvals"
               options={{
                 headerShown: true,
                 headerTitle: 'Leave Approvals',
@@ -185,7 +185,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="notifications"
+              name="(shared)/notifications"
               options={{
                 headerShown: true,
                 headerTitle: 'Notifications',
@@ -194,7 +194,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="add-homework"
+              name="(teacher)/add-homework"
               options={{
                 presentation: 'card',
                 headerShown: true,
@@ -205,7 +205,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="class-students"
+              name="(teacher)/class-students"
               options={{
                 presentation: 'card',
                 headerShown: true,
@@ -216,7 +216,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="student-performance"
+              name="(teacher)/student-performance"
               options={{
                 presentation: 'card',
                 headerShown: true,
@@ -227,7 +227,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="exam-datesheet"
+              name="(shared)/exam-datesheet"
               options={{
                 presentation: 'card',
                 headerShown: true,

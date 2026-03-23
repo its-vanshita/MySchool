@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router';
 function HeaderTitle() {
   return (
     <Text style={{ fontSize: 18, fontWeight: '800', color: colors.white, letterSpacing: 0.5 }}>
-      Viddarpan
+      VidDarpan
     </Text>
   );
 }

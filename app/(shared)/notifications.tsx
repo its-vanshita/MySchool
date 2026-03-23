@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
 import { useNotificationBadge } from '../src/context/NotificationContext';
+import { useUser } from '../src/context/UserContext';
 
 interface Notification {
   id: string;
@@ -31,6 +32,45 @@ const ICON_MAP: Record<Notification['type'], { name: keyof typeof Ionicons.glyph
   attendance: { name: 'checkmark-circle', color: '#10B981', bg: '#D1FAE5' },
   general: { name: 'notifications', color: '#6B7280', bg: '#F3F4F6' },
 };
+
+const ADMIN_NOTIFICATIONS: Notification[] = [
+  {
+    id: 'a1',
+    title: 'Pending Leave Approvals',
+    message: 'You have 3 new leave requests from teaching staff awaiting your approval.',
+    time: '09:00 AM',
+    timeLabel: 'today',
+    type: 'leave',
+    read: false,
+  },
+  {
+    id: 'a2',
+    title: 'Marks Upload Locked',
+    message: 'Class 10A Science marks portal has automatically locked. 2 teacher overrides requested.',
+    time: '08:15 AM',
+    timeLabel: 'today',
+    type: 'notice',
+    read: false,
+  },
+  {
+    id: 'a3',
+    title: 'System DB Backup',
+    message: 'Weekly database backup successfully completed at 02:00 AM.',
+    time: '11:00 PM',
+    timeLabel: 'yesterday',
+    type: 'general',
+    read: true,
+  },
+  {
+    id: 'a4',
+    title: 'New Teacher Onboarded',
+    message: 'Aman Patel has been successfully added to the school staff directory.',
+    time: '10:30 AM',
+    timeLabel: 'yesterday',
+    type: 'announcement',
+    read: true,
+  }
+];
 
 const DUMMY_NOTIFICATIONS: Notification[] = [
   {
@@ -132,7 +172,9 @@ interface NotifSection {
 }
 
 export default function NotificationsScreen() {
+  const { role } = useUser();
   const { notifications: ctxNotifications, setUnreadCount } = useNotificationBadge();
+  const baseDummies = role === 'admin' ? ADMIN_NOTIFICATIONS : DUMMY_NOTIFICATIONS;
 
   // Merge context notifications (real-time from leave status changes etc.) with dummy data
   const mergedBase: Notification[] = useMemo(() => {
@@ -145,10 +187,10 @@ export default function NotificationsScreen() {
       type: n.type as Notification['type'],
       read: n.read,
     }));
-    return [...real, ...DUMMY_NOTIFICATIONS];
-  }, [ctxNotifications]);
+    return [...real, ...baseDummies];
+  }, [ctxNotifications, baseDummies]);
 
-  const [notifications, setNotifications] = useState<Notification[]>(DUMMY_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>(baseDummies);
 
   // Keep local state in sync whenever context adds new notifications
   useEffect(() => {

@@ -132,7 +132,7 @@ export default function LoginScreen() {
           <View style={styles.logoContainer}>
             <Ionicons name="school" size={36} color={colors.primary} />
           </View>
-          <Text style={styles.appName}>My School</Text>
+          <Text style={styles.appName}>VidDarpan</Text>
         </View>
 
         {/* School Image Banner */}

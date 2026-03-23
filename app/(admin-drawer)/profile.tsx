@@ -16,15 +16,15 @@ import { useUser } from '../../src/context/UserContext';
 import { colors } from '../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
-export default function ProfileScreen() {
+export default function AdminProfileScreen() {
   const { profile, role } = useUser();
   const { signOut } = useAuth();
   const router = useRouter();
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(false);
 
-  const designation = profile?.designation || 'Teacher';
-  const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : '';
+  const designation = profile?.designation || 'System Admin';
+  const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Admin';
   const roleLabel = `${designation.toUpperCase()} / ${displayRole.toUpperCase()}`;
 
   const joiningDate = profile?.created_at
@@ -49,14 +49,6 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const initials = profile?.name
-    ? profile.name
-        .split(' ')
-        .map((n: string) => n[0])
-        .join('')
-        .toUpperCase()
-    : '?';
-
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* ── Profile Header ── */}
@@ -67,31 +59,30 @@ export default function ProfileScreen() {
               <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
             ) : (
               <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80' }}
+                source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80' }}
                 style={styles.avatarImage}
               />
             )}
           </View>
         </View>
-        <Text style={styles.profileName}>{profile?.name || 'Unknown'}</Text>
+        <Text style={styles.profileName}>{profile?.name || 'Administrator'}</Text>
         <Text style={styles.profileRole}>{roleLabel}</Text>
         <Text style={styles.profileId}>ID: {profile?.unique_id || '—'}</Text>
       </View>
 
       {/* ── Personal Details ── */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>PERSONAL DETAILS</Text>
+        <Text style={styles.cardTitle}>ADMINISTRATOR DETAILS</Text>
 
-        <DetailField label="Full Name" value={profile?.name || '—'} />
-        <DetailField label="Email Address" value={profile?.email || '—'} />
-        <DetailField label="Phone Number" value={profile?.phone || '—'} />
+        <DetailField label="Full Name" value={profile?.name || 'Admin User'} />
+        <DetailField label="Email Address" value={profile?.email || 'admin@school.com'} />
         <DetailField label="Designation" value={designation} />
-        <DetailField label="Joining Date" value={joiningDate} isLast />
+        <DetailField label="System Access" value={'Global Dashboard Access'} isLast />
       </View>
 
       {/* ── Password & Security ── */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>PASSWORD & SECURITY</Text>
+        <Text style={styles.cardTitle}>SECURITY PROTOCOLS</Text>
         <NavRow
           icon="lock-closed-outline"
           label="Change Password"
@@ -107,7 +98,7 @@ export default function ProfileScreen() {
 
       {/* ── Notifications ── */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>NOTIFICATIONS</Text>
+        <Text style={styles.cardTitle}>ALERTS & NOTIFICATIONS</Text>
         <View style={styles.toggleRow}>
           <View style={styles.toggleLeft}>
             <View style={[styles.toggleIcon, { backgroundColor: colors.primaryLight }]}>
@@ -127,7 +118,7 @@ export default function ProfileScreen() {
             <View style={[styles.toggleIcon, { backgroundColor: colors.primaryLight }]}>
               <Ionicons name="mail-outline" size={18} color={colors.primary} />
             </View>
-            <Text style={styles.toggleLabel}>Email Alerts</Text>
+            <Text style={styles.toggleLabel}>System Email Alerts</Text>
           </View>
           <Switch
             value={emailAlerts}
@@ -138,34 +129,12 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* ── About VidDarpan ── */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>ABOUT VIDDARPAN</Text>
-        <NavRow
-          icon="information-circle-outline"
-          label="Version Information"
-          rightText="v2.4.0"
-          onPress={() => {}}
-        />
-        <NavRow
-          icon="document-text-outline"
-          label="Privacy Policy"
-          onPress={() => Alert.alert('Privacy Policy', 'Privacy policy coming soon.')}
-        />
-        <NavRow
-          icon="help-circle-outline"
-          label="Help & Support"
-          onPress={() => Alert.alert('Help', 'Support coming soon.')}
-          isLast
-        />
-      </View>
-
       {/* ── Logout ── */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
         <View style={styles.logoutIconWrap}>
           <Ionicons name="log-out-outline" size={20} color="#EF4444" />
         </View>
-        <Text style={styles.logoutText}>Log Out</Text>
+        <Text style={styles.logoutText}>Secure Log Out</Text>
       </TouchableOpacity>
     </ScrollView>
   );

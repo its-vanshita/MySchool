@@ -5,7 +5,7 @@ import { useUser } from '../../src/context/UserContext';
 import { useAuth } from '../../src/context/AuthContext';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { fontSize, spacing } from '../../src/theme/spacing';
-import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 
 function ParentDrawerContent(props: any) {
@@ -43,6 +43,27 @@ function ParentDrawerContent(props: any) {
 
       {/* Navigation Items */}
       <DrawerItemList {...props} />
+
+      {/* Manual Parent Tool Links */}
+      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/(parent-drawer)/(tabs)/attendance'); props.navigation.closeDrawer(); }}>
+        <Ionicons name="checkmark-circle-outline" size={22} color={colors.drawerIcon} />
+        <Text style={drawerStyles.navItemText}>Attendance Tracker</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/(parent-drawer)/(tabs)/homework'); props.navigation.closeDrawer(); }}>
+        <Ionicons name="book-outline" size={22} color={colors.drawerIcon} />
+        <Text style={drawerStyles.navItemText}>Homework & Tasks</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/(parent-drawer)/(tabs)/notices'); props.navigation.closeDrawer(); }}>
+        <Ionicons name="megaphone-outline" size={22} color={colors.drawerIcon} />
+        <Text style={drawerStyles.navItemText}>School Notices</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/(parent-drawer)/(tabs)/datesheet'); props.navigation.closeDrawer(); }}>
+        <Ionicons name="calendar-outline" size={22} color={colors.drawerIcon} />
+        <Text style={drawerStyles.navItemText}>Exam Datesheets</Text>
+      </TouchableOpacity>
 
       {/* Logout */}
       <TouchableOpacity style={drawerStyles.logoutBtn} onPress={handleLogout}>
@@ -114,6 +135,21 @@ const drawerStyles = StyleSheet.create({
   },
   homeBtnText: {
     color: colors.white,
+    fontSize: fontSize.md,
+    fontWeight: '600',
+    marginLeft: spacing.md,
+  },
+  navItemBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+    marginHorizontal: spacing.sm,
+    marginBottom: spacing.xs,
+    borderRadius: 8,
+  },
+  navItemText: {
+    color: colors.drawerIcon,
     fontSize: fontSize.md,
     fontWeight: '600',
     marginLeft: spacing.md,

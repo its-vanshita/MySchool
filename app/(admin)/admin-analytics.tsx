@@ -120,10 +120,6 @@ export default function AdminAnalyticsScreen() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         
-        {/* Title */}
-        <Text style={styles.headerTitle}>Analytics Dashboard</Text>
-        <Text style={styles.subTitle}>Overview of Attendance & Performance</Text>
-
         {/* Global Filters */}
         <View style={styles.filterRow}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>

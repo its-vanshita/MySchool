@@ -35,7 +35,10 @@ function HeaderRight() {
           </View>
         )}
       </TouchableOpacity>
-      <TouchableOpacity style={{ marginLeft: 10 }}>
+      <TouchableOpacity 
+        style={{ marginLeft: 10 }}
+        onPress={() => router.push('/(admin-drawer)/profile')}
+      >
         <Image
           source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80' }}
           style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1.5, borderColor: colors.white }}
@@ -69,6 +72,7 @@ export default function AdminTabsLayout() {
         name="index"
         options={{
           title: 'Dashboard',
+          headerTitle: 'VidDarpan',
           tabBarIcon: ({ color, size }) => <Ionicons name="grid-outline" size={size} color={color} />,
         }}
       />
@@ -84,6 +88,13 @@ export default function AdminTabsLayout() {
         options={{
           title: 'Assign Duty',
           tabBarIcon: ({ color, size }) => <Ionicons name="clipboard-outline" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="users"
+        options={{
+          title: 'Users',
+          tabBarIcon: ({ color, size }) => <Ionicons name="people-outline" size={size} color={color} />,
         }}
       />
     </Tabs>
