@@ -10,11 +10,11 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../src/context/UserContext';
-import { useAttendance } from '../src/hooks/useAttendance';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
-import type { AttendanceStatus } from '../src/types';
+import { useUser } from '../../src/context/UserContext';
+import { useAttendance } from '../../src/hooks/useAttendance';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import type { AttendanceStatus } from '../../src/types';
 
 const STATUS_OPTIONS: { value: AttendanceStatus; label: string; icon: string; color: string }[] = [
   { value: 'present', label: 'P', icon: 'checkmark-circle', color: colors.present },

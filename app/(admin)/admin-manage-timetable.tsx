@@ -13,10 +13,10 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   useAdminTeacherTimetable,
   useAdminStudentTimetable,
-} from '../src/hooks/useAdminTimetable';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
-import type { DayOfWeek } from '../src/types';
+} from '../../src/hooks/useAdminTimetable';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import type { DayOfWeek } from '../../src/types';
 
 const DAY_OPTIONS: { key: DayOfWeek; label: string }[] = [
   { key: 'monday', label: 'Mon' },

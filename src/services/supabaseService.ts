@@ -18,6 +18,10 @@ import type {
   CalendarEvent,
   ClassInfo,
   StudentInfo,
+  FeeStructure,
+  FeePayment,
+  StudentMark,
+  StudentDocument,
 } from '../types';
 
 // ═══════════════════════════════════════════════════════════════
@@ -475,4 +479,183 @@ export function subscribeCalendarEvents(callback: (events: CalendarEvent[]) => v
   return () => {
     supabase.removeChannel(channel);
   };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEE STRUCTURE
+// ═══════════════════════════════════════════════════════════════
+
+export async function getFeeStructures(classId?: string): Promise<FeeStructure[]> {
+  let query = supabase.from('ms_fee_structure').select('*').order('fee_type');
+  if (classId) query = query.eq('class_id', classId);
+  const { data } = await query;
+  return (data ?? []) as FeeStructure[];
+}
+
+export async function createFeeStructure(
+  fee: Omit<FeeStructure, 'id' | 'created_at'>
+): Promise<FeeStructure | null> {
+  const { data } = await supabase.from('ms_fee_structure').insert(fee).select().single();
+  return data as FeeStructure | null;
+}
+
+export async function updateFeeStructure(
+  id: string,
+  updates: Partial<FeeStructure>
+): Promise<FeeStructure | null> {
+  const { data } = await supabase
+    .from('ms_fee_structure')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  return data as FeeStructure | null;
+}
+
+export async function deleteFeeStructure(id: string): Promise<void> {
+  await supabase.from('ms_fee_structure').delete().eq('id', id);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEE PAYMENTS
+// ═══════════════════════════════════════════════════════════════
+
+export async function getFeePayments(studentId?: string): Promise<FeePayment[]> {
+  let query = supabase.from('ms_fee_payments').select('*').order('payment_date', { ascending: false });
+  if (studentId) query = query.eq('student_id', studentId);
+  const { data } = await query;
+  return (data ?? []) as FeePayment[];
+}
+
+export async function createFeePayment(
+  payment: Omit<FeePayment, 'id' | 'created_at'>
+): Promise<FeePayment | null> {
+  const { data } = await supabase.from('ms_fee_payments').insert(payment).select().single();
+  return data as FeePayment | null;
+}
+
+export async function updateFeePayment(
+  id: string,
+  updates: Partial<FeePayment>
+): Promise<FeePayment | null> {
+  const { data } = await supabase
+    .from('ms_fee_payments')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+  return data as FeePayment | null;
+}
+
+export function subscribeFeePayments(
+  studentId: string | null,
+  callback: (items: FeePayment[]) => void
+) {
+  const fetch = studentId ? () => getFeePayments(studentId) : () => getFeePayments();
+  fetch().then(callback);
+
+  const filter = studentId ? `student_id=eq.${studentId}` : undefined;
+  const channel = supabase
+    .channel(`fees-${studentId ?? 'all'}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'ms_fee_payments', ...(filter ? { filter } : {}) },
+      () => fetch().then(callback)
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STUDENT MARKS / RESULTS
+// ═══════════════════════════════════════════════════════════════
+
+export async function getMarksByStudent(studentId: string): Promise<StudentMark[]> {
+  const { data } = await supabase
+    .from('ms_marks')
+    .select('*')
+    .eq('student_id', studentId)
+    .order('created_at', { ascending: false });
+  return (data ?? []) as StudentMark[];
+}
+
+export async function getMarksByExam(examId: string): Promise<StudentMark[]> {
+  const { data } = await supabase
+    .from('ms_marks')
+    .select('*')
+    .eq('exam_id', examId)
+    .order('subject');
+  return (data ?? []) as StudentMark[];
+}
+
+export async function upsertMarks(
+  marks: Omit<StudentMark, 'id' | 'created_at'>[]
+): Promise<void> {
+  const { error } = await supabase.from('ms_marks').upsert(marks, {
+    onConflict: 'student_id,exam_id,subject',
+  });
+  if (error) throw error;
+}
+
+export async function deleteMarks(id: string): Promise<void> {
+  await supabase.from('ms_marks').delete().eq('id', id);
+}
+
+export function subscribeMarks(
+  studentId: string,
+  callback: (items: StudentMark[]) => void
+) {
+  getMarksByStudent(studentId).then(callback);
+
+  const channel = supabase
+    .channel(`marks-${studentId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'ms_marks', filter: `student_id=eq.${studentId}` },
+      () => getMarksByStudent(studentId).then(callback)
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STUDENT DOCUMENTS
+// ═══════════════════════════════════════════════════════════════
+
+export async function getStudentDocuments(studentId: string): Promise<StudentDocument[]> {
+  const { data } = await supabase
+    .from('ms_student_documents')
+    .select('*')
+    .eq('student_id', studentId)
+    .order('created_at', { ascending: false });
+  return (data ?? []) as StudentDocument[];
+}
+
+export async function createStudentDocument(
+  doc: Omit<StudentDocument, 'id' | 'created_at'>
+): Promise<StudentDocument | null> {
+  const { data } = await supabase.from('ms_student_documents').insert(doc).select().single();
+  return data as StudentDocument | null;
+}
+
+export async function deleteStudentDocument(id: string): Promise<void> {
+  await supabase.from('ms_student_documents').delete().eq('id', id);
+}
+
+export async function uploadStudentDocument(
+  studentId: string,
+  fileName: string,
+  file: Blob
+): Promise<string> {
+  const path = `students/${studentId}/${Date.now()}_${fileName}`;
+  const { error } = await supabase.storage.from('student-documents').upload(path, file, { upsert: true });
+  if (error) throw error;
+  const { data } = supabase.storage.from('student-documents').getPublicUrl(path);
+  return data.publicUrl;
 }

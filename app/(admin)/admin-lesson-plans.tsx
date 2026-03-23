@@ -7,9 +7,9 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSharedLessonPlans } from '../src/hooks/useSharedLessonPlans';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
+import { useSharedLessonPlans } from '../../src/hooks/useSharedLessonPlans';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 export default function AdminLessonPlansScreen() {
   const { plans } = useSharedLessonPlans();

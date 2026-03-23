@@ -11,13 +11,13 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../src/context/UserContext';
-import { useNotices } from '../src/hooks/useNotices';
-import { useNotificationBadge } from '../src/context/NotificationContext';
-import { getClasses } from '../src/services/supabaseService';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
-import type { ClassInfo, NoticeType } from '../src/types';
+import { useUser } from '../../src/context/UserContext';
+import { useNotices } from '../../src/hooks/useNotices';
+import { useNotificationBadge } from '../../src/context/NotificationContext';
+import { getClasses } from '../../src/services/supabaseService';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import type { ClassInfo, NoticeType } from '../../src/types';
 
 const NOTICE_TYPES: { value: NoticeType; label: string; color: string }[] = [
   { value: 'general', label: 'General', color: colors.info },

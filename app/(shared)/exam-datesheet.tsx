@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
-import { useUser } from '../src/context/UserContext';
-import { useDatesheet } from '../src/hooks/useDatesheet';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
-import type { ExamEntry, ExamDuty, ExamType } from '../src/types';
+import { useUser } from '../../src/context/UserContext';
+import { useDatesheet } from '../../src/hooks/useDatesheet';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import type { ExamEntry, ExamDuty, ExamType } from '../../src/types';
 
 const EXAM_TYPE_LABELS: Record<ExamType, string> = {
   'half-yearly': 'Half Yearly Examination',

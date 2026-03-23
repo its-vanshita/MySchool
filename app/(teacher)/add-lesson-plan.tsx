@@ -12,12 +12,12 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../src/context/UserContext';
-import { useLessonPlans } from '../src/hooks/useLessonPlans';
-import { getTimetableForTeacher } from '../src/services/supabaseService';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
-import type { TimetableEntry } from '../src/types';
+import { useUser } from '../../src/context/UserContext';
+import { useLessonPlans } from '../../src/hooks/useLessonPlans';
+import { getTimetableForTeacher } from '../../src/services/supabaseService';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import type { TimetableEntry } from '../../src/types';
 
 interface SubjectClass {
   label: string;

@@ -54,6 +54,19 @@ const DEMO_USERS: Record<string, AppUser> = {
     is_first_login: false,
     created_at: new Date().toISOString(),
   },
+  super_admin: {
+    id: 'demo-super-admin',
+    unique_id: 'SUPERADMIN',
+    email: 'superadmin@myschool.app',
+    name: 'Demo Super Admin',
+    phone: '+91 98765 43213',
+    role: 'super_admin',
+    subjects: [],
+    avatar_url: '',
+    school_id: 'demo-school',
+    is_first_login: false,
+    created_at: new Date().toISOString(),
+  },
 };
 
 const UserContext = createContext<UserState | undefined>(undefined);

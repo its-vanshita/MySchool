@@ -11,11 +11,11 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../src/context/UserContext';
-import { useAnnouncements } from '../src/hooks/useAnnouncements';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
-import type { AnnouncementPriority } from '../src/types';
+import { useUser } from '../../src/context/UserContext';
+import { useAnnouncements } from '../../src/hooks/useAnnouncements';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import type { AnnouncementPriority } from '../../src/types';
 
 const PRIORITIES: { value: AnnouncementPriority; label: string; color: string; icon: string }[] = [
   { value: 'low', label: 'Low', color: colors.textSecondary, icon: 'arrow-down' },

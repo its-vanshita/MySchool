@@ -9,10 +9,10 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useAdminCalendarSetup, type AdminCalendarTarget } from '../src/hooks/useAdminCalendar';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
-import type { CalendarEventType } from '../src/types';
+import { useAdminCalendarSetup, type AdminCalendarTarget } from '../../src/hooks/useAdminCalendar';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import type { CalendarEventType } from '../../src/types';
 
 const EVENT_TYPES: { key: CalendarEventType; label: string; icon: string; color: string }[] = [
   { key: 'event', label: 'Event', icon: 'star', color: '#10B981' },

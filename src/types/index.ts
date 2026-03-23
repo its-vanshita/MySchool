@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 // ────────── Roles ──────────
-export type UserRole = 'teacher' | 'admin' | 'principal' | 'parent';
+export type UserRole = 'teacher' | 'admin' | 'principal' | 'parent' | 'super_admin';
 
 // ────────── User / Staff ──────────
 export interface AppUser {
@@ -79,6 +79,10 @@ export interface StudentInfo {
   roll_number: string;
   class_id: string;
   parent_email: string;
+  dob?: string;           // YYYY-MM-DD
+  section?: string;
+  photo_url?: string;
+  parent_id?: string;     // FK to parent user
 }
 
 // ────────── Notices (Students) ──────────
@@ -208,6 +212,68 @@ export interface CalendarEvent {
   created_at: string;
 }
 
+// ────────── Fee Management ──────────
+export type FeeType = 'tuition' | 'transport' | 'library' | 'lab' | 'exam' | 'sports' | 'other';
+export type FeeFrequency = 'monthly' | 'quarterly' | 'half_yearly' | 'yearly' | 'one_time';
+export type PaymentMethod = 'cash' | 'upi' | 'bank_transfer' | 'cheque' | 'online';
+export type PaymentStatus = 'paid' | 'partial' | 'pending' | 'overdue';
+
+export interface FeeStructure {
+  id: string;
+  class_id: string;
+  class_name: string;
+  fee_type: FeeType;
+  amount: number;
+  frequency: FeeFrequency;
+  academic_year: string;
+  school_id: string;
+  created_at: string;
+}
+
+export interface FeePayment {
+  id: string;
+  student_id: string;
+  fee_structure_id: string;
+  amount_paid: number;
+  payment_date: string;
+  payment_method: PaymentMethod;
+  receipt_number: string;
+  status: PaymentStatus;
+  remarks: string;
+  collected_by: string;
+  school_id: string;
+  created_at: string;
+}
+
+// ────────── Student Marks / Results ──────────
+export interface StudentMark {
+  id: string;
+  student_id: string;
+  exam_id: string;
+  subject: string;
+  marks_obtained: number;
+  max_marks: number;
+  grade: string;
+  remarks: string;
+  entered_by: string;
+  school_id: string;
+  created_at: string;
+}
+
+// ────────── Student Documents ──────────
+export type DocumentType = 'birth_certificate' | 'transfer_certificate' | 'marksheet' | 'aadhaar' | 'photo' | 'medical' | 'other';
+
+export interface StudentDocument {
+  id: string;
+  student_id: string;
+  doc_type: DocumentType;
+  file_url: string;
+  file_name: string;
+  uploaded_by: string;
+  school_id: string;
+  created_at: string;
+}
+
 // ────────── Dashboard Helpers ──────────
 export interface DashboardStats {
   totalClasses: number;
@@ -229,6 +295,11 @@ export interface RolePermissions {
   canApproveLeave: boolean;
   canManageData: boolean;
   canViewReports: boolean;
+  canManageFees: boolean;
+  canViewFees: boolean;
+  canEnterMarks: boolean;
+  canViewMarks: boolean;
+  canManageDocuments: boolean;
 }
 
 export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
@@ -243,6 +314,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canApproveLeave: false,
     canManageData: false,
     canViewReports: false,
+    canManageFees: false,
+    canViewFees: false,
+    canEnterMarks: true,
+    canViewMarks: true,
+    canManageDocuments: false,
   },
   admin: {
     canViewSchedule: true,
@@ -255,6 +331,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canApproveLeave: true,
     canManageData: true,
     canViewReports: true,
+    canManageFees: true,
+    canViewFees: true,
+    canEnterMarks: true,
+    canViewMarks: true,
+    canManageDocuments: true,
   },
   principal: {
     canViewSchedule: true,
@@ -267,6 +348,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canApproveLeave: true,
     canManageData: true,
     canViewReports: true,
+    canManageFees: true,
+    canViewFees: true,
+    canEnterMarks: true,
+    canViewMarks: true,
+    canManageDocuments: true,
   },
   parent: {
     canViewSchedule: true,
@@ -279,5 +365,27 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canApproveLeave: false,
     canManageData: false,
     canViewReports: true,
+    canManageFees: false,
+    canViewFees: true,
+    canEnterMarks: false,
+    canViewMarks: true,
+    canManageDocuments: false,
+  },
+  super_admin: {
+    canViewSchedule: true,
+    canMarkAttendance: true,
+    canUploadLessonPlan: true,
+    canPublishNotice: true,
+    canPublishAnnouncement: true,
+    canAssignHomework: true,
+    canRequestLeave: false,
+    canApproveLeave: true,
+    canManageData: true,
+    canViewReports: true,
+    canManageFees: true,
+    canViewFees: true,
+    canEnterMarks: true,
+    canViewMarks: true,
+    canManageDocuments: true,
   },
 };

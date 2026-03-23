@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../src/context/UserContext';
-import { useAllLeaveRequests } from '../src/hooks/useLeaveRequests';
-import { updateLeaveStatus } from '../src/services/supabaseService';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
-import type { LeaveRequest, LeaveStatus } from '../src/types';
+import { useUser } from '../../src/context/UserContext';
+import { useAllLeaveRequests } from '../../src/hooks/useLeaveRequests';
+import { updateLeaveStatus } from '../../src/services/supabaseService';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import type { LeaveRequest, LeaveStatus } from '../../src/types';
 
 const STATUS_CONFIG: Record<LeaveStatus, { color: string; bg: string; icon: string }> = {
   pending: { color: colors.warning, bg: colors.warningLight, icon: 'time-outline' },

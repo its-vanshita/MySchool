@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PieChart } from 'react-native-chart-kit';
-import { useSharedMarks, DEMO_EXAMS } from '../src/hooks/useSharedMarks';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
+import { useSharedMarks, DEMO_EXAMS } from '../../src/hooks/useSharedMarks';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 const screenWidth = Dimensions.get('window').width;
 

@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
-import { useSharedUsers } from '../src/hooks/useSharedUsers';
+import { useSharedUsers } from '../../src/hooks/useSharedUsers';
 
 export default function AdminAttendanceListScreen() {
   const router = useRouter();
@@ -35,7 +35,7 @@ export default function AdminAttendanceListScreen() {
 
       {/* Tabs */}
       <View style={styles.tabContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.tab, filter === 'all' && styles.tabActive]}
           onPress={() => setFilter('all')}
         >
@@ -43,7 +43,7 @@ export default function AdminAttendanceListScreen() {
             All ({data.length})
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.tab, filter === 'present' && styles.tabActive]}
           onPress={() => setFilter('present')}
         >
@@ -51,7 +51,7 @@ export default function AdminAttendanceListScreen() {
             Present ({presentCount})
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.tab, filter === 'absent' && styles.tabActive]}
           onPress={() => setFilter('absent')}
         >
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   backButton: { marginRight: spacing.md },
   headerTitle: { fontSize: fontSize.lg, fontWeight: '700', color: colors.white },
-  
+
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: colors.white,
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   itemInfo: { flex: 1 },
   itemName: { fontSize: fontSize.md, fontWeight: '700', color: colors.textPrimary },
   itemSub: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
-  
+
   statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   statusPresent: { backgroundColor: '#E8F5E9' },
   statusAbsent: { backgroundColor: '#FFEBEE' },

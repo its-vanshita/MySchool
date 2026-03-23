@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../src/theme/colors';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
-import { useNotificationBadge } from '../src/context/NotificationContext';
-import { useUser } from '../src/context/UserContext';
+import { colors } from '../../src/theme/colors';
+import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import { useNotificationBadge } from '../../src/context/NotificationContext';
+import { useUser } from '../../src/context/UserContext';
 
 interface Notification {
   id: string;
