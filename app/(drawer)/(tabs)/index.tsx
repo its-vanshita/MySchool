@@ -16,6 +16,8 @@ import { useUser } from '../../../src/context/UserContext';
 import { useTimetable } from '../../../src/hooks/useTimetable';
 // Announcements removed from dashboard (available via bell notifications)
 import { useHomework } from '../../../src/hooks/useHomework';
+import { useAdminTeacherEntries } from '../../../src/hooks/useAdminTimetable';
+import { useSharedDuties } from '../../../src/hooks/useSharedDuties';
 import { colors } from '../../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { ScheduleItem, ScheduleStatus, Homework } from '../../../src/types';
@@ -90,6 +92,8 @@ export default function DashboardScreen() {
   const { user } = useAuth();
   const { profile, role, permissions, isDemo } = useUser();
   const { todaySchedule, loading: scheduleLoading } = useTimetable(profile?.id);
+  const adminEntries = useAdminTeacherEntries(profile?.id);
+  const { duties } = useSharedDuties();
 
   const { homework: recentHomework } = useHomework(
     role === 'parent' ? undefined : profile?.id,
@@ -107,6 +111,10 @@ export default function DashboardScreen() {
     if (role === 'parent') {
       router.replace('/(parent-drawer)/(tabs)' as any);
     }
+    // Redirect admins to their dedicated dashboard
+    if (role === 'admin') {
+      router.replace('/(admin-drawer)/(tabs)' as any);
+    }
   }, [user, isDemo, role]);
 
   const greeting = () => {
@@ -123,7 +131,20 @@ export default function DashboardScreen() {
     return `Today is ${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
   };
 
-  const schedule = isDemo ? DUMMY_SCHEDULE : todaySchedule;
+  // Merge admin-created entries into today's schedule
+  const todayDay = (() => {
+    const idx = new Date().getDay();
+    const days: Array<import('../../../src/types').DayOfWeek> = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    return idx === 0 ? 'monday' : days[idx - 1];
+  })();
+  const adminTodayEntries: ScheduleItem[] = adminEntries
+    .filter((e) => e.day === todayDay)
+    .map((e) => ({ ...e, status: 'upcoming' as ScheduleStatus }));
+  const baseSchedule = isDemo ? DUMMY_SCHEDULE : todaySchedule;
+  const schedule = [...baseSchedule, ...adminTodayEntries]
+    .sort((a, b) => a.start_time.localeCompare(b.start_time));
+
+  const myDuties = duties.filter(d => d.teacher_id === (isDemo ? 'demo-teacher' : profile?.id));
 
   const formatTime12 = (time: string) => {
     const [hStr, mStr] = time.split(':');
@@ -260,6 +281,35 @@ export default function DashboardScreen() {
       )}
 
 
+
+      {/* Teacher Duties Section */}
+      {myDuties.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>Assigned Duties</Text>
+          {myDuties.map((duty) => (
+            <View key={duty.id} style={styles.dutyCard}>
+              <View style={styles.dutyLeftBadge}>
+                <Ionicons name="clipboard-outline" size={20} color={colors.primary} />
+              </View>
+              <View style={styles.dutyContent}>
+                <Text style={styles.dutyTitle}>{duty.activity}</Text>
+                <View style={styles.dutyRowInfo}>
+                  <Ionicons name="calendar-outline" size={12} color={colors.textLight} />
+                  <Text style={styles.dutyMetaText}>{duty.date}</Text>
+                  <Text style={styles.dutyDot}> • </Text>
+                  <Ionicons name="time-outline" size={12} color={colors.textLight} />
+                  <Text style={styles.dutyMetaText}>{duty.time}</Text>
+                </View>
+                <View style={styles.dutyRowInfo}>
+                  <Ionicons name="location-outline" size={12} color={colors.textLight} />
+                  <Text style={[styles.dutyMetaText, { color: colors.textSecondary, fontWeight: '600' }]}>{duty.room}</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.border} />
+            </View>
+          ))}
+        </>
+      )}
 
       {/* Recent Homework */}
       {recentHomework.length > 0 && (
@@ -658,24 +708,24 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xs,
     color: colors.textSecondary,
   },
-  homeworkDesc: {
-    fontSize: fontSize.xs,
-    color: colors.textLight,
-    marginTop: 2,
-    lineHeight: 16,
+  homeworkDesc: { fontSize: 13, color: colors.textSecondary, marginTop: 4, lineHeight: 18 },
+  homeworkRight: { alignItems: 'flex-end', justifyContent: 'center' },
+  homeworkDue: { fontSize: 13, fontWeight: '700', color: colors.textPrimary },
+  homeworkDueLabel: { fontSize: 11, color: colors.textLight, marginTop: 2, fontWeight: '600', textTransform: 'uppercase' },
+  
+  dutyCard: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white,
+    marginHorizontal: spacing.xl, marginBottom: spacing.md, padding: spacing.md,
+    borderRadius: borderRadius.md, borderWidth: 1, borderColor: colors.border,
+    elevation: 1, shadowColor: '#000', shadowOpacity: 0.03, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }
   },
-  homeworkRight: {
-    alignItems: 'flex-end',
-    marginLeft: spacing.sm,
+  dutyLeftBadge: {
+    width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryLight,
+    alignItems: 'center', justifyContent: 'center', marginRight: spacing.md
   },
-  homeworkDue: {
-    fontSize: fontSize.sm,
-    fontWeight: '700',
-    color: colors.purple,
-  },
-  homeworkDueLabel: {
-    fontSize: fontSize.xs,
-    color: colors.textLight,
-    marginTop: 1,
-  },
+  dutyContent: { flex: 1, gap: 4 },
+  dutyTitle: { fontSize: fontSize.md, fontWeight: '700', color: colors.textPrimary },
+  dutyRowInfo: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  dutyMetaText: { fontSize: 12, color: colors.textSecondary },
+  dutyDot: { fontSize: 12, color: colors.textLight },
 });

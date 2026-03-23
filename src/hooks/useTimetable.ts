@@ -29,6 +29,11 @@ export function useTimetable(teacherId: string | undefined) {
 
   useEffect(() => {
     if (!teacherId) return;
+    // Skip Supabase calls in demo mode — screens use DUMMY data
+    if (teacherId.startsWith('demo-')) {
+      setLoading(false);
+      return;
+    }
 
     const unsub = subscribeTimetable(teacherId, (entries) => {
       setAllEntries(entries);

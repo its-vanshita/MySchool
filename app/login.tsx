@@ -58,6 +58,8 @@ export default function LoginScreen() {
       enterDemoMode(account.role);
       if (account.role === 'parent') {
         router.replace('/(parent-drawer)/(tabs)' as any);
+      } else if (account.role === 'admin') {
+        router.replace('/(admin-drawer)/(tabs)' as any);
       } else {
         router.replace('/(drawer)/(tabs)');
       }

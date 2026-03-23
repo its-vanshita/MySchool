@@ -252,7 +252,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     canPublishAnnouncement: true,
     canAssignHomework: true,
     canRequestLeave: false,
-    canApproveLeave: false,
+    canApproveLeave: true,
     canManageData: true,
     canViewReports: true,
   },

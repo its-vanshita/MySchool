@@ -15,28 +15,16 @@ import { useLessonPlans } from '../../src/hooks/useLessonPlans';
 import { getTimetableForTeacher } from '../../src/services/supabaseService';
 import { colors } from '../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
-import type { LessonPlan, TimetableEntry } from '../../src/types';
+import type { TimetableEntry } from '../../src/types';
 
 // ── Demo data ──
+import { useSharedLessonPlans } from '../../src/hooks/useSharedLessonPlans';
+import type { UnitItem, TopicItem } from '../../src/hooks/useSharedLessonPlans';
+
 interface SubjectClass {
   label: string;
   subject: string;
   className: string;
-}
-
-interface TopicItem {
-  id: string;
-  name: string;
-  status: 'completed' | 'in-progress' | 'not-started';
-  completedDate?: string;
-  nextDate?: string;
-}
-
-interface UnitItem {
-  id: string;
-  number: number;
-  name: string;
-  topics: TopicItem[];
 }
 
 const DEMO_TIMETABLE: TimetableEntry[] = [
@@ -45,102 +33,11 @@ const DEMO_TIMETABLE: TimetableEntry[] = [
   { id: 't3', teacher_id: 'demo-teacher', subject: 'English', class_name: 'Class 10A', room: '204', start_time: '14:00', end_time: '14:45', day: 'monday', school_id: 'demo-school' },
 ];
 
-const DEMO_UNITS: Record<string, UnitItem[]> = {
-  'Mathematics|Class 10A': [
-    {
-      id: 'u1', number: 1, name: 'Algebra',
-      topics: [
-        { id: 't1', name: 'Introduction to Algebra', status: 'completed', completedDate: 'Sep 10, 2025' },
-        { id: 't2', name: 'Linear Equations', status: 'completed', completedDate: 'Sep 18, 2025' },
-        { id: 't3', name: 'Quadratic Equations', status: 'completed', completedDate: 'Sep 28, 2025' },
-        { id: 't4', name: 'Polynomials', status: 'completed', completedDate: 'Oct 5, 2025' },
-      ],
-    },
-    {
-      id: 'u2', number: 2, name: 'Geometry',
-      topics: [
-        { id: 't5', name: 'Introduction to Geometry', status: 'completed', completedDate: 'Oct 12, 2025' },
-        { id: 't6', name: 'Lines and Angles', status: 'completed', completedDate: 'Oct 15, 2025' },
-        { id: 't7', name: 'Triangles & Congruence', status: 'in-progress', nextDate: 'Mar 20' },
-        { id: 't8', name: 'Quadrilaterals', status: 'not-started' },
-        { id: 't9', name: 'Circles', status: 'not-started' },
-      ],
-    },
-    {
-      id: 'u3', number: 3, name: 'Trigonometry',
-      topics: [
-        { id: 't10', name: 'Trigonometric Ratios', status: 'not-started' },
-        { id: 't11', name: 'Heights & Distances', status: 'not-started' },
-        { id: 't12', name: 'Trigonometric Identities', status: 'not-started' },
-      ],
-    },
-    {
-      id: 'u4', number: 4, name: 'Statistics & Probability',
-      topics: [
-        { id: 't13', name: 'Mean, Median & Mode', status: 'not-started' },
-        { id: 't14', name: 'Probability Basics', status: 'not-started' },
-        { id: 't15', name: 'Data Representation', status: 'not-started' },
-      ],
-    },
-  ],
-  'Science|Class 9C': [
-    {
-      id: 'su1', number: 1, name: 'Matter in Our Surroundings',
-      topics: [
-        { id: 'st1', name: 'States of Matter', status: 'completed', completedDate: 'Sep 15, 2025' },
-        { id: 'st2', name: 'Change of State', status: 'completed', completedDate: 'Sep 22, 2025' },
-        { id: 'st3', name: 'Evaporation', status: 'completed', completedDate: 'Oct 1, 2025' },
-      ],
-    },
-    {
-      id: 'su2', number: 2, name: 'Is Matter Around Us Pure',
-      topics: [
-        { id: 'st4', name: 'Mixtures & Solutions', status: 'completed', completedDate: 'Oct 10, 2025' },
-        { id: 'st5', name: 'Separation Techniques', status: 'in-progress', nextDate: 'Mar 18' },
-        { id: 'st6', name: 'Physical & Chemical Changes', status: 'not-started' },
-      ],
-    },
-    {
-      id: 'su3', number: 3, name: 'Atoms and Molecules',
-      topics: [
-        { id: 'st7', name: 'Atomic Theory', status: 'not-started' },
-        { id: 'st8', name: 'Molecules & Ions', status: 'not-started' },
-      ],
-    },
-  ],
-  'English|Class 10A': [
-    {
-      id: 'eu1', number: 1, name: 'Prose',
-      topics: [
-        { id: 'et1', name: 'A Letter to God', status: 'completed', completedDate: 'Sep 8, 2025' },
-        { id: 'et2', name: 'Nelson Mandela', status: 'completed', completedDate: 'Sep 20, 2025' },
-        { id: 'et3', name: 'Two Stories about Flying', status: 'in-progress', nextDate: 'Mar 15' },
-        { id: 'et4', name: 'From the Diary of Anne Frank', status: 'not-started' },
-      ],
-    },
-    {
-      id: 'eu2', number: 2, name: 'Poetry',
-      topics: [
-        { id: 'et5', name: 'Dust of Snow', status: 'not-started' },
-        { id: 'et6', name: 'Fire and Ice', status: 'not-started' },
-        { id: 'et7', name: 'A Tiger in the Zoo', status: 'not-started' },
-      ],
-    },
-    {
-      id: 'eu3', number: 3, name: 'Grammar',
-      topics: [
-        { id: 'et8', name: 'Tenses', status: 'not-started' },
-        { id: 'et9', name: 'Modals', status: 'not-started' },
-        { id: 'et10', name: 'Active & Passive Voice', status: 'not-started' },
-      ],
-    },
-  ],
-};
-
 export default function LessonPlansScreen() {
   const router = useRouter();
   const { profile } = useUser();
-  const { plans } = useLessonPlans(profile?.id);
+  const { plans: dbPlans } = useLessonPlans(profile?.id);
+  const { plans: sharedPlans, markTopicCompleted } = useSharedLessonPlans();
 
   const [subjectClasses, setSubjectClasses] = useState<SubjectClass[]>([]);
   const [selected, setSelected] = useState<SubjectClass | null>(null);
@@ -180,10 +77,15 @@ export default function LessonPlansScreen() {
 
   // Get units for current selection
   const units = useMemo(() => {
-    if (!selected) return [];
-    const key = `${selected.subject}|${selected.className}`;
-    return DEMO_UNITS[key] ?? [];
-  }, [selected]);
+    if (!selected || !profile?.id) return [];
+    
+    // Find the matching plan in the shared store
+    const plan = sharedPlans.find(
+      (p) => p.teacherId === profile.id && p.subject === selected.subject && p.className === selected.className
+    );
+    
+    return plan?.units ?? [];
+  }, [selected, profile?.id, sharedPlans]);
 
   // Auto-expand first unit that has in-progress topics
   useEffect(() => {
@@ -364,6 +266,25 @@ export default function LessonPlansScreen() {
                           </Text>
                         )}
                       </View>
+                      
+                      {/* Mark Complete Button */}
+                      {topic.status !== 'completed' && profile?.id && (
+                        <TouchableOpacity
+                          style={{
+                            backgroundColor: colors.primaryLight,
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 6,
+                            marginLeft: 10,
+                            alignSelf: 'flex-start',
+                            borderWidth: 1,
+                            borderColor: colors.primary,
+                          }}
+                          onPress={() => markTopicCompleted(profile.id, selected!.subject, selected!.className, unit.id, topic.id)}
+                        >
+                          <Text style={{ fontSize: 9, fontWeight: '700', color: colors.primary }}>MARK DONE</Text>
+                        </TouchableOpacity>
+                      )}
                     </View>
                   ))}
                 </View>

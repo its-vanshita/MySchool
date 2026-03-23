@@ -64,16 +64,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
+      // Set a timeout so demo mode isn't blocked by slow network
+      const timeout = setTimeout(() => {
+        if (loading) setLoading(false);
+      }, 3000);
+
       supabase.auth
         .getSession()
         .then(({ data: { session: s } }) => {
           setSession(s);
           setUser(s?.user ?? null);
           setLoading(false);
+          clearTimeout(timeout);
         })
         .catch((err) => {
           console.warn('Failed to get session:', err);
           setLoading(false);
+          clearTimeout(timeout);
         });
 
       const {
@@ -84,7 +91,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       });
 
-      return () => subscription.unsubscribe();
+      return () => {
+        clearTimeout(timeout);
+        subscription.unsubscribe();
+      };
     } catch (err) {
       console.error('Auth initialization error:', err);
       setLoading(false);

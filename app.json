@@ -7,15 +7,14 @@
     "icon": "./assets/icon.png",
     "scheme": "myschool",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#1565C0"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.itsvanshita.MySchool"
     },
     "web": {
@@ -46,3 +45,4 @@
     }
   }
 }
+

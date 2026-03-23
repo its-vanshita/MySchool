@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import { useAdminStudentCalendarEvents } from '../../src/hooks/useAdminCalendar';
 
 // Student-centric event types only (no meetings)
 type StudentEventType = 'exam' | 'holiday' | 'event';
@@ -152,6 +153,12 @@ function toDateStr(y: number, m: number, d: number) {
 }
 
 export default function ParentAcademicCalendarScreen() {
+  const adminEvents = useAdminStudentCalendarEvents();
+
+  const allEvents = useMemo(() => {
+    return [...STUDENT_EVENTS, ...adminEvents].sort((a, b) => a.date.localeCompare(b.date));
+  }, [adminEvents]);
+
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -162,7 +169,7 @@ export default function ParentAcademicCalendarScreen() {
   // Build a map of dates to event types for calendar dots
   const eventsByDate = useMemo(() => {
     const map: Record<string, { types: Set<StudentEventType>; events: StudentEvent[] }> = {};
-    STUDENT_EVENTS.forEach((ev) => {
+    allEvents.forEach((ev) => {
       const start = ev.date;
       const end = ev.endDate || ev.date;
       const s = new Date(start + 'T00:00:00');
@@ -175,15 +182,15 @@ export default function ParentAcademicCalendarScreen() {
       }
     });
     return map;
-  }, []);
+  }, [allEvents]);
 
   // Upcoming events from current month onwards
   const upcomingEvents = useMemo(() => {
     const monthStart = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-01`;
-    return STUDENT_EVENTS
+    return allEvents
       .filter((ev) => ev.date >= monthStart)
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [viewYear, viewMonth]);
+  }, [viewYear, viewMonth, allEvents]);
 
   const daysInMonth = getDaysInMonth(viewYear, viewMonth);
   const firstDay = getFirstDayOfWeek(viewYear, viewMonth);
@@ -309,7 +316,7 @@ export default function ParentAcademicCalendarScreen() {
       ) : (
         upcomingEvents.map((ev) => {
           const evDate = new Date(ev.date + 'T00:00:00');
-          const config = EVENT_TYPE_CONFIG[ev.type];
+          const config = EVENT_TYPE_CONFIG[ev.type as StudentEventType];
           const isExam = ev.type === 'exam';
 
           return (

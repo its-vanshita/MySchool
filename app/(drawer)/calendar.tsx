@@ -12,6 +12,7 @@ import { useCalendar } from '../../src/hooks/useCalendar';
 import { colors } from '../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { CalendarEvent, CalendarEventType } from '../../src/types';
+import { useAdminTeacherCalendarEvents } from '../../src/hooks/useAdminCalendar';
 
 // ─── Event type config ──────────────────────────────────────
 
@@ -89,10 +90,12 @@ const FILTERS: { value: FilterValue; label: string; icon: string }[] = [
 export default function CalendarScreen() {
   const { profile, role } = useUser();
   const { events: dbEvents } = useCalendar(profile?.school_id);
+  const adminEvents = useAdminTeacherCalendarEvents();
 
   const allEvents = useMemo(() => {
-    return dbEvents.length > 0 ? dbEvents : DEMO_EVENTS;
-  }, [dbEvents]);
+    const defaultEvents = dbEvents.length > 0 ? dbEvents : DEMO_EVENTS;
+    return [...defaultEvents, ...adminEvents].sort((a, b) => a.date.localeCompare(b.date));
+  }, [dbEvents, adminEvents]);
 
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());

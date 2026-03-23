@@ -8,6 +8,11 @@ export function useLessonPlans(teacherId: string | undefined) {
 
   const fetch = useCallback(async () => {
     if (!teacherId) return;
+    // Skip Supabase in demo mode
+    if (teacherId.startsWith('demo-')) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const data = await getLessonPlans(teacherId);
     setPlans(data);

@@ -26,63 +26,18 @@ interface SubjectClass {
   className: string;
 }
 
-interface ExamOption {
-  id: string;
-  label: string;
-}
-
-interface StudentMark {
-  id: string;
-  name: string;
-  rollNumber: string;
-  avatar: string;
-  marks: string; // user-entered text
-  maxMarks: number;
-  status: 'entered' | 'pending';
-}
-
-// ── Demo Data ──
-const DEMO_TIMETABLE: TimetableEntry[] = [
-  { id: 't1', teacher_id: 'demo-teacher', subject: 'Mathematics', class_name: 'Class 10A', room: '204', start_time: '09:00', end_time: '09:45', day: 'monday', school_id: 'demo-school' },
-  { id: 't2', teacher_id: 'demo-teacher', subject: 'Science', class_name: 'Class 9C', room: 'Lab 02', start_time: '11:30', end_time: '12:15', day: 'monday', school_id: 'demo-school' },
-  { id: 't3', teacher_id: 'demo-teacher', subject: 'English', class_name: 'Class 10A', room: '204', start_time: '14:00', end_time: '14:45', day: 'monday', school_id: 'demo-school' },
-];
-
-const DEMO_EXAMS: ExamOption[] = [
-  { id: 'e1', label: 'Mid-Term Examination 2025' },
-  { id: 'e2', label: 'Unit Test 3 - 2025' },
-  { id: 'e3', label: 'Pre-Board Examination 2026' },
-  { id: 'e4', label: 'Final Examination 2026' },
-];
-
-const DEMO_STUDENTS: Record<string, StudentMark[]> = {
-  'Mathematics|Class 10A': [
-    { id: 's1', name: 'Arjun Sharma', rollNumber: '20230101', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80', marks: '85', maxMarks: 100, status: 'entered' },
-    { id: 's2', name: 'Diya Kapoor', rollNumber: '20230102', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80', marks: '92', maxMarks: 100, status: 'entered' },
-    { id: 's3', name: 'Rohan Mehta', rollNumber: '20230103', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80', marks: '', maxMarks: 100, status: 'pending' },
-    { id: 's4', name: 'Priya Singh', rollNumber: '20230104', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80', marks: '', maxMarks: 100, status: 'pending' },
-    { id: 's5', name: 'Aditya Patel', rollNumber: '20230105', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80', marks: '', maxMarks: 100, status: 'pending' },
-  ],
-  'Science|Class 9C': [
-    { id: 's6', name: 'Kavya Joshi', rollNumber: '20230201', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80', marks: '78', maxMarks: 100, status: 'entered' },
-    { id: 's7', name: 'Rahul Nair', rollNumber: '20230202', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80', marks: '', maxMarks: 100, status: 'pending' },
-    { id: 's8', name: 'Ananya Gupta', rollNumber: '20230203', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80', marks: '', maxMarks: 100, status: 'pending' },
-  ],
-  'English|Class 10A': [
-    { id: 's9', name: 'Arjun Sharma', rollNumber: '20230101', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80', marks: '', maxMarks: 100, status: 'pending' },
-    { id: 's10', name: 'Diya Kapoor', rollNumber: '20230102', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80', marks: '', maxMarks: 100, status: 'pending' },
-    { id: 's11', name: 'Rohan Mehta', rollNumber: '20230103', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80', marks: '', maxMarks: 100, status: 'pending' },
-  ],
-};
+import { useSharedMarks, DEMO_EXAMS, type StudentMark } from '../../../src/hooks/useSharedMarks';
 
 export default function UploadMarksScreen() {
   const { profile } = useUser();
+
+  const { getMarksForClassAndExam, updateTeacherMarks, store } = useSharedMarks();
 
   const [subjectClasses, setSubjectClasses] = useState<SubjectClass[]>([]);
   const [selectedClass, setSelectedClass] = useState<SubjectClass | null>(null);
   const [showClassPicker, setShowClassPicker] = useState(false);
 
-  const [selectedExam, setSelectedExam] = useState<ExamOption>(DEMO_EXAMS[0]);
+  const [selectedExam, setSelectedExam] = useState(DEMO_EXAMS[0]);
   const [showExamPicker, setShowExamPicker] = useState(false);
 
   const [students, setStudents] = useState<StudentMark[]>([]);
@@ -106,7 +61,11 @@ export default function UploadMarksScreen() {
       if (profile?.id) {
         timetable = await getTimetableForTeacher(profile.id);
         if (timetable.length === 0 && profile.school_id === 'demo-school') {
-          timetable = DEMO_TIMETABLE;
+          timetable = [
+            { id: 't1', teacher_id: 'demo-teacher', subject: 'Mathematics', class_name: 'Class 10A', room: '204', start_time: '09:00', end_time: '09:45', day: 'monday', school_id: 'demo-school' },
+            { id: 't2', teacher_id: 'demo-teacher', subject: 'Science', class_name: 'Class 9C', room: 'Lab 02', start_time: '11:30', end_time: '12:15', day: 'monday', school_id: 'demo-school' },
+            { id: 't3', teacher_id: 'demo-teacher', subject: 'English', class_name: 'Class 10A', room: '204', start_time: '14:00', end_time: '14:45', day: 'monday', school_id: 'demo-school' },
+          ] as TimetableEntry[];
         }
       }
       const seen = new Set<string>();
@@ -135,19 +94,14 @@ export default function UploadMarksScreen() {
       return;
     }
     const key = `${selectedClass.subject}|${selectedClass.className}`;
-    const demoStudents = DEMO_STUDENTS[key];
-    if (demoStudents) {
-      // Deep clone so edits don't mutate the constant
-      setStudents(demoStudents.map((s) => ({ ...s })));
-    } else {
-      setStudents([]);
-    }
-  }, [selectedClass, selectedExam]);
+    const entry = getMarksForClassAndExam(key, selectedExam.id);
+    setStudents(entry.students.map((s) => ({ ...s })));
+  }, [selectedClass, selectedExam, store]);
 
   const enteredCount = students.filter((s) => s.marks.trim() !== '').length;
 
   const updateMark = (studentId: string, value: string) => {
-    // Allow only digits
+    if (isLocked) return;
     const cleaned = value.replace(/[^0-9]/g, '');
     setStudents((prev) =>
       prev.map((s) =>
@@ -158,8 +112,21 @@ export default function UploadMarksScreen() {
     );
   };
 
+  let isLocked = false;
+  let deadlinePassed = false;
+  if (selectedClass) {
+    const entry = getMarksForClassAndExam(`${selectedClass.subject}|${selectedClass.className}`, selectedExam.id);
+    deadlinePassed = entry.uploadDeadline ? Date.now() > entry.uploadDeadline : false;
+    isLocked = entry.submitted || deadlinePassed;
+  }
+
   const handleSaveDraft = () => {
-    Alert.alert('Draft Saved', 'Marks have been saved as draft. You can continue editing later.');
+    if (isLocked) return;
+    if (selectedClass) {
+      const key = `${selectedClass.subject}|${selectedClass.className}`;
+      updateTeacherMarks(key, selectedExam.id, students, false);
+      Alert.alert('Draft Saved', 'Marks have been saved as draft. You can continue editing later.');
+    }
   };
 
   const handleSubmit = () => {
@@ -179,11 +146,14 @@ export default function UploadMarksScreen() {
   };
 
   const doSubmit = async () => {
+    if (isLocked || !selectedClass) return;
     setSubmitting(true);
     // Simulate API call
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 600));
+    const key = `${selectedClass.subject}|${selectedClass.className}`;
+    updateTeacherMarks(key, selectedExam.id, students, true);
     setSubmitting(false);
-    Alert.alert('Success', 'Marks have been submitted successfully!');
+    Alert.alert('Success', 'Marks have been submitted successfully! They are now locked.');
   };
 
   return (
@@ -260,6 +230,7 @@ export default function UploadMarksScreen() {
                     styles.marksInput,
                     isPending && styles.marksInputPending,
                     !isPending && styles.marksInputFilled,
+                    isLocked && { backgroundColor: '#F0F0F0', color: colors.textSecondary }
                   ]}
                   value={student.marks}
                   onChangeText={(val) => updateMark(student.id, val)}
@@ -267,6 +238,7 @@ export default function UploadMarksScreen() {
                   maxLength={3}
                   placeholder="..."
                   placeholderTextColor={colors.textLight}
+                  editable={!isLocked}
                 />
                 <Text style={styles.maxMarksText}>/ {student.maxMarks}</Text>
               </View>
@@ -291,7 +263,7 @@ export default function UploadMarksScreen() {
       </ScrollView>
 
       {/* Bottom Action Bar */}
-      {students.length > 0 && (
+      {students.length > 0 && !isLocked && (
         <View style={styles.bottomBar}>
           <TouchableOpacity style={styles.draftBtn} onPress={handleSaveDraft}>
             <Ionicons name="save-outline" size={18} color={colors.primary} />
@@ -311,6 +283,14 @@ export default function UploadMarksScreen() {
               </>
             )}
           </TouchableOpacity>
+        </View>
+      )}
+      {students.length > 0 && isLocked && (
+        <View style={[styles.bottomBar, { justifyContent: 'center', backgroundColor: deadlinePassed ? '#FEF2F2' : '#F0F9E8' }]}>
+          <Ionicons name="lock-closed" size={18} color={deadlinePassed ? colors.danger : colors.success} />
+          <Text style={{ fontSize: fontSize.md, fontWeight: '700', color: deadlinePassed ? colors.danger : colors.success, marginLeft: 8 }}>
+            {deadlinePassed ? 'Deadline Passed (Locked)' : 'Marks Submitted (Locked)'}
+          </Text>
         </View>
       )}
 

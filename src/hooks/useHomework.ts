@@ -16,6 +16,11 @@ export function useHomework(teacherId?: string, viewAll?: boolean) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Skip Supabase calls in demo mode
+    if (teacherId?.startsWith('demo-') || (!teacherId && !viewAll)) {
+      setLoading(false);
+      return;
+    }
     if (viewAll) {
       const unsub = subscribeAllHomework((data) => {
         setHomework(data);

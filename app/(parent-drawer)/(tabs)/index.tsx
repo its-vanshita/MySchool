@@ -14,6 +14,7 @@ import { useAuth } from '../../../src/context/AuthContext';
 import { useUser } from '../../../src/context/UserContext';
 import { colors } from '../../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
+import { useAdminStudentEntries } from '../../../src/hooks/useAdminTimetable';
 
 const DEMO_CHILD = {
   name: 'Arjun Sharma',
@@ -110,6 +111,26 @@ export default function ParentDashboardScreen() {
       router.replace('/login');
     }
   }, [user, isDemo]);
+
+  // Get admin-created timetable entries for this student's class
+  const adminClassEntries = useAdminStudentEntries(`Class ${DEMO_CHILD.class}`);
+
+  // Merge admin entries into timetable display
+  const adminAsTimetable = adminClassEntries.map((e, idx) => ({
+    id: `admin-${e.id}`,
+    startTime: e.start_time,
+    endTime: e.end_time,
+    subject: e.subject,
+    subjectShort: e.subject.toUpperCase().split(' ')[0],
+    chapter: e.is_supplementary ? 'Supplementary Class' : (e.note || ''),
+    teacher: e.teacher_name,
+    room: e.room,
+    color: e.is_supplementary ? '#D97706' : '#6366F1',
+    bgColor: e.is_supplementary ? '#FFFBEB' : '#EEF2FF',
+    isSupplementary: e.is_supplementary,
+  }));
+  const allTimetable = [...DEMO_TIMETABLE, ...adminAsTimetable]
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   const todayString = () => {
     const d = new Date();
@@ -209,17 +230,17 @@ export default function ParentDashboardScreen() {
         </TouchableOpacity>
       </View>
 
-      {DEMO_TIMETABLE.map((period) => (
+      {allTimetable.map((period) => (
         <View
           key={period.id}
           style={[
             styles.timetableCard,
-            period.isOngoing && styles.timetableCardOngoing,
+            (period as any).isOngoing && styles.timetableCardOngoing,
           ]}
         >
           {/* Time column */}
           <View style={styles.timeColumn}>
-            <Text style={[styles.startTime, period.isOngoing && styles.ongoingTime]}>
+            <Text style={[styles.startTime, (period as any).isOngoing && styles.ongoingTime]}>
               {period.startTime}
             </Text>
             <Text style={styles.endTime}>{period.endTime}</Text>
@@ -240,6 +261,22 @@ export default function ParentDashboardScreen() {
             {/* Chapter title */}
             <Text style={styles.chapterTitle}>{period.chapter}</Text>
 
+            {/* Supplementary badge */}
+            {(period as any).isSupplementary && (
+              <View style={{
+                backgroundColor: '#FFFBEB',
+                borderRadius: 6,
+                paddingHorizontal: 8,
+                paddingVertical: 2,
+                alignSelf: 'flex-start',
+                marginBottom: 4,
+                borderWidth: 1,
+                borderColor: '#FDE68A',
+              }}>
+                <Text style={{ fontSize: 9, fontWeight: '800', color: '#D97706', letterSpacing: 0.5 }}>SUPPLEMENTARY</Text>
+              </View>
+            )}
+
             {/* Teacher */}
             <View style={styles.teacherRow}>
               <Ionicons name="person-outline" size={12} color={colors.textLight} />
@@ -248,7 +285,7 @@ export default function ParentDashboardScreen() {
           </View>
 
           {/* Ongoing indicator */}
-          {period.isOngoing && (
+          {(period as any).isOngoing && (
             <View style={styles.ongoingBadge}>
               <Text style={styles.ongoingText}>Ongoing</Text>
             </View>
