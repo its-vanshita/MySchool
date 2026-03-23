@@ -446,7 +446,7 @@ export default function AdminManageTimetableScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F7FA' },
-  content: { padding: spacing.lg },
+  content: { padding: spacing.lg, paddingBottom: 100 },
 
   toggleRow: {
     flexDirection: 'row',
@@ -783,3 +783,4 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
   },
 });
+

@@ -389,7 +389,7 @@ export default function UploadMarksScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.xl },
+  content: { padding: spacing.xl, paddingBottom: 100 },
 
   label: {
     fontSize: fontSize.sm,
@@ -575,6 +575,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    paddingBottom: 25,
     flexDirection: 'row',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
@@ -632,6 +633,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     padding: spacing.xxl,
+    paddingBottom: spacing.xxl + 25,
     maxHeight: '60%',
   },
   modalTitle: {
@@ -657,3 +659,6 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
 });
+
+
+

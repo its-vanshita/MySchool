@@ -194,7 +194,7 @@ function NavRow({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: 40 },
+  content: { paddingBottom: 100 },
 
   headerSection: {
     alignItems: 'center',
@@ -361,3 +361,4 @@ const styles = StyleSheet.create({
     color: colors.danger,
   },
 });
+

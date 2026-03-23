@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
 
   // ── Content ──
   content: {
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
 
   // ── Occasion banners ──

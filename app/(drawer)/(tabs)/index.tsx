@@ -439,7 +439,7 @@ function ScheduleCard({ item, isLast }: { item: ScheduleItem; isLast: boolean })
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.white },
-  content: { paddingBottom: spacing.xxxl },
+  content: { paddingBottom: 100 },
 
   // Greeting Section
   greetingSection: {
@@ -729,3 +729,4 @@ const styles = StyleSheet.create({
   dutyMetaText: { fontSize: 12, color: colors.textSecondary },
   dutyDot: { fontSize: 12, color: colors.textLight },
 });
+

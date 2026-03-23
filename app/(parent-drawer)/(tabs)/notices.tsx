@@ -98,7 +98,7 @@ function NoticeCard({ notice }: { notice: Notice }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: spacing.xxxl },
+  content: { paddingBottom: 100 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loadingText: { fontSize: fontSize.md, color: colors.textSecondary },
 
@@ -224,3 +224,4 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
 });
+

@@ -167,7 +167,7 @@ export default function ParentMarksScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F7FA' },
-  content: { paddingBottom: 32 },
+  content: { paddingBottom: 100 },
 
   overviewCard: {
     flexDirection: 'row',
@@ -329,3 +329,4 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
 });
+

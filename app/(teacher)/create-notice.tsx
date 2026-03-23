@@ -170,7 +170,7 @@ export default function CreateNoticeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.xl },
+  content: { padding: spacing.xl, paddingBottom: 100 },
   label: {
     fontSize: fontSize.sm,
     fontWeight: '700',
@@ -225,3 +225,4 @@ const styles = StyleSheet.create({
   submitBtnDisabled: { opacity: 0.7 },
   submitBtnText: { color: colors.white, fontSize: fontSize.md, fontWeight: '700' },
 });
+

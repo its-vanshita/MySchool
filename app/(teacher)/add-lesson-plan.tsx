@@ -214,7 +214,7 @@ export default function AddLessonPlanScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.xl, paddingBottom: spacing.xxxl },
+  content: { padding: spacing.xl, paddingBottom: 100 },
   label: {
     fontSize: fontSize.sm,
     fontWeight: '700',
@@ -276,6 +276,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     padding: spacing.xxl,
+    paddingBottom: spacing.xxl + 25,
     maxHeight: '60%',
   },
   modalTitle: {
@@ -301,3 +302,4 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
 });
+

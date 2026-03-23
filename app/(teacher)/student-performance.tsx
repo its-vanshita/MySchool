@@ -381,7 +381,7 @@ export default function StudentPerformanceScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, paddingBottom: spacing.xxxl },
+  content: { padding: spacing.lg, paddingBottom: 100 },
 
   // Profile
   profileCard: {
@@ -607,6 +607,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     padding: spacing.xxl,
+    paddingBottom: spacing.xxl + 25,
     maxHeight: '60%',
   },
   modalTitle: {
@@ -632,3 +633,4 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
 });
+

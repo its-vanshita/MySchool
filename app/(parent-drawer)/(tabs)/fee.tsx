@@ -161,7 +161,7 @@ export default function ParentFeeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F7FA' },
-  content: { paddingBottom: 32 },
+  content: { paddingBottom: 100 },
 
   summaryCard: {
     backgroundColor: colors.white,
@@ -332,3 +332,4 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
 });
+

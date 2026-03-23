@@ -186,7 +186,7 @@ export default function AdminDashboardScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.white },
-  content: { paddingBottom: spacing.xxxl },
+  content: { paddingBottom: 100 },
 
   greetingSection: {
     flexDirection: 'row',
@@ -327,3 +327,4 @@ const styles = StyleSheet.create({
     color: colors.success,
   },
 });
+

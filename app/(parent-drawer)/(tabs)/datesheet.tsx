@@ -159,7 +159,7 @@ export default function ParentDatesheetScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: spacing.xxxl },
+  content: { paddingBottom: 100 },
 
   headerCard: {
     flexDirection: 'row',
@@ -330,3 +330,4 @@ const styles = StyleSheet.create({
   uploadedTitle: { fontSize: 13, fontWeight: '700', color: colors.textPrimary, marginBottom: 2 },
   uploadedDate: { fontSize: 11, color: colors.textLight }
 });
+

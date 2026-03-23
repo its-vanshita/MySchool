@@ -411,7 +411,7 @@ export default function AddHomeworkScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.xl, paddingBottom: spacing.xxxl + 20 },
+  content: { padding: spacing.xl, paddingBottom: 100 },
 
   label: {
     fontSize: fontSize.sm,
@@ -588,6 +588,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     padding: spacing.xxl,
+    paddingBottom: spacing.xxxl + 20,
     maxHeight: '60%',
   },
   modalTitle: {

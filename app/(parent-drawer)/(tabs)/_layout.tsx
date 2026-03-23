@@ -49,9 +49,9 @@ export default function ParentTabsLayout() {
         tabBarStyle: {
           backgroundColor: colors.white,
           borderTopColor: '#F0F0F0',
-          height: 62,
-          paddingBottom: 8,
-          paddingTop: 6,
+          height: 75,
+          paddingBottom: 25,
+          paddingTop: 8,
           elevation: 8,
           shadowColor: '#000',
           shadowOpacity: 0.06,

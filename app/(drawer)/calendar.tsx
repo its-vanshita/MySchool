@@ -353,7 +353,7 @@ export default function CalendarScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: 40 },
+  content: { paddingBottom: 100 },
 
   // Filter
   filterRow: {
@@ -583,3 +583,4 @@ const styles = StyleSheet.create({
   upcomingTitle: { fontSize: fontSize.md, fontWeight: '600', color: colors.textPrimary },
   upcomingType: { fontSize: fontSize.xs, color: colors.textSecondary },
 });
+

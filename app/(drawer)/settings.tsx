@@ -144,7 +144,7 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, paddingBottom: 40 },
+  content: { padding: spacing.lg, paddingBottom: 100 },
   sectionHeader: {
     fontSize: fontSize.sm,
     fontWeight: '700',
@@ -196,3 +196,4 @@ const styles = StyleSheet.create({
     color: colors.danger,
   },
 });
+

@@ -174,7 +174,7 @@ export default function AdminDutiesTab() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.xl },
+  content: { padding: spacing.xl, paddingBottom: 100 },
   headerTitle: { fontSize: fontSize.xl, fontWeight: '800', color: colors.textPrimary },
   subTitle: { fontSize: fontSize.sm, color: colors.textSecondary, marginTop: 4, marginBottom: spacing.lg },
   
@@ -236,3 +236,4 @@ const styles = StyleSheet.create({
   dutyRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   dutyText: { fontSize: 12, color: colors.textSecondary },
 });
+

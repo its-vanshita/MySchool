@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F7FA',
   },
   content: {
-    paddingBottom: spacing.xxxl,
+    paddingBottom: 100,
   },
 
   // Profile Card

@@ -326,7 +326,7 @@ export default function AdminAnalyticsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FB' },
-  content: { padding: spacing.xl },
+  content: { padding: spacing.xl, paddingBottom: 100 },
   headerTitle: { fontSize: fontSize.xl, fontWeight: '800', color: colors.textPrimary },
   subTitle: { fontSize: fontSize.sm, color: colors.textSecondary, marginTop: 4, marginBottom: spacing.lg },
   
@@ -420,3 +420,4 @@ const styles = StyleSheet.create({
     color: colors.primary, fontWeight: '700'
   }
 });
+

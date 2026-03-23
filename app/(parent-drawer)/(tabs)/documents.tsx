@@ -125,7 +125,7 @@ export default function ParentDocumentsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F7FA' },
-  content: { paddingBottom: 32 },
+  content: { paddingBottom: 100 },
 
   headerCard: {
     flexDirection: 'row',
@@ -253,3 +253,4 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 });
+

@@ -101,23 +101,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const signIn = async (uniqueId: string, password: string): Promise<{ isFirstLogin: boolean }> => {
+  const signIn = async (uniqueId: string, password: string, isEmail = false): Promise<{ isFirstLogin: boolean }> => {
     setError(null);
 
-    // Look up the user by unique_id to get their email
-    const { data: userRow, error: lookupErr } = await supabase
-      .from('users')
-      .select('email, is_first_login')
-      .eq('unique_id', uniqueId.toUpperCase().trim())
-      .single();
+    let email = uniqueId.trim().toLowerCase();
 
-    if (lookupErr || !userRow) {
-      const msg = 'Invalid Unique ID. Please check and try again.';
-      setError(msg);
-      throw new Error(msg);
+    if (!isEmail) {
+        // Look up the user by unique_id to get their email
+        const { data: userRow, error: lookupErr } = await supabase
+        .from('users')
+        .select('email, is_first_login')
+        .eq('unique_id', uniqueId.toUpperCase().trim())
+        .single();
+
+        if (lookupErr || !userRow) {
+            const msg = 'Invalid Unique ID. Please check and try again.';
+            setError(msg);
+            throw new Error(msg);
+        }
+        email = userRow.email;
     }
-
-    const email = userRow.email;
 
     let result;
     try {
@@ -130,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (result.error) {
       const raw = sanitizeError(result.error.message);
       const msg = raw.includes('Invalid login credentials')
-        ? 'Incorrect password. Please try again.'
+        ? 'Incorrect Email/ID or Password. Please try again.'
         : raw.includes('rate limit')
         ? 'Too many attempts. Please wait a few minutes.'
         : raw;
@@ -138,7 +141,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(msg);
     }
 
-    return { isFirstLogin: userRow.is_first_login ?? false };
+    const { data: userRow } = await supabase
+        .from('users')
+        .select('is_first_login')
+        .eq('id', result.data.user.id)
+        .single();
+
+    return { isFirstLogin: userRow?.is_first_login ?? false };
   };
 
   const changePassword = async (newPassword: string) => {

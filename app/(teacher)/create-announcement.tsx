@@ -142,7 +142,7 @@ export default function CreateAnnouncementScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.xl },
+  content: { padding: spacing.xl, paddingBottom: 100 },
   infoBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -196,3 +196,4 @@ const styles = StyleSheet.create({
   submitBtnDisabled: { opacity: 0.7 },
   submitBtnText: { color: colors.white, fontSize: fontSize.md, fontWeight: '700' },
 });
+

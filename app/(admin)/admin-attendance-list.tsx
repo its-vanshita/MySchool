@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   tabText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
   tabTextActive: { color: colors.primary, fontWeight: '700' },
 
-  listContent: { padding: spacing.xl },
+  listcontent: { padding: spacing.xl, paddingBottom: 100 },
   itemCard: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white,
     borderRadius: borderRadius.md, padding: spacing.md, marginBottom: spacing.md,
@@ -134,3 +134,4 @@ const styles = StyleSheet.create({
   statusTextPresent: { color: colors.success },
   statusTextAbsent: { color: colors.danger },
 });
+

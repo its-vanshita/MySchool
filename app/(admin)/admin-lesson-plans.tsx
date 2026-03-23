@@ -141,7 +141,7 @@ export default function AdminLessonPlansScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FB' },
-  content: { padding: spacing.lg },
+  content: { padding: spacing.lg, paddingBottom: 100 },
   
   headerTitle: { fontSize: fontSize.xl, fontWeight: '800', color: colors.textPrimary },
   subTitle: { fontSize: fontSize.sm, color: colors.textSecondary, marginTop: 4, marginBottom: spacing.lg },
@@ -209,3 +209,4 @@ const styles = StyleSheet.create({
   emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xxxl, opacity: 0.6 },
   emptyText: { marginTop: spacing.md, fontSize: fontSize.md, fontWeight: '500', color: colors.textLight },
 });
+

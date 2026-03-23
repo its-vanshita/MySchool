@@ -287,7 +287,7 @@ export default function AdminManageCalendarScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FB' },
-  content: { padding: spacing.lg },
+  content: { padding: spacing.lg, paddingBottom: 100 },
   
   header: {
     flexDirection: 'row',
@@ -393,3 +393,4 @@ const styles = StyleSheet.create({
     elevation: 4, shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 6, shadowOffset: { width: 0, height: 3 },
   },
 });
+

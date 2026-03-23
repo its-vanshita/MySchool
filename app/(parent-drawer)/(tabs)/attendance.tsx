@@ -170,7 +170,7 @@ export default function ParentAttendanceScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: spacing.xxxl },
+  content: { paddingBottom: 100 },
 
   childHeader: {
     flexDirection: 'row',
@@ -365,3 +365,4 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
 });
+

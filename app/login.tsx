@@ -43,28 +43,23 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!uniqueId.trim() || !password.trim()) {
-      Alert.alert('Missing Fields', 'Please enter both Unique ID and password.');
+      Alert.alert('Missing Fields', 'Please enter both Email/Unique ID and password.');
       return;
     }
     
     setSubmitting(true);
     try {
-      const { isFirstLogin } = await signIn(uniqueId, password);
+      // Auto-detect if user entered an email
+      const isEmailLogin = uniqueId.includes('@');
+      
+      const { isFirstLogin } = await signIn(uniqueId, password, isEmailLogin);
       
       if (isFirstLogin) {
         setShowChangePassword(true);
       } else {
-        // We aren't checking roles here in production because the role is part of the user profile
-        // The router will likely redirect based on the layout, but for now lets default to main drawer
-        // In a real app we might redirect based on user.role from the context
         router.replace('/(drawer)/(tabs)');
       }
     } catch (err: any) {
-      // Error is handled by AuthContext and exposed via 'error' state, 
-      // but signIn also throws so we can catch it here too if needed
-      // or rely on the context error.
-      // already showed alert in context? No, context sets error state.
-      // actually signIn throws error with message.
       Alert.alert('Login Failed', err.message || 'Could not sign in');
     } finally {
       setSubmitting(false);
@@ -166,11 +161,11 @@ export default function LoginScreen() {
             <Ionicons name="person-outline" size={20} color={colors.textLight} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="e.g. MS-2024-001"
+              placeholder="e.g. MS-2024-001 or Email"
               placeholderTextColor={colors.textLight}
               value={uniqueId}
               onChangeText={setUniqueId}
-              autoCapitalize="characters"
+              autoCapitalize="none"
               autoCorrect={false}
             />
           </View>
@@ -544,6 +539,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: borderRadius.xl,
     padding: spacing.xxl,
+    paddingBottom: spacing.xxl + 25,
   },
   modalIconContainer: {
     width: 60,
@@ -579,3 +575,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
