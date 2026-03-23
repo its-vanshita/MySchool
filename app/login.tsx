@@ -46,25 +46,28 @@ export default function LoginScreen() {
       Alert.alert('Missing Fields', 'Please enter both Unique ID and password.');
       return;
     }
-    // Demo credentials mapping
-    const demoAccounts: Record<string, { password: string; role: UserRole }> = {
-      TEACHER: { password: 'teacher123', role: 'teacher' },
-      ADMIN: { password: 'admin123', role: 'admin' },
-      PARENT: { password: 'parent123', role: 'parent' },
-    };
-    const id = uniqueId.trim().toUpperCase();
-    const account = demoAccounts[id];
-    if (account && password === account.password) {
-      enterDemoMode(account.role);
-      if (account.role === 'parent') {
-        router.replace('/(parent-drawer)/(tabs)' as any);
-      } else if (account.role === 'admin') {
-        router.replace('/(admin-drawer)/(tabs)' as any);
+    
+    setSubmitting(true);
+    try {
+      const { isFirstLogin } = await signIn(uniqueId, password);
+      
+      if (isFirstLogin) {
+        setShowChangePassword(true);
       } else {
+        // We aren't checking roles here in production because the role is part of the user profile
+        // The router will likely redirect based on the layout, but for now lets default to main drawer
+        // In a real app we might redirect based on user.role from the context
         router.replace('/(drawer)/(tabs)');
       }
-    } else {
-      Alert.alert('Invalid Credentials', 'Use one of the demo credentials shown below the login button.');
+    } catch (err: any) {
+      // Error is handled by AuthContext and exposed via 'error' state, 
+      // but signIn also throws so we can catch it here too if needed
+      // or rely on the context error.
+      // already showed alert in context? No, context sets error state.
+      // actually signIn throws error with message.
+      Alert.alert('Login Failed', err.message || 'Could not sign in');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -214,25 +217,7 @@ export default function LoginScreen() {
             <Text style={styles.forgotBtnText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          {/* Demo Credentials */}
-          <View style={styles.demoBox}>
-            <Text style={styles.demoTitle}>Demo Credentials</Text>
-            <TouchableOpacity style={styles.demoRow} onPress={() => { setUniqueId('TEACHER'); setPassword('teacher123'); }}>
-              <Ionicons name="school-outline" size={16} color={colors.primary} />
-              <Text style={styles.demoRoleText}>Teacher</Text>
-              <Text style={styles.demoCred}>TEACHER / teacher123</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.demoRow} onPress={() => { setUniqueId('ADMIN'); setPassword('admin123'); }}>
-              <Ionicons name="shield-outline" size={16} color={colors.success} />
-              <Text style={[styles.demoRoleText, { color: colors.success }]}>Admin</Text>
-              <Text style={styles.demoCred}>ADMIN / admin123</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.demoRow} onPress={() => { setUniqueId('PARENT'); setPassword('parent123'); }}>
-              <Ionicons name="people-outline" size={16} color={colors.warning} />
-              <Text style={[styles.demoRoleText, { color: colors.warning }]}>Parent</Text>
-              <Text style={styles.demoCred}>PARENT / parent123</Text>
-            </TouchableOpacity>
-          </View>
+          {/* Demo Credentials removed for production */}
 
           {/* Footer */}
           <Text style={styles.trustedText}>TRUSTED BY 300+ SCHOOLS</Text>

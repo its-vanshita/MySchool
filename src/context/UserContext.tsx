@@ -72,17 +72,12 @@ const DEMO_USERS: Record<string, AppUser> = {
 const UserContext = createContext<UserState | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const { user, isDemo, demoRole } = useAuth();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async () => {
     try {
-      if (isDemo) {
-        setProfile(DEMO_USERS[demoRole] ?? DEMO_USERS.teacher);
-        setLoading(false);
-        return;
-      }
       if (!user) {
         setProfile(null);
         setLoading(false);
@@ -97,51 +92,29 @@ export function UserProvider({ children }: { children: ReactNode }) {
         .single();
 
       if (error || !data) {
-        // Auto-create profile for new users
-        const newProfile: Partial<AppUser> = {
-          id: user.id,
-          email: user.email ?? '',
-          name: user.email?.split('@')[0] ?? 'User',
-          phone: '',
-          role: 'teacher',
-          subjects: [],
-          avatar_url: '',
-          school_id: '',
-        };
-        const { data: created } = await supabase
-          .from('users')
-          .upsert(newProfile)
-          .select()
-          .single();
-
-        setProfile(created as AppUser | null);
+        console.warn('Profile not found for user:', user.id);
+        setProfile(null);
       } else {
         setProfile(data as AppUser);
       }
       setLoading(false);
     } catch (err) {
       console.warn('Failed to fetch profile:', err);
-      // Set default profile in case of error
-      setProfile(DEMO_USERS[isDemo ? demoRole : 'teacher']);
+      setProfile(null);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    try {
-      fetchProfile();
-    } catch (err) {
-      console.error('Profile initialization error:', err);
-      setLoading(false);
-    }
-  }, [user, isDemo, demoRole]);
+    fetchProfile();
+  }, [user]);
 
   const role: UserRole = profile?.role ?? 'teacher';
   const permissions: RolePermissions = ROLE_PERMISSIONS[role];
 
   return (
     <UserContext.Provider
-      value={{ profile, role, permissions, loading, isDemo, refreshProfile: fetchProfile }}
+      value={{ profile, role, permissions, loading, isDemo: false, refreshProfile: fetchProfile }}
     >
       {children}
     </UserContext.Provider>

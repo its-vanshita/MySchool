@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { getAllTeachers, getAllStudents } from '../services/supabaseService';
+import { Alert } from 'react-native';
+import { supabase } from '../config/supabase';
 
 export interface BaseUser {
   id: string;
@@ -15,39 +18,79 @@ export interface StudentUser extends BaseUser {
   class: string;
 }
 
-let sharedTeachers: TeacherUser[] = [
-  { id: 't1', name: 'Sarah Jenkins', role: 'Mathematics', status: 'present', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80' },
-  { id: 't2', name: 'Aman Patel', role: 'Science', status: 'present', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80' },
-  { id: 't3', name: 'Rohit Sharma', role: 'English', status: 'absent', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80' },
-  { id: 't4', name: 'Nisha Gupta', role: 'Social Studies', status: 'present', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80' },
-  { id: 't5', name: 'David Smith', role: 'Physical Education', status: 'absent', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80' },
-  { id: 't6', name: 'Priya Kumar', role: 'Computer Science', status: 'present', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80' },
-];
-
-let sharedStudents: StudentUser[] = [
-  { id: 's1', name: 'Arjun Sharma', class: 'Class 10A', status: 'present', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80' },
-  { id: 's2', name: 'Diya Kapoor', class: 'Class 10A', status: 'present', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80' },
-  { id: 's3', name: 'Rohan Mehta', class: 'Class 9C', status: 'absent', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80' },
-  { id: 's4', name: 'Priya Singh', class: 'Class 10A', status: 'present', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80' },
-  { id: 's5', name: 'Kavya Joshi', class: 'Class 9C', status: 'present', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80' },
-  { id: 's6', name: 'Rahul Nair', class: 'Class 8B', status: 'absent', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80' },
-  { id: 's7', name: 'Aditya Patel', class: 'Class 12B', status: 'present', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80' },
-];
-
-let listeners: Array<() => void> = [];
-
-function notify() {
-  listeners.forEach(fn => fn());
-}
-
 export function useSharedUsers() {
-  const [teachers, setTeachers] = useState<TeacherUser[]>(sharedTeachers);
-  const [students, setStudents] = useState<StudentUser[]>(sharedStudents);
+  const [teachers, setTeachers] = useState<TeacherUser[]>([]);
+  const [students, setStudents] = useState<StudentUser[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [tData, sData] = await Promise.all([
+        getAllTeachers(),
+        getAllStudents()
+      ]);
+
+      setTeachers(tData.map(u => ({
+        id: u.id,
+        name: u.name,
+        role: u.subjects?.[0] || u.role,
+        status: 'present', // TODO: Integrate with staff attendance if available
+        avatar: u.avatar_url || 'https://via.placeholder.com/150'
+      })));
+
+      setStudents(sData.map(s => ({
+        id: s.id,
+        name: s.name,
+        class: s.classes ? `${s.classes.name} ${s.classes.section || ''}`.trim() : 'Unassigned',
+        status: 'present', // TODO: Integrate with student attendance
+        avatar: s.photo_url || 'https://via.placeholder.com/150'
+      })));
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fn = () => {
-      setTeachers([...sharedTeachers]);
-      setStudents([...sharedStudents]);
+    refresh();
+  }, [refresh]);
+
+  const addTeacher = async (data: { name: string; role: string }) => {
+    Alert.alert('Action Required', 'To add a teacher, please invite them via the Supabase Dashboard or Admin Console. Direct creation is disabled in this version.');
+  };
+
+  const removeTeacher = async (id: string) => {
+    Alert.alert('Action Required', 'To remove a teacher, please delete their account via the Supabase Dashboard.');
+  };
+
+  const addStudent = async (data: { name: string; class: string }) => {
+    // Basic implementation: Find class by name, then insert
+    try {
+      const className = data.class.trim();
+      // Try to split logic if needed, but for now exact match on name might contain section?
+      // Assuming 'class' input is just class name like "10A".
+      // We need to parse it.
+      
+      Alert.alert('Info', 'Please use the Class Management screen to add students to ensure correct class assignment.');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const removeStudent = async (id: string) => {
+    try {
+      const { error } = await supabase.from('class_students').delete().eq('id', id);
+      if (error) throw error;
+      refresh();
+    } catch (err) {
+      Alert.alert('Error', 'Failed to remove student.');
+    }
+  };
+
+  return { teachers, students, loading, refresh, addTeacher, removeTeacher, addStudent, removeStudent };
+}
     };
     listeners.push(fn);
     return () => {

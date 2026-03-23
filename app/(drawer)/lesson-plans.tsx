@@ -17,7 +17,7 @@ import { colors } from '../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { TimetableEntry } from '../../src/types';
 
-// ── Demo data ──
+// ── Demo data removed ──
 import { useSharedLessonPlans } from '../../src/hooks/useSharedLessonPlans';
 import type { UnitItem, TopicItem } from '../../src/hooks/useSharedLessonPlans';
 
@@ -27,17 +27,10 @@ interface SubjectClass {
   className: string;
 }
 
-const DEMO_TIMETABLE: TimetableEntry[] = [
-  { id: 't1', teacher_id: 'demo-teacher', subject: 'Mathematics', class_name: 'Class 10A', room: '204', start_time: '09:00', end_time: '09:45', day: 'monday', school_id: 'demo-school' },
-  { id: 't2', teacher_id: 'demo-teacher', subject: 'Science', class_name: 'Class 9C', room: 'Lab 02', start_time: '11:30', end_time: '12:15', day: 'monday', school_id: 'demo-school' },
-  { id: 't3', teacher_id: 'demo-teacher', subject: 'English', class_name: 'Class 10A', room: '204', start_time: '14:00', end_time: '14:45', day: 'monday', school_id: 'demo-school' },
-];
-
 export default function LessonPlansScreen() {
   const router = useRouter();
   const { profile } = useUser();
   const { plans: dbPlans } = useLessonPlans(profile?.id);
-  const { plans: sharedPlans, markTopicCompleted } = useSharedLessonPlans();
 
   const [subjectClasses, setSubjectClasses] = useState<SubjectClass[]>([]);
   const [selected, setSelected] = useState<SubjectClass | null>(null);
@@ -50,11 +43,9 @@ export default function LessonPlansScreen() {
       let timetable: TimetableEntry[] = [];
       if (profile?.id) {
         timetable = await getTimetableForTeacher(profile.id);
-        if (timetable.length === 0 && profile.school_id === 'demo-school') {
-          timetable = DEMO_TIMETABLE;
-        }
       }
       const seen = new Set<string>();
+
       const opts: SubjectClass[] = [];
       for (const entry of timetable) {
         const key = `${entry.subject}|${entry.class_name}`;
@@ -78,14 +69,27 @@ export default function LessonPlansScreen() {
   // Get units for current selection
   const units = useMemo(() => {
     if (!selected || !profile?.id) return [];
-    
-    // Find the matching plan in the shared store
-    const plan = sharedPlans.find(
-      (p) => p.teacherId === profile.id && p.subject === selected.subject && p.className === selected.className
+
+    const relevant = dbPlans.filter(
+      (p) => p.subject === selected.subject && p.class_name === selected.className
     );
-    
-    return plan?.units ?? [];
-  }, [selected, profile?.id, sharedPlans]);
+
+    if (relevant.length === 0) return [];
+
+    const dummyUnit: UnitItem = {
+      id: 'uploaded',
+      number: 1,
+      name: 'Uploaded Lesson Plans',
+      topics: relevant.map((p) => ({
+        id: p.id,
+        name: p.topic || 'Untitled',
+        status: 'completed',
+        completedDate: new Date(p.uploaded_at).toLocaleDateString(),
+      })),
+    };
+
+    return [dummyUnit];
+  }, [selected, dbPlans]);
 
   // Auto-expand first unit that has in-progress topics
   useEffect(() => {

@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '../config/supabase';
+import { Alert } from 'react-native';
 
 export interface Duty {
   id: string;
@@ -11,65 +13,83 @@ export interface Duty {
   created_at: number;
 }
 
-let sharedDuties: Duty[] = [
-  {
-    id: 'd1',
-    teacher_id: 't1',
-    teacher_name: 'Sarah Jenkins',
-    activity: 'Mid-Term Invigilation',
-    date: 'Oct 15, 2025',
-    time: '09:00 AM - 12:00 PM',
-    room: 'Hall A',
-    created_at: Date.now() - 100000,
-  },
-  {
-    id: 'd2',
-    teacher_id: 'demo-teacher',
-    teacher_name: 'Demo Teacher',
-    activity: 'Bus Duty',
-    date: 'Oct 16, 2025',
-    time: '03:00 PM - 04:00 PM',
-    room: 'Main Gate',
-    created_at: Date.now() - 50000,
-  }
-];
+export function useSharedDuties(teacherId?: string) {
+  const [duties, setDuties] = useState<Duty[]>([]);
+  const [loading, setLoading] = useState(true);
 
-let listeners: Array<() => void> = [];
+  const fetchDuties = useCallback(async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from('ms_exam_duties')
+        .select(`
+          id,
+          teacher_id,
+          exam_date,
+          start_time,
+          end_time,
+          room,
+          created_at,
+          users ( name ),
+          ms_exams ( subject, class_name )
+        `)
+        .order('exam_date', { ascending: true });
 
-function notify() {
-  listeners.forEach(fn => fn());
-}
+      if (teacherId) {
+        query = query.eq('teacher_id', teacherId);
+      }
 
-export function useSharedDuties() {
-  const [duties, setDuties] = useState<Duty[]>(sharedDuties);
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error('DB Error:', error);
+        return;
+      }
+
+      const mapped: Duty[] = (data || []).map((d: any) => {
+        const teacherName = d.users?.name || 'Unknown Staff';
+        const examSubject = d.ms_exams?.subject || 'Duty';
+        const examClass = d.ms_exams?.class_name || '';
+        const act = `${examSubject} ${examClass}`.trim();
+
+        return {
+          id: d.id,
+          teacher_id: d.teacher_id,
+          teacher_name: teacherName,
+          activity: act || 'Invigilation',
+          date: new Date(d.exam_date).toLocaleDateString(),
+          time: `${d.start_time} - ${d.end_time}`,
+          room: d.room || 'TBD',
+          created_at: new Date(d.created_at).getTime(),
+        };
+      });
+      
+      setDuties(mapped);
+    } catch (err) {
+      console.error('Fetch duties error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [teacherId]);
 
   useEffect(() => {
-    const fn = () => setDuties([...sharedDuties]);
-    listeners.push(fn);
-    return () => {
-      listeners = listeners.filter(f => f !== fn);
-    };
-  }, []);
+    fetchDuties();
+  }, [fetchDuties]);
 
-  const addDuty = (duty: Omit<Duty, 'id' | 'created_at'>) => {
-    const newDuty: Duty = {
-      ...duty,
-      id: Math.random().toString(36).substring(2, 9),
-      created_at: Date.now(),
-    };
-    sharedDuties = [newDuty, ...sharedDuties];
-    notify();
-    return newDuty;
+  const addDuty = async (duty: any) => {
+    Alert.alert('Action Required', 'Adding duties requires Admin Dashboard access.');
+    return null;
   };
 
-  const removeDuty = (id: string) => {
-    sharedDuties = sharedDuties.filter(d => d.id !== id);
-    notify();
+  const removeDuty = async (id: string) => {
+    Alert.alert('Action Required', 'Deleting duties requires Admin Dashboard access.');
   };
 
   return {
     duties,
     addDuty,
     removeDuty,
+    loading,
+    refresh: fetchDuties
   };
 }

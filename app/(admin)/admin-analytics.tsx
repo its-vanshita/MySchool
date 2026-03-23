@@ -190,8 +190,8 @@ export default function AdminAnalyticsScreen() {
               <View style={[styles.highlightCard, { backgroundColor: '#E8F5E9', marginTop: spacing.md }]}>
                 <Ionicons name="shield-checkmark" size={24} color={colors.success} />
                 <Text style={styles.highlightTitle}>Best Attendance</Text>
-                <Text style={styles.highlightVal} numberOfLines={1}>Rohan Mehta</Text>
-                <Text style={styles.highlightSub}>98% Present</Text>
+                <Text style={styles.highlightVal} numberOfLines={1}>N/A</Text>
+                <Text style={styles.highlightSub}>No data</Text>
               </View>
             </View>
           </View>
