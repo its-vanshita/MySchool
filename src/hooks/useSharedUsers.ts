@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAllTeachers, getAllStudents } from '../services/supabaseService';
+import { getAllTeachers, getAllStudents, createStudent, deleteStudent, deleteUser } from '../services/supabaseService';
 import { Alert } from 'react-native';
 import { supabase } from '../config/supabase';
 
@@ -31,7 +31,7 @@ export function useSharedUsers() {
         getAllStudents()
       ]);
 
-      setTeachers(tData.map(u => ({
+      setTeachers(tData.map((u) => ({
         id: u.id,
         name: u.name,
         role: u.subjects?.[0] || u.role,
@@ -39,7 +39,7 @@ export function useSharedUsers() {
         avatar: u.avatar_url || 'https://via.placeholder.com/150'
       })));
 
-      setStudents(sData.map(s => ({
+      setStudents(sData.map((s) => ({
         id: s.id,
         name: s.name,
         class: s.classes ? `${s.classes.name} ${s.classes.section || ''}`.trim() : 'Unassigned',
@@ -58,36 +58,53 @@ export function useSharedUsers() {
   }, [refresh]);
 
   const addTeacher = async (data: { name: string; role: string }) => {
-    Alert.alert('Action Required', 'To add a teacher, please invite them via the Supabase Dashboard or Admin Console. Direct creation is disabled in this version.');
+    Alert.alert('Action Required', 'To add a teacher, please invite them via the Supabase Dashboard. Adding users directly requires Authentication setup.');
   };
 
   const removeTeacher = async (id: string) => {
-    Alert.alert('Action Required', 'To remove a teacher, please delete their account via the Supabase Dashboard.');
+    try {
+      await deleteUser(id);
+      refresh();
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'Failed to remove teacher record. They may still exist in Auth.');
+    }
   };
 
   const addStudent = async (data: { name: string; class: string }) => {
-    // Basic implementation: Find class by name, then insert
     try {
-      const className = data.class.trim();
-      // Try to split logic if needed, but for now exact match on name might contain section?
-      // Assuming 'class' input is just class name like "10A".
-      // We need to parse it.
+      const normalize = (s: string) => s.replace(/[\s-]/g, '').toLowerCase();
+      const normalizedInput = normalize(data.class);
       
-      Alert.alert('Info', 'Please use the Class Management screen to add students to ensure correct class assignment.');
+      const foundClass = classes.find(c => {
+        const fullName = `${c.name}${c.section || ''}`;
+        return normalize(fullName) === normalizedInput;
+      });
+
+      if (!foundClass) {
+        Alert.alert('Error', `Class "${data.class}" not found. Please ensure exact name matches (e.g. "Class 10 A").`);
+        return;
+      }
+
+      await createStudent({ name: data.name, class_id: foundClass.id });
+      refresh();
+      Alert.alert('Success', `Student ${data.name} added to ${foundClass.name} ${foundClass.section || ''}`);
+      
     } catch (err) {
       console.error(err);
+      Alert.alert('Error', 'Failed to add student.');
     }
   };
 
   const removeStudent = async (id: string) => {
     try {
-      const { error } = await supabase.from('class_students').delete().eq('id', id);
-      if (error) throw error;
+      await deleteStudent(id);
       refresh();
     } catch (err) {
+      console.error(err);
       Alert.alert('Error', 'Failed to remove student.');
     }
   };
 
   return { teachers, students, loading, refresh, addTeacher, removeTeacher, addStudent, removeStudent };
-}
+}

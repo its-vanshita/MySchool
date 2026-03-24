@@ -88,17 +88,25 @@ export interface StudentInfo {
 // ────────── Notices (Students) ──────────
 export type NoticeType = 'general' | 'urgent' | 'event' | 'holiday' | 'exam';
 
+export type TargetAudience = 'all' | 'students' | 'teachers' | 'specific_classes' | 'specific_teachers' | 'specific_students';
+
 export interface Notice {
   id: string;
   title: string;
   message: string;
-  class_id: string;
-  class_name?: string;
-  attachment_url: string;
+  class_id?: string;       // Legacy / for simple single-class
+  class_name?: string;     // Legacy
+  attachment_url?: string;
   type: NoticeType;
   created_by: string;
   creator_name?: string;
   created_at: string;
+  
+  // New Targeting Fields
+  target_audience?: TargetAudience;
+  target_classes?: string[];
+  target_teachers?: string[];
+  target_students?: string[];
 }
 
 // ────────── Announcements (Teachers/Staff) ──────────

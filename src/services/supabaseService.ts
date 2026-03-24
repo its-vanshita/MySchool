@@ -664,6 +664,47 @@ export async function uploadStudentDocument(
 // SHARED USERS (For Admin/Parent/Staff Directories)
 // ═══════════════════════════════════════════════════════════════
 
+export async function createStudent(
+  data: { name: string; class_id: string; parent_email?: string; roll_number?: string }
+): Promise<any | null> {
+  const { data: result, error } = await supabase
+    .from('class_students')
+    .insert([data])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating student:', error);
+    throw error;
+  }
+  return result;
+}
+
+export async function deleteStudent(studentId: string): Promise<void> {
+  const { error } = await supabase
+    .from('class_students')
+    .delete()
+    .eq('id', studentId);
+
+  if (error) {
+    console.error('Error deleting student:', error);
+    throw error;
+  }
+}
+
+export async function deleteUser(userId: string): Promise<void> {
+  // This physically removes the profile. Note: Auth user remains until deleted from Auth.
+  const { error } = await supabase
+    .from('users')
+    .delete()
+    .eq('id', userId);
+
+  if (error) {
+    console.error('Error deleting user profile:', error);
+    throw error;
+  }
+}
+
 export async function getAllTeachers(schoolId: string = ''): Promise<AppUser[]> {
   let query = supabase.from('users').select('*').eq('role', 'teacher').order('name');
   if (schoolId) {

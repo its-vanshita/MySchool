@@ -8,6 +8,8 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,9 +17,10 @@ import { useUser } from '../../src/context/UserContext';
 import { useNotices } from '../../src/hooks/useNotices';
 import { useNotificationBadge } from '../../src/context/NotificationContext';
 import { getClasses } from '../../src/services/supabaseService';
+import { useSharedUsers } from '../../src/hooks/useSharedUsers';
 import { colors } from '../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
-import type { ClassInfo, NoticeType } from '../../src/types';
+import type { ClassInfo, NoticeType, TargetAudience } from '../../src/types';
 
 const NOTICE_TYPES: { value: NoticeType; label: string; color: string }[] = [
   { value: 'general', label: 'General', color: colors.info },
@@ -25,28 +28,22 @@ const NOTICE_TYPES: { value: NoticeType; label: string; color: string }[] = [
   { value: 'event', label: 'Event', color: colors.success },
 ];
 
-const MOCK_TEACHERS = [
-  { id: 'T-001', name: 'John Doe' },
-  { id: 'T-002', name: 'Jane Smith' },
-  { id: 'T-003', name: 'Michael Brown' },
-];
-
 export default function AssignNoticeScreen() {
   const router = useRouter();
   const { profile } = useUser();
   const { addNotice } = useNotices();
   const { addNotification } = useNotificationBadge();
+  const { teachers, students: allStudents } = useSharedUsers();
 
-  // Selections
-  const [targetAudience, setTargetAudience] = useState<'students' | 'teachers'>('students');
-  const [teacherTarget, setTeacherTarget] = useState<'all' | 'specific'>('all');
-  const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(null);
+  const [targetAudience, setTargetAudience] = useState<TargetAudience>('all');
+  
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
+  const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
   const [type, setType] = useState<NoticeType>('general');
-  const [selectedClass, setSelectedClass] = useState<ClassInfo | null>(null);
   const [classes, setClasses] = useState<ClassInfo[]>([]);
 
-  // Content
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -57,332 +54,158 @@ export default function AssignNoticeScreen() {
     }
   }, [profile]);
 
+  const toggleClass = (id: string) => setSelectedClasses(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  const toggleTeacher = (id: string) => setSelectedTeachers(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  const toggleStudent = (id: string) => setSelectedStudents(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+
   const handleSubmit = async () => {
     if (!title.trim() || !message.trim()) {
       Alert.alert('Missing Fields', 'Please enter both title and message.');
       return;
     }
-
-    if (targetAudience === 'teachers' && teacherTarget === 'specific' && !selectedTeacherId) {
-      Alert.alert('Missing Selection', 'Please select a specific teacher.');
-      return;
-    }
+    if (targetAudience === 'specific_classes' && selectedClasses.length === 0) return Alert.alert('Error', 'Select at least one class.');
+    if (targetAudience === 'specific_teachers' && selectedTeachers.length === 0) return Alert.alert('Error', 'Select at least one teacher.');
+    if (targetAudience === 'specific_students' && selectedStudents.length === 0) return Alert.alert('Error', 'Select at least one student.');
 
     setSubmitting(true);
     try {
-      if (targetAudience === 'students') {
-        // Send to students (via notices table)
-        await addNotice({
-          title: title.trim(),
-          message: message.trim(),
-          type,
-          class_id: selectedClass?.id ?? '',
-          class_name: selectedClass?.name ?? 'All Classes',
-          attachment_url: '',
-          created_by: profile?.id ?? '',
-          creator_name: profile?.name ?? 'Admin',
-        });
-      } else {
-        // Send to Teachers - Simulating via adding to local NotificationContext
-        let targetLabel = 'All Teachers';
-        if (teacherTarget === 'specific') {
-          const t = MOCK_TEACHERS.find(x => x.id === selectedTeacherId);
-          targetLabel = `${t?.name} (${t?.id})`;
-        }
+      await addNotice({
+        title: title.trim(),
+        message: message.trim(),
+        type,
+        class_id: targetAudience === 'specific_classes' ? selectedClasses[0] : '', // legacy compat
+        class_name: targetAudience === 'specific_classes' ? 'Selected Classes' : (targetAudience === 'all' ? 'All' : targetAudience),
+        attachment_url: '',
+        created_by: profile?.id ?? '',
+        creator_name: profile?.name ?? 'Admin',
+        target_audience: targetAudience,
+        target_classes: selectedClasses,
+        target_teachers: selectedTeachers,
+        target_students: selectedStudents,
+      });
 
-        addNotification({
-          title: `Notice: ${title.trim()}`,
-          message: message.trim(),
-          type: 'notice',
-        });
-
-        console.log(`Notice assigned to: ${targetLabel}`);
+      if (targetAudience === 'all' || targetAudience === 'teachers' || targetAudience === 'specific_teachers') {
+        addNotification({ title: `Notice: ${title.trim()}`, message: message.trim(), type: 'notice' });
       }
 
       Alert.alert('Success', 'Notice assigned successfully!', [{ text: 'OK', onPress: () => router.back() }]);
-    } catch {
-      Alert.alert('Error', 'Failed to assign notice. Please try again.');
+    } catch (err: any) {
+      console.error(err);
+      Alert.alert('Error', 'Failed to assign notice. Note: Please ensure UPDATE_NOTICES_SCHEMA.sql was executed in Supabase.');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Target Audience */}
-      <Text style={styles.label}>Target Audience</Text>
-      <View style={styles.audienceRow}>
-        <TouchableOpacity
-          style={[styles.audienceBtn, targetAudience === 'students' && styles.audienceBtnActive]}
-          onPress={() => setTargetAudience('students')}
-        >
-          <Ionicons name="people" size={20} color={targetAudience === 'students' ? colors.white : colors.textSecondary} />
-          <Text style={[styles.audienceBtnText, targetAudience === 'students' && styles.audienceBtnTextActive]}>
-            Students
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.audienceBtn, targetAudience === 'teachers' && styles.audienceBtnActive]}
-          onPress={() => setTargetAudience('teachers')}
-        >
-          <Ionicons name="school" size={20} color={targetAudience === 'teachers' ? colors.white : colors.textSecondary} />
-          <Text style={[styles.audienceBtnText, targetAudience === 'teachers' && styles.audienceBtnTextActive]}>
-            Teachers
-          </Text>
-        </TouchableOpacity>
-      </View>
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
+    >
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Text style={styles.label}>Notice Type</Text>
+        <View style={styles.typeRow}>
+          {NOTICE_TYPES.map((t) => (
+            <TouchableOpacity
+              key={t.value}
+              style={[styles.typeChip, type === t.value && { backgroundColor: t.color + '20', borderColor: t.color }]}
+              onPress={() => setType(t.value)}
+            >
+              <Text style={[styles.typeChipText, type === t.value && { color: t.color, fontWeight: '700' }]}>{t.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      {targetAudience === 'students' ? (
-        <>
-          {/* Class Selection for Students */}
-          <Text style={styles.label}>Send To</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollRow}>
+        <Text style={styles.label}>Target Audience</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollRow}>
+          {[
+            { id: 'all', label: 'Everybody' },
+            { id: 'students', label: 'All Students' },
+            { id: 'teachers', label: 'All Teachers' },
+            { id: 'specific_classes', label: 'Specific Classes' },
+            { id: 'specific_teachers', label: 'Specific Teachers' },
+            { id: 'specific_students', label: 'Specific Students' }
+          ].map(aud => (
             <TouchableOpacity
-              style={[styles.chip, !selectedClass && styles.chipActive]}
-              onPress={() => setSelectedClass(null)}
+              key={aud.id}
+              style={[styles.chip, targetAudience === aud.id && styles.chipActive]}
+              onPress={() => setTargetAudience(aud.id as TargetAudience)}
             >
-              <Text style={[styles.chipText, !selectedClass && styles.chipTextActive]}>All Classes</Text>
+              <Text style={[styles.chipText, targetAudience === aud.id && styles.chipTextActive]}>{aud.label}</Text>
             </TouchableOpacity>
-            {classes.map((c) => (
-              <TouchableOpacity
-                key={c.id}
-                style={[styles.chip, selectedClass?.id === c.id && styles.chipActive]}
-                onPress={() => setSelectedClass(c)}
-              >
-                <Text style={[styles.chipText, selectedClass?.id === c.id && styles.chipTextActive]}>
-                  {c.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </>
-      ) : (
-        <>
-          {/* Teacher Selection */}
-          <Text style={styles.label}>Target Teachers</Text>
-          <View style={styles.audienceRow}>
-            <TouchableOpacity
-              style={[styles.chip, teacherTarget === 'all' && styles.chipActive]}
-              onPress={() => setTeacherTarget('all')}
-            >
-              <Text style={[styles.chipText, teacherTarget === 'all' && styles.chipTextActive]}>All Teachers</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.chip, teacherTarget === 'specific' && styles.chipActive]}
-              onPress={() => setTeacherTarget('specific')}
-            >
-              <Text style={[styles.chipText, teacherTarget === 'specific' && styles.chipTextActive]}>Specific Teacher</Text>
-            </TouchableOpacity>
-          </View>
+          ))}
+        </ScrollView>
 
-          {teacherTarget === 'specific' && (
-            <View style={styles.teacherList}>
-              {MOCK_TEACHERS.map(t => (
-                <TouchableOpacity
-                  key={t.id}
-                  style={[styles.teacherItem, selectedTeacherId === t.id && styles.teacherItemActive]}
-                  onPress={() => setSelectedTeacherId(t.id)}
-                >
-                  <View style={styles.teacherAvatar}>
-                    <Ionicons name="person" size={16} color={selectedTeacherId === t.id ? colors.white : colors.primary} />
-                  </View>
-                  <View>
-                    <Text style={[styles.teacherName, selectedTeacherId === t.id && { color: colors.white }]}>{t.name}</Text>
-                    <Text style={[styles.teacherId, selectedTeacherId === t.id && { color: 'rgba(255,255,255,0.8)' }]}>ID: {t.id}</Text>
-                  </View>
-                  {selectedTeacherId === t.id && (
-                    <Ionicons name="checkmark-circle" size={24} color={colors.white} style={styles.checkIcon} />
-                  )}
+        {targetAudience === 'specific_classes' && (
+          <>
+            <Text style={styles.label}>Select Classes</Text>
+            <View style={styles.wrapRow}>
+              {classes.map((c) => (
+                <TouchableOpacity key={c.id} style={[styles.chip, selectedClasses.includes(c.id) && styles.chipActive]} onPress={() => toggleClass(c.id)}>
+                  <Text style={[styles.chipText, selectedClasses.includes(c.id) && styles.chipTextActive]}>{c.name} {c.section || ''}</Text>
                 </TouchableOpacity>
               ))}
             </View>
-          )}
-        </>
-      )}
-
-      {/* Notice Type */}
-      <Text style={styles.label}>Notice Type</Text>
-      <View style={styles.typeRow}>
-        {NOTICE_TYPES.map((t) => (
-          <TouchableOpacity
-            key={t.value}
-            style={[styles.typeChip, type === t.value && { backgroundColor: t.color + '20', borderColor: t.color }]}
-            onPress={() => setType(t.value)}
-          >
-            <Text style={[styles.typeChipText, type === t.value && { color: t.color, fontWeight: '700' }]}>{t.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Title */}
-      <Text style={styles.label}>Title</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter notice title"
-        placeholderTextColor={colors.textLight}
-        value={title}
-        onChangeText={setTitle}
-      />
-
-      {/* Message */}
-      <Text style={styles.label}>Message</Text>
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Write the notice details here..."
-        placeholderTextColor={colors.textLight}
-        value={message}
-        onChangeText={setMessage}
-        multiline
-        numberOfLines={6}
-        textAlignVertical="top"
-      />
-
-      {/* Submit */}
-      <TouchableOpacity
-        style={[styles.submitBtn, submitting && styles.submitBtnDisabled]}
-        onPress={handleSubmit}
-        disabled={submitting}
-      >
-        {submitting ? (
-          <ActivityIndicator color={colors.white} />
-        ) : (
-          <>
-            <Ionicons name="send" size={20} color={colors.white} />
-            <Text style={styles.submitBtnText}>Assign Notice</Text>
           </>
         )}
-      </TouchableOpacity>
-      
-      <View style={{ height: 40 }} />
-    </ScrollView>
+
+        {targetAudience === 'specific_teachers' && (
+          <>
+            <Text style={styles.label}>Select Teachers</Text>
+            <View style={styles.wrapRow}>
+              {teachers.map((t) => (
+                <TouchableOpacity key={t.id} style={[styles.chip, selectedTeachers.includes(t.id) && styles.chipActive]} onPress={() => toggleTeacher(t.id)}>
+                  <Text style={[styles.chipText, selectedTeachers.includes(t.id) && styles.chipTextActive]}>{t.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
+
+        {targetAudience === 'specific_students' && (
+          <>
+            <Text style={styles.label}>Select Students (Recent 50)</Text>
+            <View style={styles.wrapRow}>
+              {allStudents.slice(0, 50).map((s) => (
+                <TouchableOpacity key={s.id} style={[styles.chip, selectedStudents.includes(s.id) && styles.chipActive]} onPress={() => toggleStudent(s.id)}>
+                  <Text style={[styles.chipText, selectedStudents.includes(s.id) && styles.chipTextActive]}>{s.name} ({s.class})</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
+
+        <Text style={styles.label}>Title</Text>
+        <TextInput style={styles.input} placeholder="Notice title" value={title} onChangeText={setTitle} />
+
+        <Text style={styles.label}>Message</Text>
+        <TextInput style={[styles.input, styles.textArea]} placeholder="Write notice here..." value={message} onChangeText={setMessage} multiline numberOfLines={6} textAlignVertical="top" />
+
+        <TouchableOpacity style={[styles.submitBtn, submitting && styles.submitBtnDisabled]} onPress={handleSubmit} disabled={submitting}>
+          {submitting ? <ActivityIndicator color={colors.white} /> : <><Ionicons name="send" size={20} color={colors.white} /><Text style={styles.submitBtnText}>Send Notice</Text></>}
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: 100 },
-  label: {
-    fontSize: fontSize.sm,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-    marginTop: spacing.lg,
-  },
-  audienceRow: { flexDirection: 'row', gap: spacing.sm },
-  audienceBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.md,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.lg,
-    gap: spacing.sm,
-  },
-  audienceBtnActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  audienceBtnText: {
-    fontSize: fontSize.md,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  audienceBtnTextActive: {
-    color: colors.white,
-  },
-  scrollRow: { marginBottom: spacing.sm },
-  chip: {
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    marginRight: spacing.sm,
-    backgroundColor: colors.white,
-  },
-  chipActive: {
-    backgroundColor: colors.primaryLight,
-    borderColor: colors.primary,
-  },
-  chipText: { fontSize: fontSize.sm, color: colors.textSecondary, fontWeight: '500' },
-  chipTextActive: { color: colors.primary, fontWeight: '700' },
-  
-  teacherList: {
-    marginTop: spacing.sm,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
-  },
-  teacherItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.background,
-  },
-  teacherItemActive: {
-    backgroundColor: colors.primary,
-  },
-  teacherAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-  teacherName: {
-    fontSize: fontSize.md,
-    fontWeight: '600',
-    color: colors.textPrimary,
-  },
-  teacherId: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  checkIcon: {
-    marginLeft: 'auto',
-  },
-
-  typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  typeChip: {
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.white,
-  },
+  label: { fontSize: fontSize.sm, fontWeight: '700', color: colors.textPrimary, marginBottom: spacing.sm, marginTop: spacing.lg },
+  typeRow: { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.sm },
+  typeChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: borderRadius.full, borderWidth: 1, borderColor: colors.border },
   typeChipText: { fontSize: fontSize.sm, color: colors.textSecondary },
-  
-  input: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.lg,
-    fontSize: fontSize.md,
-    color: colors.textPrimary,
-  },
-  textArea: { minHeight: 120, textAlignVertical: 'top' },
-  submitBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    marginTop: spacing.xxl,
-  },
+  scrollRow: { flexDirection: 'row', marginBottom: spacing.sm },
+  wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.sm },
+  chip: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: borderRadius.full, marginRight: spacing.sm, marginBottom: spacing.sm },
+  chipActive: { backgroundColor: colors.primary + '20', borderColor: colors.primary },
+  chipText: { fontSize: fontSize.sm, color: colors.textSecondary },
+  chipTextActive: { color: colors.primary, fontWeight: '700' },
+  input: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, borderRadius: borderRadius.md, padding: spacing.md, fontSize: fontSize.md, color: colors.textPrimary },
+  textArea: { minHeight: 120, paddingTop: spacing.md },
+  submitBtn: { flexDirection: 'row', backgroundColor: colors.primary, padding: spacing.md, borderRadius: borderRadius.md, alignItems: 'center', justifyContent: 'center', marginTop: spacing.xl },
   submitBtnDisabled: { opacity: 0.7 },
-  submitBtnText: { color: colors.white, fontSize: fontSize.md, fontWeight: '700' },
+  submitBtnText: { color: colors.white, fontSize: fontSize.md, fontWeight: '700', marginLeft: spacing.sm },
 });
-
