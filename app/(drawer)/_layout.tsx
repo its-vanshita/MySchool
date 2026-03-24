@@ -44,6 +44,27 @@ function CustomDrawerContent(props: any) {
       {/* Navigation Items */}
       <DrawerItemList {...props} />
 
+      <TouchableOpacity 
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: spacing.xl,
+          paddingVertical: spacing.md,
+          marginHorizontal: spacing.sm,
+          marginBottom: spacing.xs,
+          borderRadius: 8,
+        }} 
+        onPress={() => { router.push('/(shared)/faq'); props.navigation.closeDrawer(); }}
+      >
+        <Ionicons name="help-circle-outline" size={22} color={colors.drawerIcon} />
+        <Text style={{
+          color: colors.drawerIcon,
+          fontSize: fontSize.md,
+          fontWeight: '600',
+          marginLeft: spacing.md,
+        }}>Help & FAQs</Text>
+      </TouchableOpacity>
+
       {/* Logout */}
       <TouchableOpacity style={drawerStyles.logoutBtn} onPress={handleLogout}>
         <Ionicons name="log-out-outline" size={22} color="#FF6B6B" />

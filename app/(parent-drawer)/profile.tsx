@@ -51,10 +51,13 @@ export default function ParentProfileScreen() {
       <View style={styles.headerSection}>
         <View style={styles.avatarRing}>
           <View style={styles.avatarInner}>
-            <Image
-              source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80' }}
-              style={styles.avatarImage}
-            />
+            {profile?.avatar_url ? (
+              <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
+            ) : (
+              <View style={[styles.avatarImage, { backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center' }]}>
+                <Ionicons name="person" size={54} color={colors.primary} />
+              </View>
+            )}
           </View>
         </View>
         <Text style={styles.profileName}>{profile?.name || 'Parent'}</Text>

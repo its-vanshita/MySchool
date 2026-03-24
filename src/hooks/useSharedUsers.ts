@@ -76,7 +76,10 @@ export function useSharedUsers() {
       const normalize = (s: string) => s.replace(/[\s-]/g, '').toLowerCase();
       const normalizedInput = normalize(data.class);
       
-      const foundClass = classes.find(c => {
+      const { data: dbClasses, error: classErr } = await supabase.from('classes').select('id, name, section');
+      if (classErr) throw classErr;
+
+      const foundClass = (dbClasses || []).find((c: any) => {
         const fullName = `${c.name}${c.section || ''}`;
         return normalize(fullName) === normalizedInput;
       });

@@ -66,10 +66,9 @@ export default function ProfileScreen() {
             {profile?.avatar_url ? (
               <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
             ) : (
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80' }}
-                style={styles.avatarImage}
-              />
+              <View style={[styles.avatarImage, { backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center' }]}>
+                <Ionicons name="person" size={54} color={colors.primary} />
+              </View>
             )}
           </View>
         </View>

@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Image, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../../src/theme/colors';
 import { useNotificationBadge } from '../../../src/context/NotificationContext';
+import { useUser } from '../../../src/context/UserContext';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 
@@ -25,6 +26,7 @@ function HeaderLeft() {
 function HeaderRight() {
   const router = useRouter();
   const { unreadCount } = useNotificationBadge();
+  const { profile } = useUser();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 12 }}>
       <TouchableOpacity style={{ padding: 6 }} onPress={() => router.push('/notifications')}>
@@ -39,10 +41,16 @@ function HeaderRight() {
         style={{ marginLeft: 10 }}
         onPress={() => router.push('/(admin-drawer)/profile')}
       >
-        <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80' }}
-          style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1.5, borderColor: colors.white }}
-        />
+        {profile?.avatar_url ? (
+          <Image
+            source={{ uri: profile.avatar_url }}
+            style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1.5, borderColor: colors.white }}
+          />
+        ) : (
+          <View style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1.5, borderColor: colors.white, backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center' }}>
+            <Ionicons name="person" size={16} color={colors.primary} />
+          </View>
+        )}
       </TouchableOpacity>
     </View>
   );

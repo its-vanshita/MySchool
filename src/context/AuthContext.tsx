@@ -7,7 +7,7 @@ interface AuthState {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signIn: (uniqueId: string, password: string) => Promise<{ isFirstLogin: boolean }>;
+  signIn: (uniqueId: string, password: string, isEmail?: boolean) => Promise<{ isFirstLogin: boolean }>;
   signOut: () => Promise<void>;
   changePassword: (newPassword: string) => Promise<void>;
   resetPassword: (uniqueId: string) => Promise<void>;

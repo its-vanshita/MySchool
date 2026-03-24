@@ -65,6 +65,11 @@ function ParentDrawerContent(props: any) {
         <Text style={drawerStyles.navItemText}>Exam Datesheets</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/(shared)/faq'); props.navigation.closeDrawer(); }}>
+        <Ionicons name="help-circle-outline" size={22} color={colors.drawerIcon} />
+        <Text style={drawerStyles.navItemText}>Help & FAQs</Text>
+      </TouchableOpacity>
+
       {/* Logout */}
       <TouchableOpacity style={drawerStyles.logoutBtn} onPress={handleLogout}>
         <Ionicons name="log-out-outline" size={22} color="#FF6B6B" />

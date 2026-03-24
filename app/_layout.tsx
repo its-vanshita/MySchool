@@ -7,6 +7,7 @@ import { NotificationProvider } from '../src/context/NotificationContext';
 import { StatusBar } from 'expo-status-bar';
 import { colors } from '../src/theme/colors';
 import { View, Text } from 'react-native';
+import { AnimatedSplashScreen } from '../src/components/AnimatedSplashScreen';
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -44,15 +45,16 @@ export default function RootLayout() {
       <AuthProvider>
         <UserProvider>
           <NotificationProvider>
-          <StatusBar style="light" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.background },
-              animation: 'slide_from_right',
-              animationDuration: 200,
-            }}
-          >
+          <AnimatedSplashScreen>
+            <StatusBar style="light" />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.background },
+                animation: 'slide_from_right',
+                animationDuration: 200,
+              }}
+            >
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
@@ -238,7 +240,15 @@ export default function RootLayout() {
                 headerTintColor: colors.white,
               }}
             />
+            <Stack.Screen
+              name="(shared)/faq"
+              options={{
+                presentation: 'card',
+                headerShown: false,
+              }}
+            />
           </Stack>
+          </AnimatedSplashScreen>
           </NotificationProvider>
         </UserProvider>
       </AuthProvider>

@@ -18,7 +18,7 @@ import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { TimetableEntry } from '../../src/types';
 
 // ── Demo data removed ──
-import { useSharedLessonPlans } from '../../src/hooks/useSharedLessonPlans';
+import { useSharedLessonPlans, markTopicCompleted } from '../../src/hooks/useSharedLessonPlans';
 import type { UnitItem, TopicItem } from '../../src/hooks/useSharedLessonPlans';
 
 interface SubjectClass {
