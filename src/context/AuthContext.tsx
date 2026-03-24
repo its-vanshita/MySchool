@@ -7,7 +7,7 @@ interface AuthState {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signIn: (uniqueId: string, password: string, isEmail?: boolean) => Promise<{ isFirstLogin: boolean }>;
+  signIn: (uniqueId: string, password: string, isEmail?: boolean) => Promise<{ isFirstLogin: boolean; role?: UserRole }>;
   signOut: () => Promise<void>;
   changePassword: (newPassword: string) => Promise<void>;
   resetPassword: (uniqueId: string) => Promise<void>;
@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const signIn = async (uniqueId: string, password: string, isEmail = false): Promise<{ isFirstLogin: boolean }> => {
+  const signIn = async (uniqueId: string, password: string, isEmail = false): Promise<{ isFirstLogin: boolean; role?: UserRole }> => {
     setError(null);
 
     let email = uniqueId.trim().toLowerCase();
@@ -143,13 +143,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: userRow } = await supabase
         .from('users')
-        .select('is_first_login')
-        .eq('id', result.data.user.id)
-        .single();
+          .select('is_first_login, role')
+          .eq('id', result.data.user.id)
+          .single();
 
-    return { isFirstLogin: userRow?.is_first_login ?? false };
+      return {
+        isFirstLogin: userRow?.is_first_login ?? false,
+        role: userRow?.role
+      };
   };
-
   const changePassword = async (newPassword: string) => {
     setError(null);
     const { error: err } = await supabase.auth.updateUser({ password: newPassword });

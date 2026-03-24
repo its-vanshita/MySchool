@@ -41,26 +41,39 @@ export default function LoginScreen() {
   const [forgotUniqueId, setForgotUniqueId] = useState('');
   const [resettingPassword, setResettingPassword] = useState(false);
 
+  const [pendingRole, setPendingRole] = useState<string | undefined>(undefined);
+
+  const routeForRole = (r?: string) => {
+    if (r === 'admin' || r === 'super_admin' || r === 'principal') {
+      router.replace('/(admin-drawer)/(tabs)');
+    } else if (r === 'parent' || r === 'student') {
+      router.replace('/(parent-drawer)/(tabs)');
+    } else {
+      router.replace('/(drawer)/(tabs)');
+    }
+  };
+
   const handleLogin = async () => {
     if (!uniqueId.trim() || !password.trim()) {
       Alert.alert('Missing Fields', 'Please enter both Email/Unique ID and password.');
       return;
     }
-    
+
     setSubmitting(true);
     try {
       // Auto-detect if user entered an email
       const isEmailLogin = uniqueId.includes('@');
-      
-      const { isFirstLogin } = await signIn(uniqueId, password, isEmailLogin);
-      
+
+      const { isFirstLogin, role } = await signIn(uniqueId, password, isEmailLogin);
+
       if (isFirstLogin) {
+        setPendingRole(role);
         setShowChangePassword(true);
       } else {
-        router.replace('/(drawer)/(tabs)');
+        routeForRole(role);
       }
-    } catch (err: any) {
-      Alert.alert('Login Failed', err.message || 'Could not sign in');
+    } catch (error: any) {
+      Alert.alert('Login Failed', error.message || 'An error occurred during login');
     } finally {
       setSubmitting(false);
     }
@@ -86,7 +99,7 @@ export default function LoginScreen() {
       setNewPassword('');
       setConfirmPassword('');
       Alert.alert('Success', 'Password updated successfully!');
-      router.replace('/(drawer)/(tabs)');
+      routeForRole(pendingRole);
     } catch {
       Alert.alert('Error', 'Failed to update password. Please try again.');
     } finally {

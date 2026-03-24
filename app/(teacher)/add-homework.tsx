@@ -15,9 +15,11 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
 import { useUser } from '../../src/context/UserContext';
 import { useHomework } from '../../src/hooks/useHomework';
-import { getClasses, getTimetableForTeacher } from '../../src/services/supabaseService';
+import { getClasses, getTimetableForTeacher, uploadFile } from '../../src/services/supabaseService';
 import { colors } from '../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { ClassInfo, TimetableEntry } from '../../src/types';
@@ -182,13 +184,35 @@ export default function AddHomeworkScreen() {
 
     setSubmitting(true);
     try {
+      let finalDescription = description.trim();
+      
+      // Upload attachments if any
+      if (attachments.length > 0) {
+        const uploadedUrls: string[] = [];
+        for (const file of attachments) {
+          const base64 = await FileSystem.readAsStringAsync(file.uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          const fileData = decode(base64);
+          const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+          const path = `homework/${Date.now()}_${safeName}`;
+          
+          const url = await uploadFile('myschool-files', path, fileData, file.mimeType || 'application/octet-stream');
+          uploadedUrls.push(`\n- [${file.name}](${url})`);
+        }
+        
+        if (uploadedUrls.length > 0) {
+          finalDescription += '\n\n**Attachments:**' + uploadedUrls.join('');
+        }
+      }
+
       await addHomework({
         teacher_id: profile?.id ?? '',
         class_id: selectedOption.classInfo.id,
         class_name: selectedOption.classInfo.name,
         subject: selectedOption.subject + (topic.trim() ? ` - ${topic.trim()}` : ''),
         title: title.trim(),
-        description: description.trim(),
+        description: finalDescription,
         due_date: dueDate,
       });
       Alert.alert('Success', 'Homework assigned!', [

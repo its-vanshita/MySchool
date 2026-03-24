@@ -1,32 +1,74 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
+import { uploadFile } from '../../src/services/supabaseService';
 import { useSharedUploadedDatesheets } from '../../src/hooks/useSharedUploadedDatesheets';
 import { colors } from '../../src/theme/colors';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 export default function AdminDatesheetScreen() {
   const { datesheets, addDatesheet, removeDatesheet } = useSharedUploadedDatesheets();
-  
+
   const [title, setTitle] = useState('');
   const [target, setTarget] = useState<'teacher' | 'student' | 'both'>('both');
-  const [imageUrl, setImageUrl] = useState('');
+  const [fileUri, setFileUri] = useState('');
+  const [fileName, setFileName] = useState('');
+  const [fileMimeType, setFileMimeType] = useState('');
+  const [uploading, setUploading] = useState(false);
 
-  const handleUpload = () => {
+  const handlePickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['image/*', 'application/pdf'],
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setFileUri(result.assets[0].uri);
+        setFileName(result.assets[0].name);
+        setFileMimeType(result.assets[0].mimeType ?? 'application/octet-stream');
+      }
+    } catch {
+      Alert.alert('Error', 'Failed to pick document.');
+    }
+  };
+
+  const handleUpload = async () => {
     if (!title.trim()) {
       Alert.alert('Error', 'Please enter a title for the datesheet.');
       return;
     }
-    
-    // Fallback image if not provided
-    const finalImage = imageUrl.trim() || 'https://images.unsplash.com/photo-1596495578065-6ec0798ceb4d?w=800&q=80';
 
-    addDatesheet({ title, target, imageUrl: finalImage });
-    Alert.alert('Success', `Datesheet published successfully for ${target === 'both' ? 'Teachers & Students' : target === 'teacher' ? 'Teachers only' : 'Students only'}!`);
-    
-    setTitle('');
-    setImageUrl('');
-    setTarget('both');
+    setUploading(true);
+    let finalImageUrl = 'https://images.unsplash.com/photo-1596495578065-6ec0798ceb4d?w=800&q=80';
+
+    try {
+      if (fileUri) {
+        const base64 = await FileSystem.readAsStringAsync(fileUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const fileData = decode(base64);
+        const safeName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+        const path = `datesheets/${Date.now()}_${safeName}`;
+
+        finalImageUrl = await uploadFile('myschool-files', path, fileData, fileMimeType);
+      }
+
+      addDatesheet({ title, target, imageUrl: finalImageUrl });
+      Alert.alert('Success', `Datesheet published successfully for ${target === 'both' ? 'Teachers & Students' : target === 'teacher' ? 'Teachers only' : 'Students only'}!`);
+
+      setTitle('');
+      setFileUri('');
+      setFileName('');
+      setTarget('both');
+    } catch (err) {
+      Alert.alert('Error', 'Failed to upload document.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -44,13 +86,12 @@ export default function AdminDatesheetScreen() {
             onChangeText={setTitle}
           />
 
-          <Text style={styles.label}>Image URL (Optional)</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Paste image URL here"
-            value={imageUrl}
-            onChangeText={setImageUrl}
-          />
+          <Text style={styles.label}>Datesheet Document</Text>
+          <TouchableOpacity style={[styles.input, { justifyContent: 'center' }]} onPress={handlePickDocument}>
+            <Text style={{ color: fileName ? colors.textPrimary : colors.textLight }}>
+              {fileName ? fileName : 'Tap to select document (PDF/Image)'}
+            </Text>
+          </TouchableOpacity>
 
           <Text style={styles.label}>Show Datesheet To:</Text>
           <View style={styles.radioGroup}>
@@ -66,9 +107,15 @@ export default function AdminDatesheetScreen() {
             ))}
           </View>
 
-          <TouchableOpacity style={styles.uploadBtn} onPress={handleUpload}>
-            <Ionicons name="cloud-upload" size={18} color={colors.white} />
-            <Text style={styles.uploadBtnText}>Upload Datesheet</Text>
+          <TouchableOpacity style={styles.uploadBtn} onPress={handleUpload} disabled={uploading}>
+            {uploading ? (
+              <ActivityIndicator color={colors.white} />
+            ) : (
+              <>
+                <Ionicons name="cloud-upload" size={18} color={colors.white} />
+                <Text style={styles.uploadBtnText}>Upload Datesheet</Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
 

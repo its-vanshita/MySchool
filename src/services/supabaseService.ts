@@ -342,8 +342,16 @@ export async function deleteLessonPlan(id: string): Promise<void> {
   await supabase.from('ms_lesson_plans').delete().eq('id', id);
 }
 
-export async function uploadFile(bucket: string, path: string, file: Blob): Promise<string> {
-  const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
+export async function uploadFile(
+  bucket: string,
+  path: string,
+  fileData: Uint8Array | ArrayBuffer | string,
+  contentType: string = 'application/octet-stream'
+): Promise<string> {
+  const { error } = await supabase.storage.from(bucket).upload(path, fileData, {
+    upsert: true,
+    contentType,
+  });
   if (error) throw error;
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
   return data.publicUrl;
