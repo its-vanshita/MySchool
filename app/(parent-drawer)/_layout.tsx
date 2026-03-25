@@ -101,30 +101,55 @@ function ParentDrawerContent(props: any) {
       <DrawerItemList {...props} />
 
       {/* Manual Parent Tool Links */}
-      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/(parent-drawer)/(tabs)/attendance'); props.navigation.closeDrawer(); }}>
-        <Ionicons name="checkmark-circle-outline" size={22} color={colors.drawerIcon} />
-        <Text style={drawerStyles.navItemText}>Attendance Tracker</Text>
-      </TouchableOpacity>
+      <DrawerItem
+        label="Attendance Tracker"
+        icon={({ color, size }) => (
+          <Ionicons name="checkmark-circle-outline" size={size} color={color} />
+        )}
+        labelStyle={{ fontSize: fontSize.md, fontWeight: '600' }}
+        inactiveTintColor={colors.drawerIcon}
+        onPress={() => { router.push('/(parent-drawer)/(tabs)/attendance'); props.navigation.closeDrawer(); }}
+      />
 
-      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/(parent-drawer)/(tabs)/homework'); props.navigation.closeDrawer(); }}>
-        <Ionicons name="book-outline" size={22} color={colors.drawerIcon} />
-        <Text style={drawerStyles.navItemText}>Homework & Tasks</Text>
-      </TouchableOpacity>
+      <DrawerItem
+        label="Homework & Tasks"
+        icon={({ color, size }) => (
+          <Ionicons name="book-outline" size={size} color={color} />
+        )}
+        labelStyle={{ fontSize: fontSize.md, fontWeight: '600' }}
+        inactiveTintColor={colors.drawerIcon}
+        onPress={() => { router.push('/(parent-drawer)/(tabs)/homework'); props.navigation.closeDrawer(); }}
+      />
 
-      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/(parent-drawer)/(tabs)/notices'); props.navigation.closeDrawer(); }}>
-        <Ionicons name="megaphone-outline" size={22} color={colors.drawerIcon} />
-        <Text style={drawerStyles.navItemText}>School Notices</Text>
-      </TouchableOpacity>
+      <DrawerItem
+        label="School Notices"
+        icon={({ color, size }) => (
+          <Ionicons name="megaphone-outline" size={size} color={color} />
+        )}
+        labelStyle={{ fontSize: fontSize.md, fontWeight: '600' }}
+        inactiveTintColor={colors.drawerIcon}
+        onPress={() => { router.push('/(parent-drawer)/(tabs)/notices'); props.navigation.closeDrawer(); }}
+      />
 
-      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/(parent-drawer)/(tabs)/datesheet'); props.navigation.closeDrawer(); }}>
-        <Ionicons name="calendar-outline" size={22} color={colors.drawerIcon} />
-        <Text style={drawerStyles.navItemText}>Exam Datesheets</Text>
-      </TouchableOpacity>
+      <DrawerItem
+        label="Exam Datesheets"
+        icon={({ color, size }) => (
+          <Ionicons name="calendar-outline" size={size} color={color} />
+        )}
+        labelStyle={{ fontSize: fontSize.md, fontWeight: '600' }}
+        inactiveTintColor={colors.drawerIcon}
+        onPress={() => { router.push('/(parent-drawer)/(tabs)/datesheet'); props.navigation.closeDrawer(); }}
+      />
 
-      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/faq' as any); props.navigation.closeDrawer(); }}>
-        <Ionicons name="help-circle-outline" size={22} color={colors.drawerIcon} />
-        <Text style={drawerStyles.navItemText}>Help & FAQs</Text>
-      </TouchableOpacity>
+      <DrawerItem
+        label="Help & FAQs"
+        icon={({ color, size }) => (
+          <Ionicons name="help-circle-outline" size={size} color={color} />
+        )}
+        labelStyle={{ fontSize: fontSize.md, fontWeight: '600' }}
+        inactiveTintColor={colors.drawerIcon}
+        onPress={() => { router.push('/faq' as any); props.navigation.closeDrawer(); }}
+      />
 
       {/* Logout */}
       <TouchableOpacity style={drawerStyles.logoutBtn} onPress={handleLogout}>

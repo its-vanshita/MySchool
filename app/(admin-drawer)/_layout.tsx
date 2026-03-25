@@ -101,21 +101,36 @@ function CustomDrawerContent(props: any) {
       <DrawerItemList {...props} />
 
       {/* Manual Admin Tool Links */}
-      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/admin-analytics'); props.navigation.closeDrawer(); }}>
-        <Ionicons name="bar-chart-outline" size={22} color={colors.drawerIcon} />
-        <Text style={drawerStyles.navItemText}>Analytics Dashboard</Text>
-      </TouchableOpacity>
+      <DrawerItem
+        label="Analytics Dashboard"
+        icon={({ color, size }) => (
+          <Ionicons name="bar-chart-outline" size={size} color={color} />
+        )}
+        labelStyle={{ fontSize: fontSize.md, fontWeight: '600' }}
+        inactiveTintColor={colors.drawerIcon}
+        onPress={() => { router.push('/admin-analytics'); props.navigation.closeDrawer(); }}
+      />
 
-      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/admin-leave-approvals'); props.navigation.closeDrawer(); }}>
-        <Ionicons name="checkmark-circle-outline" size={22} color={colors.drawerIcon} />
-        <Text style={drawerStyles.navItemText}>Leave Approvals</Text>
-      </TouchableOpacity>
+      <DrawerItem
+        label="Leave Approvals"
+        icon={({ color, size }) => (
+          <Ionicons name="checkmark-circle-outline" size={size} color={color} />
+        )}
+        labelStyle={{ fontSize: fontSize.md, fontWeight: '600' }}
+        inactiveTintColor={colors.drawerIcon}
+        onPress={() => { router.push('/admin-leave-approvals'); props.navigation.closeDrawer(); }}
+      />
 
-      <TouchableOpacity style={drawerStyles.navItemBtn} onPress={() => { router.push('/faq' as any); props.navigation.closeDrawer(); }}>
-        <Ionicons name="help-buoy-outline" size={22} color={colors.drawerIcon} />
-        <Text style={drawerStyles.navItemText}>Help & FAQs</Text>
-      </TouchableOpacity>
-      
+      <DrawerItem
+        label="Help & FAQs"
+        icon={({ color, size }) => (
+          <Ionicons name="help-buoy-outline" size={size} color={color} />
+        )}
+        labelStyle={{ fontSize: fontSize.md, fontWeight: '600' }}
+        inactiveTintColor={colors.drawerIcon}
+        onPress={() => { router.push('/faq' as any); props.navigation.closeDrawer(); }}
+      />
+
       {/* Logout */}
       <TouchableOpacity style={drawerStyles.logoutBtn} onPress={handleLogout}>
         <Ionicons name="log-out-outline" size={22} color="#FF6B6B" />

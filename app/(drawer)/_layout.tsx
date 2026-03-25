@@ -5,7 +5,7 @@ import { useUser } from '../../src/context/UserContext';
 import { useAuth } from '../../src/context/AuthContext';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { fontSize, spacing } from '../../src/theme/spacing';
-import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 
 function CustomDrawerContent(props: any) {
@@ -84,26 +84,15 @@ function CustomDrawerContent(props: any) {
       {/* Navigation Items */}
       <DrawerItemList {...props} />
 
-      <TouchableOpacity 
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: spacing.xl,
-          paddingVertical: spacing.md,
-          marginHorizontal: spacing.sm,
-          marginBottom: spacing.xs,
-          borderRadius: 8,
-        }} 
+      <DrawerItem
+        label="Help & FAQs"
+        icon={({ color, size }) => (
+          <Ionicons name="help-circle-outline" size={size} color={color} />
+        )}
+        labelStyle={{ fontSize: fontSize.md, fontWeight: '600' }}
+        inactiveTintColor={colors.drawerIcon}
         onPress={() => { router.push('/faq' as any); props.navigation.closeDrawer(); }}
-      >
-        <Ionicons name="help-circle-outline" size={22} color={colors.drawerIcon} />
-        <Text style={{
-          color: colors.drawerIcon,
-          fontSize: fontSize.md,
-          fontWeight: '600',
-          marginLeft: spacing.md,
-        }}>Help & FAQs</Text>
-      </TouchableOpacity>
+      />
 
       {/* Logout */}
       <TouchableOpacity style={drawerStyles.logoutBtn} onPress={handleLogout}>

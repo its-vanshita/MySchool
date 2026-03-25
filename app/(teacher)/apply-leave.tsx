@@ -383,23 +383,25 @@ export default function ApplyLeaveScreen() {
               </TouchableOpacity>
             </View>
 
-            <View style={{ height: 100 }} />
+            <View style={{ height: 80 }} />
         </ScrollView>
 
-        <TouchableOpacity
-          style={styles.submitBtn}
-          onPress={handleSubmit}
-          disabled={submitting}
-        >
-          {submitting ? (
-            <ActivityIndicator color={colors.white} />
-          ) : (
-            <>
-              <Text style={styles.submitBtnText}>Submit Leave Request</Text>
-              <Ionicons name="send" size={18} color={colors.white} />
-            </>
-          )}
-        </TouchableOpacity>
+        <View style={styles.bottomBar}>
+          <TouchableOpacity
+            style={styles.submitBtn}
+            onPress={handleSubmit}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <ActivityIndicator color={colors.white} />
+            ) : (
+              <>
+                <Text style={styles.submitBtnText}>Submit Leave Request</Text>
+                <Ionicons name="send" size={18} color={colors.white} />
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
 
       {/* ── Leave Type Picker Modal ── */}
       <Modal visible={showTypePicker} transparent animationType="slide">
