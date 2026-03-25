@@ -12,7 +12,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../../src/context/AuthContext';
 import { useUser } from '../../../src/context/UserContext';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import { useAdminStudentEntries } from '../../../src/hooks/useAdminTimetable';
 
@@ -100,6 +100,8 @@ const DEMO_TIMETABLE = [
 ];
 
 export default function ParentDashboardScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { user } = useAuth();
   const { profile, isDemo } = useUser();
@@ -298,7 +300,7 @@ export default function ParentDashboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F7FA',

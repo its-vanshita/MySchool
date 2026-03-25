@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useHomework } from '../../../src/hooks/useHomework';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { Homework } from '../../../src/types';
 
@@ -23,6 +23,8 @@ const SUBJECT_COLORS: Record<string, { color: string; bg: string; icon: string }
 };
 
 function getSubjectConfig(subject: string) {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   return SUBJECT_COLORS[subject] || SUBJECT_COLORS['Other'];
 }
 
@@ -108,6 +110,8 @@ const DEMO_HOMEWORK: Homework[] = [
 ];
 
 export default function ParentHomeworkScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { homework: dbHomework, loading } = useHomework(undefined, true);
   const [selectedTab] = useState<'assigned'>('assigned');
 
@@ -193,7 +197,9 @@ export default function ParentHomeworkScreen() {
 }
 
 function HomeworkCard({ hw }: { hw: Homework }) {
-  const dueDate = new Date(hw.due_date + 'T00:00:00');
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const dueDate = new Date(hw.due_date + 'T00:00:00');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const daysLeft = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -284,7 +290,7 @@ function HomeworkCard({ hw }: { hw: Homework }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F7FA',

@@ -6,10 +6,12 @@ import * as FileSystem from 'expo-file-system';
 import { decode } from 'base64-arraybuffer';
 import { uploadFile } from '../../src/services/supabaseService';
 import { useSharedUploadedDatesheets } from '../../src/hooks/useSharedUploadedDatesheets';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 export default function AdminDatesheetScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { datesheets, addDatesheet, removeDatesheet } = useSharedUploadedDatesheets();
 
   const [title, setTitle] = useState('');
@@ -48,7 +50,7 @@ export default function AdminDatesheetScreen() {
     try {
       if (fileUri) {
         const base64 = await FileSystem.readAsStringAsync(fileUri, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: 'base64',
         });
         const fileData = decode(base64);
         const safeName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_');
@@ -145,7 +147,7 @@ export default function AdminDatesheetScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: 100 },
   headerTitle: { fontSize: fontSize.xl, fontWeight: '800', color: colors.textPrimary },

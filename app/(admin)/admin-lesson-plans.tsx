@@ -8,10 +8,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSharedLessonPlans } from '../../src/hooks/useSharedLessonPlans';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 export default function AdminLessonPlansScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { plans } = useSharedLessonPlans();
   
   // Extract unique teachers from plans
@@ -139,7 +141,7 @@ export default function AdminLessonPlansScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FB' },
   content: { padding: spacing.lg, paddingBottom: 100 },
   

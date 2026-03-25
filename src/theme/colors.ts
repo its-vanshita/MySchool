@@ -1,5 +1,4 @@
-export const colors = {
-  // MySchool brand — professional blue theme
+export const lightColors = {
   primary: '#1565C0',
   primaryDark: '#0D47A1',
   primaryLight: '#E3F2FD',
@@ -29,18 +28,60 @@ export const colors = {
   white: '#FFFFFF',
   black: '#000000',
 
-  // Attendance statuses
   present: '#10B981',
   absent: '#EF4444',
   holiday: '#F59E0B',
 
-  // Leave statuses
   approved: '#10B981',
   rejected: '#EF4444',
   pending: '#F59E0B',
 
-  // Drawer
   drawerBg: '#0D47A1',
   drawerText: '#FFFFFF',
   drawerIcon: '#90CAF9',
 };
+
+export const darkColors = {
+  primary: '#90CAF9',
+  primaryDark: '#42A5F5',
+  primaryLight: '#0D47A1',
+  accent: '#FFB300',
+  background: '#121212',
+  card: '#1E1E1E',
+  surface: '#1E1E1E',
+
+  textPrimary: '#E0E0E0',
+  textSecondary: '#AAB4BE',
+  textLight: '#757575',
+
+  border: '#333333',
+  divider: '#2C2C2C',
+
+  success: '#34D399',
+  successLight: '#064E3B',
+  warning: '#FBBF24',
+  warningLight: '#78350F',
+  danger: '#F87171',
+  dangerLight: '#7F1D1D',
+  info: '#60A5FA',
+  infoLight: '#1E3A8A',
+  purple: '#A78BFA',
+  purpleLight: '#4C1D95',
+
+  white: '#121212',
+  black: '#E0E0E0',
+
+  present: '#34D399',
+  absent: '#F87171',
+  holiday: '#FBBF24',
+
+  approved: '#34D399',
+  rejected: '#F87171',
+  pending: '#FBBF24',
+
+  drawerBg: '#1E1E1E',
+  drawerText: '#E0E0E0',
+  drawerIcon: '#90CAF9',
+};
+
+export const colors = lightColors;

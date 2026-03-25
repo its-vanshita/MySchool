@@ -12,11 +12,11 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../src/context/UserContext';
 import { useAttendance } from '../../src/hooks/useAttendance';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { AttendanceStatus } from '../../src/types';
 
-const STATUS_OPTIONS: { value: AttendanceStatus; label: string; icon: string; color: string }[] = [
+const getStatusOptions = (colors: any): { value: AttendanceStatus; label: string; icon: string; color: string }[] => [
   { value: 'present', label: 'P', icon: 'checkmark-circle', color: colors.present },
   { value: 'absent', label: 'A', icon: 'close-circle', color: colors.absent },
   { value: 'late', label: 'L', icon: 'time', color: colors.warning },
@@ -24,6 +24,8 @@ const STATUS_OPTIONS: { value: AttendanceStatus; label: string; icon: string; co
 ];
 
 export default function MarkAttendanceScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { classId, className } = useLocalSearchParams<{ classId: string; className: string }>();
   const router = useRouter();
   const { profile } = useUser();
@@ -48,8 +50,8 @@ export default function MarkAttendanceScreen() {
   const toggleStatus = (studentId: string) => {
     setAttendance((prev) => {
       const current = prev[studentId] || 'present';
-      const idx = STATUS_OPTIONS.findIndex((o) => o.value === current);
-      const next = STATUS_OPTIONS[(idx + 1) % STATUS_OPTIONS.length].value;
+      const idx = getStatusOptions(colors).findIndex((o) => o.value === current);
+      const next = getStatusOptions(colors)[(idx + 1) % getStatusOptions(colors).length].value;
       return { ...prev, [studentId]: next };
     });
   };
@@ -101,7 +103,7 @@ export default function MarkAttendanceScreen() {
 
       {/* Legend */}
       <View style={styles.legend}>
-        {STATUS_OPTIONS.map((opt) => (
+        {getStatusOptions(colors).map((opt) => (
           <View key={opt.value} style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: opt.color }]} />
             <Text style={styles.legendText}>{opt.value}</Text>
@@ -120,8 +122,10 @@ export default function MarkAttendanceScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => {
-            const status = attendance[item.id] || 'present';
-            const opt = STATUS_OPTIONS.find((o) => o.value === status)!;
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const status = attendance[item.id] || 'present';
+            const opt = getStatusOptions(colors).find((o) => o.value === status)!;
             return (
               <TouchableOpacity
                 style={[styles.studentRow, index % 2 === 0 && styles.studentRowAlt]}
@@ -160,7 +164,7 @@ export default function MarkAttendanceScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   statsBar: {

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 // ── Types ──
@@ -170,6 +170,8 @@ const SUBJECT_COLORS: Record<string, string> = {
 };
 
 export default function StudentPerformanceScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const params = useLocalSearchParams<{
     studentId: string;
     studentName: string;
@@ -379,7 +381,7 @@ export default function StudentPerformanceScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, paddingBottom: 100 },
 

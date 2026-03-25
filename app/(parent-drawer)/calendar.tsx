@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import { useAdminStudentCalendarEvents } from '../../src/hooks/useAdminCalendar';
 
@@ -153,6 +153,8 @@ function toDateStr(y: number, m: number, d: number) {
 }
 
 export default function ParentAcademicCalendarScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const adminEvents = useAdminStudentCalendarEvents();
 
   const allEvents = useMemo(() => {
@@ -354,7 +356,7 @@ export default function ParentAcademicCalendarScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F7FA',

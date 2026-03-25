@@ -7,19 +7,23 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotices } from '../../../src/hooks/useNotices';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { Notice, NoticeType } from '../../../src/types';
 
-const TYPE_CONFIG: Record<NoticeType, { icon: string; color: string; bg: string; label: string }> = {
+
+
+const getNoticeConfig = (colors: any, isDark: boolean): Record<NoticeType, { icon: string; color: string; bg: string; label: string }> => ({
   general: { icon: 'information-circle', color: colors.info, bg: colors.infoLight, label: 'General' },
   urgent: { icon: 'alert-circle', color: colors.danger, bg: colors.dangerLight, label: 'Urgent' },
   event: { icon: 'calendar', color: colors.purple, bg: colors.purpleLight, label: 'Event' },
   holiday: { icon: 'sunny', color: colors.warning, bg: colors.warningLight, label: 'Holiday' },
   exam: { icon: 'school', color: colors.primary, bg: colors.primaryLight, label: 'Exam' },
-};
+});
 
 export default function ParentNoticesScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { notices, loading } = useNotices();
 
   if (loading) {
@@ -60,7 +64,9 @@ export default function ParentNoticesScreen() {
 }
 
 function NoticeCard({ notice }: { notice: Notice }) {
-  const config = TYPE_CONFIG[notice.type] || TYPE_CONFIG.general;
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const config = getNoticeConfig(colors, isDark)[notice.type] || getNoticeConfig(colors, isDark).general;
   const createdAt = new Date(notice.created_at);
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const dateStr = `${months[createdAt.getMonth()]} ${createdAt.getDate()}, ${createdAt.getFullYear()}`;
@@ -96,7 +102,7 @@ function NoticeCard({ notice }: { notice: Notice }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 100 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },

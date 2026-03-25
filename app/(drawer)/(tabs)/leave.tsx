@@ -16,7 +16,7 @@ import { useUser } from '../../../src/context/UserContext';
 import { useLeaveRequests, useAllLeaveRequests } from '../../../src/hooks/useLeaveRequests';
 import { useNotificationBadge } from '../../../src/context/NotificationContext';
 import { updateLeaveStatus } from '../../../src/services/supabaseService';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { LeaveRequest, LeaveStatus } from '../../../src/types';
 
@@ -60,6 +60,8 @@ function timeAgo(dateStr: string): string {
 }
 
 export default function LeaveScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { profile, permissions } = useUser();
   const { addNotification } = useNotificationBadge();
@@ -419,7 +421,7 @@ export default function LeaveScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F7FA' },
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 

@@ -1,0 +1,1 @@
+const fs=require('fs');const txt=fs.readFileSync('c:/Users/gaura/AppData/Roaming/Code/User/workspaceStorage/887ab4d84a5996832e76e01f6dfda5f3/GitHub.copilot-chat/chat-session-resources/5ee4855f-c4ca-428d-a019-6c929bbabbd8/call_MHwyTXlKd1Jsbzh3cExVYms2NHA__vscode-1774414670061/content.txt', 'utf8');console.log(txt.split('\n').slice(0, 50).join('\n'));

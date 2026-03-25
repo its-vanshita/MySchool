@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAdminCalendarSetup, type AdminCalendarTarget } from '../../src/hooks/useAdminCalendar';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { CalendarEventType } from '../../src/types';
 
@@ -28,6 +28,8 @@ const TARGET_OPTIONS: { key: 'teacher' | 'student' | 'both'; label: string; icon
 ];
 
 export default function AdminManageCalendarScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { events, addEvent, deleteEvent } = useAdminCalendarSetup();
   
   const [showForm, setShowForm] = useState(false);
@@ -285,7 +287,7 @@ export default function AdminManageCalendarScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FB' },
   content: { padding: spacing.lg, paddingBottom: 100 },
   

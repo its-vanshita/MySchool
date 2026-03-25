@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import { useNotificationBadge } from '../../src/context/NotificationContext';
 import { useUser } from '../../src/context/UserContext';
@@ -139,7 +139,9 @@ const DUMMY_NOTIFICATIONS: Notification[] = [
 ];
 
 function NotificationItem({ item, onPress }: { item: Notification; onPress: () => void }) {
-  const icon = ICON_MAP[item.type] ?? ICON_MAP.general;
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const icon = ICON_MAP[item.type] ?? ICON_MAP.general;
 
   return (
     <TouchableOpacity
@@ -172,6 +174,8 @@ interface NotifSection {
 }
 
 export default function NotificationsScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { role } = useUser();
   const { notifications: ctxNotifications, setUnreadCount } = useNotificationBadge();
   const baseDummies = role === 'admin' ? ADMIN_NOTIFICATIONS : DUMMY_NOTIFICATIONS;
@@ -269,7 +273,7 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8F9FB',

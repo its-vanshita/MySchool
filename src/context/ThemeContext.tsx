@@ -1,0 +1,41 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useColorScheme, Appearance } from 'react-native';
+import { lightColors, darkColors } from '../theme/colors';
+
+type ThemeContextType = {
+  isDark: boolean;
+  colors: typeof lightColors;
+  toggleTheme: () => void;
+  setTheme: (dark: boolean) => void;
+};
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const systemColorScheme = useColorScheme();
+  const [isDark, setIsDark] = useState(systemColorScheme === 'dark');
+
+  useEffect(() => {
+    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+      setIsDark(colorScheme === 'dark');
+    });
+    return () => subscription.remove();
+  }, []);
+
+  const toggleTheme = () => setIsDark(!isDark);
+  const setTheme = (dark: boolean) => setIsDark(dark);
+
+  const colors = isDark ? darkColors : lightColors;
+
+  return (
+    <ThemeContext.Provider value={{ isDark, colors, toggleTheme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
+);
+};
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) throw new Error('useTheme must be used within ThemeProvider');
+  return context;
+};

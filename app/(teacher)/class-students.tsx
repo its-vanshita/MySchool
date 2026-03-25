@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 interface Student {
@@ -53,12 +53,16 @@ const DEMO_STUDENTS: Record<string, Student[]> = {
 };
 
 function getAttendanceColor(pct: number) {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   if (pct >= 90) return colors.success;
   if (pct >= 75) return colors.warning;
   return colors.danger;
 }
 
 export default function ClassStudentsScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { className, subjects, isClassTeacher } = useLocalSearchParams<{
     className: string;
@@ -99,7 +103,9 @@ export default function ClassStudentsScreen() {
     : 0;
 
   const renderStudent = ({ item, index }: { item: Student; index: number }) => {
-    const attColor = getAttendanceColor(item.attendance);
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const attColor = getAttendanceColor(item.attendance);
     return (
       <TouchableOpacity
         style={styles.studentCard}
@@ -212,7 +218,7 @@ export default function ClassStudentsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
   // Summary

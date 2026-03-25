@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 import { useSharedUsers } from '../../src/hooks/useSharedUsers';
 
 export default function AdminAttendanceListScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const params = useLocalSearchParams();
   const type = params.type === 'teachers' ? 'teachers' : 'students';
@@ -88,7 +90,7 @@ export default function AdminAttendanceListScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     backgroundColor: colors.primary,

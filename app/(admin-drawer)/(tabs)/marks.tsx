@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSharedMarks, DEMO_EXAMS } from '../../../src/hooks/useSharedMarks';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 
 const CLASSES = ['Class 10A', 'Class 9C', 'Class 8B'];
@@ -21,6 +21,8 @@ const CLASS_SUBJECTS: Record<string, string[]> = {
 };
 
 export default function AdminUpdateMarksTab() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { store, adminUpdateMarks, adminUnlockPortal } = useSharedMarks();
 
   const [selectedClass, setSelectedClass] = useState(CLASSES[0]);
@@ -162,7 +164,7 @@ export default function AdminUpdateMarksTab() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: 100 },
   headerTitle: { fontSize: fontSize.xl, fontWeight: '800', color: colors.textPrimary },

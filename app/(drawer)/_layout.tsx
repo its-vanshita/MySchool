@@ -1,6 +1,6 @@
 import { Drawer } from 'expo-router/drawer';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { useUser } from '../../src/context/UserContext';
 import { useAuth } from '../../src/context/AuthContext';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
@@ -9,7 +9,74 @@ import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawe
 import { useRouter } from 'expo-router';
 
 function CustomDrawerContent(props: any) {
-  const { profile, role } = useUser();
+  const { colors, isDark } = useTheme(); const styles = getStyles(colors);
+  const drawerStyles = StyleSheet.create({
+    header: {
+      padding: spacing.xl,
+      paddingTop: spacing.xxxl,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255,255,255,0.15)',
+      marginBottom: spacing.sm,
+    },
+    avatar: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: colors.white,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: spacing.md,
+    },
+    name: {
+      color: colors.drawerText,
+      fontSize: fontSize.xl,
+      fontWeight: '800',
+    },
+    role: {
+      color: colors.drawerIcon,
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+      marginTop: 2,
+      textTransform: 'capitalize',
+    },
+    email: {
+      color: 'rgba(255,255,255,0.6)',
+      fontSize: fontSize.xs,
+      marginTop: 4,
+    },
+    logoutBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.lg,
+      marginTop: spacing.lg,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255,255,255,0.15)',
+    },
+    logoutText: {
+      color: '#FF6B6B',
+      fontSize: fontSize.md,
+      fontWeight: '600',
+      marginLeft: spacing.md,
+    },
+    homeBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.md,
+      marginHorizontal: spacing.sm,
+      marginBottom: spacing.xs,
+      borderRadius: 8,
+      backgroundColor: 'rgba(255,255,255,0.15)',
+    },
+    homeBtnText: {
+      color: colors.white,
+      fontSize: fontSize.md,
+      fontWeight: '600',
+      marginLeft: spacing.md,
+    },
+  });
+    const { profile, role } = useUser();
   const { signOut } = useAuth();
   const router = useRouter();
 
@@ -54,7 +121,7 @@ function CustomDrawerContent(props: any) {
           marginBottom: spacing.xs,
           borderRadius: 8,
         }} 
-        onPress={() => { router.push('/(shared)/faq'); props.navigation.closeDrawer(); }}
+        onPress={() => { router.push('/faq' as any); props.navigation.closeDrawer(); }}
       >
         <Ionicons name="help-circle-outline" size={22} color={colors.drawerIcon} />
         <Text style={{
@@ -74,74 +141,10 @@ function CustomDrawerContent(props: any) {
   );
 }
 
-const drawerStyles = StyleSheet.create({
-  header: {
-    padding: spacing.xl,
-    paddingTop: spacing.xxxl,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.15)',
-    marginBottom: spacing.sm,
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
-  },
-  name: {
-    color: colors.drawerText,
-    fontSize: fontSize.xl,
-    fontWeight: '800',
-  },
-  role: {
-    color: colors.drawerIcon,
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    marginTop: 2,
-    textTransform: 'capitalize',
-  },
-  email: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: fontSize.xs,
-    marginTop: 4,
-  },
-  logoutBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.lg,
-    marginTop: spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.15)',
-  },
-  logoutText: {
-    color: '#FF6B6B',
-    fontSize: fontSize.md,
-    fontWeight: '600',
-    marginLeft: spacing.md,
-  },
-  homeBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-    marginHorizontal: spacing.sm,
-    marginBottom: spacing.xs,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-  },
-  homeBtnText: {
-    color: colors.white,
-    fontSize: fontSize.md,
-    fontWeight: '600',
-    marginLeft: spacing.md,
-  },
-});
+
 
 export default function DrawerLayout() {
+  const { colors, isDark } = useTheme();
   return (
     <Drawer
       drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -211,3 +214,6 @@ export default function DrawerLayout() {
     </Drawer>
   );
 }
+
+
+function getStyles(colors: any) { return {}; }

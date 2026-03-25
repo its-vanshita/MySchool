@@ -9,7 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../src/context/UserContext';
 import { useCalendar } from '../../src/hooks/useCalendar';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { CalendarEvent, CalendarEventType } from '../../src/types';
 import { useAdminTeacherCalendarEvents } from '../../src/hooks/useAdminCalendar';
@@ -88,6 +88,8 @@ const FILTERS: { value: FilterValue; label: string; icon: string }[] = [
 // ═══════════════════════════════════════════════════════════════
 
 export default function CalendarScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { profile, role } = useUser();
   const { events: dbEvents } = useCalendar(profile?.school_id);
   const adminEvents = useAdminTeacherCalendarEvents();
@@ -351,7 +353,7 @@ export default function CalendarScreen() {
 // Styles
 // ═══════════════════════════════════════════════════════════════
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 100 },
 

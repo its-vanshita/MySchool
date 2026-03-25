@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -48,12 +48,7 @@ const DEMO_ATTENDANCE: Record<string, { date: string; status: 'present' | 'absen
   ],
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  present: colors.success,
-  absent: colors.danger,
-  late: colors.warning,
-  excused: colors.info,
-};
+
 
 const STATUS_LABELS: Record<string, string> = {
   present: 'Present',
@@ -63,6 +58,14 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default function ParentAttendanceScreen() {
+  const { colors, isDark } = useTheme();
+  const STATUS_COLORS: Record<string, string> = {
+    present: colors.success,
+    absent: colors.danger,
+    late: colors.warning,
+    excused: colors.info,
+  };
+  const styles = getStyles(colors);
   const now = new Date();
   const currentMonthKey = `${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
   const monthKeys = Object.keys(DEMO_ATTENDANCE);
@@ -143,7 +146,9 @@ export default function ParentAttendanceScreen() {
         </View>
       ) : (
         records.map((record) => {
-          const d = new Date(record.date + 'T00:00:00');
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const d = new Date(record.date + 'T00:00:00');
           const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
           return (
             <View key={record.date} style={styles.recordRow}>
@@ -168,7 +173,7 @@ export default function ParentAttendanceScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 100 },
 

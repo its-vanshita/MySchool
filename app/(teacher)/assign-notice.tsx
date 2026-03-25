@@ -18,17 +18,19 @@ import { useNotices } from '../../src/hooks/useNotices';
 import { useNotificationBadge } from '../../src/context/NotificationContext';
 import { getClasses } from '../../src/services/supabaseService';
 import { useSharedUsers } from '../../src/hooks/useSharedUsers';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { ClassInfo, NoticeType, TargetAudience } from '../../src/types';
 
-const NOTICE_TYPES: { value: NoticeType; label: string; color: string }[] = [
+const getNoticeTypes = (colors: any): { value: NoticeType; label: string; color: string }[] => [
   { value: 'general', label: 'General', color: colors.info },
   { value: 'urgent', label: 'Urgent', color: colors.danger },
   { value: 'event', label: 'Event', color: colors.success },
 ];
 
 export default function AssignNoticeScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { profile } = useUser();
   const { addNotice } = useNotices();
@@ -106,7 +108,7 @@ export default function AssignNoticeScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <Text style={styles.label}>Notice Type</Text>
         <View style={styles.typeRow}>
-          {NOTICE_TYPES.map((t) => (
+          {getNoticeTypes(colors).map((t) => (
             <TouchableOpacity
               key={t.value}
               style={[styles.typeChip, type === t.value && { backgroundColor: t.color + '20', borderColor: t.color }]}
@@ -190,7 +192,7 @@ export default function AssignNoticeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: 100 },
   label: { fontSize: fontSize.sm, fontWeight: '700', color: colors.textPrimary, marginBottom: spacing.sm, marginTop: spacing.lg },

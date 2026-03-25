@@ -18,15 +18,11 @@ import { useTimetable } from '../../../src/hooks/useTimetable';
 import { useHomework } from '../../../src/hooks/useHomework';
 import { useAdminTeacherEntries } from '../../../src/hooks/useAdminTimetable';
 import { useSharedDuties } from '../../../src/hooks/useSharedDuties';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { ScheduleItem, ScheduleStatus, Homework } from '../../../src/types';
 
-const STATUS_COLORS: Record<ScheduleStatus, string> = {
-  upcoming: colors.info,
-  ongoing: colors.success,
-  completed: colors.textLight,
-};
+
 
 // Dummy schedule for demo mode
 const DUMMY_SCHEDULE: ScheduleItem[] = [
@@ -88,6 +84,13 @@ const STUDENT_COUNTS: Record<string, number> = {
 };
 
 export default function DashboardScreen() {
+  const { colors, isDark } = useTheme();
+  const STATUS_COLORS: Record<ScheduleStatus, string> = {
+    upcoming: colors.info,
+    ongoing: colors.success,
+    completed: colors.textLight,
+  };
+  const styles = getStyles(colors);
   const router = useRouter();
   const { user } = useAuth();
   const { profile, role, permissions, isDemo } = useUser();
@@ -329,7 +332,9 @@ export default function DashboardScreen() {
 }
 
 function HomeworkCard({ hw }: { hw: Homework }) {
-  const dueDate = new Date(hw.due_date + 'T00:00:00');
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const dueDate = new Date(hw.due_date + 'T00:00:00');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const daysLeft = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -383,7 +388,9 @@ function HomeworkCard({ hw }: { hw: Homework }) {
 }
 
 function ScheduleCard({ item, isLast }: { item: ScheduleItem; isLast: boolean }) {
-  const formatTime12 = (time: string) => {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const formatTime12 = (time: string) => {
     const [hStr, mStr] = time.split(':');
     let h = parseInt(hStr, 10);
     const ampm = h >= 12 ? 'PM' : 'AM';
@@ -437,7 +444,7 @@ function ScheduleCard({ item, isLast }: { item: ScheduleItem; isLast: boolean })
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.white },
   content: { paddingBottom: 100 },
 

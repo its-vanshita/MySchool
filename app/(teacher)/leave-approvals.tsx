@@ -4,17 +4,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../src/context/UserContext';
 import { useAllLeaveRequests } from '../../src/hooks/useLeaveRequests';
 import { updateLeaveStatus } from '../../src/services/supabaseService';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { LeaveRequest, LeaveStatus } from '../../src/types';
 
-const STATUS_CONFIG: Record<LeaveStatus, { color: string; bg: string; icon: string }> = {
-  pending: { color: colors.warning, bg: colors.warningLight, icon: 'time-outline' },
-  approved: { color: colors.success, bg: colors.successLight, icon: 'checkmark-circle-outline' },
-  rejected: { color: colors.danger, bg: colors.dangerLight, icon: 'close-circle-outline' },
-};
+
 
 export default function LeaveApprovalsScreen() {
+  const { colors, isDark } = useTheme();
+  const STATUS_CONFIG: Record<LeaveStatus, { color: string; bg: string; icon: string }> = {
+    pending: { color: colors.warning, bg: colors.warningLight, icon: 'time-outline' },
+    approved: { color: colors.success, bg: colors.successLight, icon: 'checkmark-circle-outline' },
+    rejected: { color: colors.danger, bg: colors.dangerLight, icon: 'close-circle-outline' },
+  };
+  const styles = getStyles(colors);
   const { profile } = useUser();
   const { leaves, loading } = useAllLeaveRequests();
 
@@ -36,7 +39,9 @@ export default function LeaveApprovalsScreen() {
   };
 
   const renderItem = ({ item }: { item: LeaveRequest }) => {
-    const config = STATUS_CONFIG[item.status];
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const config = STATUS_CONFIG[item.status];
     return (
       <View style={styles.card}>
         <View style={styles.cardTop}>
@@ -94,7 +99,7 @@ export default function LeaveApprovalsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   list: { padding: spacing.lg },
   card: {

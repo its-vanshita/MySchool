@@ -13,10 +13,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
 import { useUser } from '../../src/context/UserContext';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 export default function AdminProfileScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { profile, role } = useUser();
   const { signOut } = useAuth();
   const router = useRouter();
@@ -150,7 +152,9 @@ function DetailField({
   value: string;
   isLast?: boolean;
 }) {
-  return (
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+return (
     <View style={[styles.detailField, !isLast && styles.detailFieldBorder]}>
       <Text style={styles.detailLabel}>{label}</Text>
       <Text style={styles.detailValue}>{value}</Text>
@@ -171,7 +175,9 @@ function NavRow({
   onPress: () => void;
   isLast?: boolean;
 }) {
-  return (
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+return (
     <TouchableOpacity
       style={[styles.navRow, !isLast && styles.navRowBorder]}
       onPress={onPress}
@@ -194,7 +200,7 @@ function NavRow({
 
 // ── Styles ──────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 100 },
 

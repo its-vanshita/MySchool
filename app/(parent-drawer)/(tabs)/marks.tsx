@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 
 const DEMO_SUBJECTS = [
@@ -76,6 +76,8 @@ const DEMO_SUBJECTS = [
 const EXAM_TYPES = ['All', 'Term 1', 'Term 2', 'Unit Test'];
 
 export default function ParentMarksScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const [selectedExam, setSelectedExam] = useState('All');
 
   const totalTerm1 = DEMO_SUBJECTS.reduce((sum, s) => sum + s.term1, 0);
@@ -165,7 +167,7 @@ export default function ParentMarksScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F7FA' },
   content: { paddingBottom: 100 },
 

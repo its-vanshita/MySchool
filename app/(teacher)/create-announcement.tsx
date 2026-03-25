@@ -15,18 +15,20 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../src/context/UserContext';
 import { useAnnouncements } from '../../src/hooks/useAnnouncements';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { AnnouncementPriority } from '../../src/types';
 
-const PRIORITIES: { value: AnnouncementPriority; label: string; color: string; icon: string }[] = [
-  { value: 'low', label: 'Low', color: colors.textSecondary, icon: 'arrow-down' },
-  { value: 'normal', label: 'Normal', color: colors.info, icon: 'remove' },
-  { value: 'high', label: 'High', color: colors.warning, icon: 'arrow-up' },
-  { value: 'urgent', label: 'Urgent', color: colors.danger, icon: 'alert-circle' },
+const getPriorities = (colors: any) => [
+  { value:'low', label:'Low', color:colors.textSecondary, icon:'arrow-down' },
+  { value:'normal', label:'Normal', color:colors.info, icon:'remove' },
+  { value:'high', label:'High', color:colors.warning, icon:'arrow-up' },
+  { value:'urgent', label:'Urgent', color:colors.danger, icon:'alert-circle' }
 ];
 
 export default function CreateAnnouncementScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { profile } = useUser();
   const { addAnnouncement } = useAnnouncements();
@@ -83,14 +85,14 @@ export default function CreateAnnouncementScreen() {
       {/* Priority */}
       <Text style={styles.label}>Priority</Text>
       <View style={styles.priorityRow}>
-        {PRIORITIES.map((p) => (
+        {getPriorities(colors).map((p) => (
           <TouchableOpacity
             key={p.value}
             style={[
               styles.priorityChip,
               priority === p.value && { backgroundColor: p.color + '20', borderColor: p.color },
             ]}
-            onPress={() => setPriority(p.value)}
+            onPress={() => setPriority(p.value as AnnouncementPriority)}
           >
             <Ionicons name={p.icon as any} size={16} color={priority === p.value ? p.color : colors.textLight} />
             <Text
@@ -148,7 +150,7 @@ export default function CreateAnnouncementScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: 100 },
   infoBox: {

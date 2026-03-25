@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 
 const DEMO_FEE_STRUCTURE = [
@@ -59,6 +59,8 @@ const STATUS_CONFIG = {
 };
 
 export default function ParentFeeScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const totalFee = DEMO_FEE_STRUCTURE.reduce((sum, f) => sum + f.amount, 0);
   const paidAmount = DEMO_FEE_STRUCTURE
     .filter((f) => f.status === 'paid')
@@ -159,7 +161,7 @@ export default function ParentFeeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F7FA' },
   content: { paddingBottom: 100 },
 

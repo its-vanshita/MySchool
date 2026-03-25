@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { PieChart } from 'react-native-chart-kit';
 import { useSharedMarks, DEMO_EXAMS } from '../../src/hooks/useSharedMarks';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 const screenWidth = Dimensions.get('window').width;
@@ -27,6 +27,8 @@ const CLASS_SUBJECTS: Record<string, string[]> = {
 };
 
 export default function AdminAnalyticsScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { store, adminUpdateMarks, adminUnlockPortal } = useSharedMarks();
 
   const [activeTab, setActiveTab] = useState<'analytics' | 'marks'>('analytics');
@@ -324,7 +326,7 @@ export default function AdminAnalyticsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FB' },
   content: { padding: spacing.xl, paddingBottom: 100 },
   headerTitle: { fontSize: fontSize.xl, fontWeight: '800', color: colors.textPrimary },

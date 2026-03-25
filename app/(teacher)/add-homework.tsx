@@ -20,7 +20,7 @@ import { decode } from 'base64-arraybuffer';
 import { useUser } from '../../src/context/UserContext';
 import { useHomework } from '../../src/hooks/useHomework';
 import { getClasses, getTimetableForTeacher, uploadFile } from '../../src/services/supabaseService';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { ClassInfo, TimetableEntry } from '../../src/types';
 
@@ -31,15 +31,7 @@ interface AttachedFile {
   mimeType?: string;
 }
 
-const FILE_ICONS: Record<string, { icon: string; color: string }> = {
-  pdf: { icon: 'document-text', color: colors.danger },
-  doc: { icon: 'document', color: colors.primary },
-  docx: { icon: 'document', color: colors.primary },
-  png: { icon: 'image', color: colors.success },
-  jpg: { icon: 'image', color: colors.success },
-  jpeg: { icon: 'image', color: colors.success },
-  default: { icon: 'attach', color: colors.textSecondary },
-};
+
 
 interface TimetableOption {
   label: string;
@@ -48,6 +40,17 @@ interface TimetableOption {
 }
 
 export default function AddHomeworkScreen() {
+  const { colors, isDark } = useTheme();
+  const FILE_ICONS: Record<string, { icon: string; color: string }> = {
+    pdf: { icon: 'document-text', color: colors.danger },
+    doc: { icon: 'document', color: colors.primary },
+    docx: { icon: 'document', color: colors.primary },
+    png: { icon: 'image', color: colors.success },
+    jpg: { icon: 'image', color: colors.success },
+    jpeg: { icon: 'image', color: colors.success },
+    default: { icon: 'attach', color: colors.textSecondary },
+  };
+  const styles = getStyles(colors);
   const router = useRouter();
   const { profile } = useUser();
   const { addHomework } = useHomework(profile?.id);
@@ -191,7 +194,7 @@ export default function AddHomeworkScreen() {
         const uploadedUrls: string[] = [];
         for (const file of attachments) {
           const base64 = await FileSystem.readAsStringAsync(file.uri, {
-            encoding: FileSystem.EncodingType.Base64,
+            encoding: 'base64',
           });
           const fileData = decode(base64);
           const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
@@ -346,7 +349,9 @@ export default function AddHomeworkScreen() {
       {attachments.length > 0 && (
         <View style={styles.attachList}>
           {attachments.map((file, idx) => {
-            const fileIcon = getFileIcon(file.name);
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const fileIcon = getFileIcon(file.name);
             return (
               <View key={`${file.name}-${idx}`} style={styles.attachItem}>
                 <View style={[styles.fileIconWrap, { backgroundColor: fileIcon.color + '18' }]}>
@@ -433,7 +438,7 @@ export default function AddHomeworkScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: 100 },
 

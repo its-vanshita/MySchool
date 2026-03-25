@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert 
 import { Ionicons } from '@expo/vector-icons';
 import { useSharedDuties } from '../../../src/hooks/useSharedDuties';
 import { useNotificationBadge } from '../../../src/context/NotificationContext';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 
 const TEACHERS = [
@@ -20,6 +20,8 @@ const ACTIVITIES = [
 ];
 
 export default function AdminDutiesTab() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { duties, addDuty, removeDuty } = useSharedDuties();
   const { addNotification } = useNotificationBadge();
 
@@ -172,7 +174,7 @@ export default function AdminDutiesTab() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: 100 },
   headerTitle: { fontSize: fontSize.xl, fontWeight: '800', color: colors.textPrimary },

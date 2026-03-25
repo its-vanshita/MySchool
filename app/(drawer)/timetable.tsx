@@ -10,7 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../src/context/UserContext';
 import { useTimetable } from '../../src/hooks/useTimetable';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { DayOfWeek, TimetableEntry } from '../../src/types';
 
@@ -116,6 +116,8 @@ function hasBreakBetween(a: TimetableEntry, b: TimetableEntry): { has: boolean; 
 }
 
 export default function TimetableScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { profile } = useUser();
   const { allEntries, loading, getEntriesForDay } = useTimetable(profile?.id);
 
@@ -324,7 +326,7 @@ export default function TimetableScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FB' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 

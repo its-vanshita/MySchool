@@ -16,19 +16,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../src/context/UserContext';
 import { useNotices } from '../../src/hooks/useNotices';
 import { getClasses } from '../../src/services/supabaseService';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { ClassInfo, NoticeType } from '../../src/types';
 
-const NOTICE_TYPES: { value: NoticeType; label: string; color: string }[] = [
+const getNoticeTypes = (colors: any) => [
   { value: 'general', label: 'General', color: colors.info },
   { value: 'urgent', label: 'Urgent', color: colors.danger },
   { value: 'event', label: 'Event', color: colors.success },
   { value: 'holiday', label: 'Holiday', color: colors.warning },
-  { value: 'exam', label: 'Exam', color: colors.purple },
+  { value: 'exam', label: 'Exam', color: colors.purple }
 ];
 
 export default function CreateNoticeScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { profile } = useUser();
   const { addNotice } = useNotices();
@@ -86,14 +88,14 @@ export default function CreateNoticeScreen() {
       {/* Notice Type */}
       <Text style={styles.label}>Type</Text>
       <View style={styles.typeRow}>
-        {NOTICE_TYPES.map((t) => (
+        {getNoticeTypes(colors).map((t) => (
           <TouchableOpacity
             key={t.value}
             style={[
               styles.typeChip,
               type === t.value && { backgroundColor: t.color + '20', borderColor: t.color },
             ]}
-            onPress={() => setType(t.value)}
+            onPress={() => setType(t.value as NoticeType)}
           >
             <Text
               style={[styles.typeChipText, type === t.value && { color: t.color, fontWeight: '700' }]}
@@ -176,7 +178,7 @@ export default function CreateNoticeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: 100 },
   label: {

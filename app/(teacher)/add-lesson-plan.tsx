@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../src/context/UserContext';
 import { useLessonPlans } from '../../src/hooks/useLessonPlans';
 import { getTimetableForTeacher } from '../../src/services/supabaseService';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { TimetableEntry } from '../../src/types';
 
@@ -32,6 +32,8 @@ const DEMO_TIMETABLE: TimetableEntry[] = [
 ];
 
 export default function AddLessonPlanScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { profile } = useUser();
   const { addPlan } = useLessonPlans(profile?.id);
@@ -212,7 +214,7 @@ export default function AddLessonPlanScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: 100 },
   label: {

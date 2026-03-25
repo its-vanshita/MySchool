@@ -12,13 +12,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../../src/context/UserContext';
 import { useNotices } from '../../../src/hooks/useNotices';
 import { useAnnouncements } from '../../../src/hooks/useAnnouncements';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { Notice, Announcement } from '../../../src/types';
 
 type Tab = 'notices' | 'announcements';
 
 export default function NoticesScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { permissions, profile } = useUser();
   const { notices, loading: noticesLoading, removeNotice } = useNotices();
@@ -208,7 +210,7 @@ export default function NoticesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   tabBar: {
     flexDirection: 'row',

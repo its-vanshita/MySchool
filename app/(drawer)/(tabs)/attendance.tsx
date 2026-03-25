@@ -17,7 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useUser } from '../../../src/context/UserContext';
 import { getClasses } from '../../../src/services/supabaseService';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { ClassInfo, AttendanceStatus } from '../../../src/types';
 
@@ -36,6 +36,8 @@ const DUMMY_STUDENTS = [
 const DEMO_CLASSES = ['Grade 10-A', 'Grade 9-C', 'Grade 8-B'];
 
 export default function AttendanceScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { profile, isDemo } = useUser();
   const [classes, setClasses] = useState<ClassInfo[]>([]);
@@ -297,7 +299,7 @@ export default function AttendanceScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 

@@ -11,7 +11,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../../src/context/UserContext';
 import { getTimetableForTeacher } from '../../../src/services/supabaseService';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { TimetableEntry } from '../../../src/types';
 
@@ -52,6 +52,8 @@ const CLASS_COLORS = [
 ];
 
 export default function MyClassScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { profile } = useUser();
   const [classes, setClasses] = useState<ClassInfo[]>([]);
@@ -214,7 +216,7 @@ export default function MyClassScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 

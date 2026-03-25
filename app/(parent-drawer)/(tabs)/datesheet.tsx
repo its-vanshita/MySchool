@@ -10,7 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useDatesheet } from '../../../src/hooks/useDatesheet';
 import { useSharedUploadedDatesheets } from '../../../src/hooks/useSharedUploadedDatesheets';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { ExamEntry, ExamGroup } from '../../../src/types';
 
@@ -27,16 +27,13 @@ const DEMO_EXAMS: ExamEntry[] = [
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const SUBJECT_COLORS: Record<string, string> = {
-  Mathematics: colors.primary,
-  Science: colors.success,
-  English: colors.purple,
-  Hindi: colors.warning,
-  'Social Studies': colors.info,
-  'Computer Science': colors.accent,
-};
+const getSubjectColors = (colors: any): Record<string, string> => ({
+
+});
 
 export default function ParentDatesheetScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { examGroups, loading } = useDatesheet('demo-school', true);
   const { datesheets } = useSharedUploadedDatesheets();
   const [showDemo, setShowDemo] = useState(true);
@@ -86,13 +83,15 @@ export default function ParentDatesheetScreen() {
         </View>
       ) : (
         exams.map((exam, idx) => {
-          const examDate = new Date(exam.exam_date + 'T00:00:00');
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const examDate = new Date(exam.exam_date + 'T00:00:00');
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           const daysUntil = Math.ceil((examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           const isPast = daysUntil < 0;
           const isToday = daysUntil === 0;
-          const subjectColor = SUBJECT_COLORS[exam.subject] || colors.textPrimary;
+          const subjectColor = getSubjectColors(colors)[exam.subject] || colors.textPrimary;
 
           return (
             <View key={exam.id} style={[styles.examCard, isPast && styles.examCardPast]}>
@@ -157,7 +156,7 @@ export default function ParentDatesheetScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { paddingBottom: 100 },
 

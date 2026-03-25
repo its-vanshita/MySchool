@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useUser } from '../../src/context/UserContext';
 import { useDatesheet } from '../../src/hooks/useDatesheet';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { ExamEntry, ExamDuty, ExamType } from '../../src/types';
 
@@ -57,7 +57,9 @@ interface DutySection {
 }
 
 function ExamRow({ exam }: { exam: ExamEntry }) {
-  return (
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+return (
     <View style={styles.examRow}>
       <View style={styles.examRowLeft}>
         <Text style={styles.subjectName}>{exam.subject}</Text>
@@ -82,7 +84,9 @@ function ExamRow({ exam }: { exam: ExamEntry }) {
 }
 
 function DutyRow({ duty }: { duty: ExamDuty }) {
-  return (
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+return (
     <View style={[styles.examRow, styles.dutyRow]}>
       <View style={styles.dutyIconBox}>
         <Ionicons name="shield-checkmark" size={20} color="#D97706" />
@@ -110,6 +114,8 @@ function DutyRow({ duty }: { duty: ExamDuty }) {
 }
 
 export default function ExamDatesheetScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { examType } = useLocalSearchParams<{ examType: string }>();
   const { profile, isDemo } = useUser();
   const { examGroups, loading } = useDatesheet(profile?.school_id, isDemo);
@@ -276,7 +282,7 @@ export default function ExamDatesheetScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 

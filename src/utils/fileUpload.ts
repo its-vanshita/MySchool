@@ -16,7 +16,7 @@ export async function pickAndUploadDocument(bucketName: string, pathPrefix: stri
 
     const file = result.assets[0];
     const base64 = await FileSystem.readAsStringAsync(file.uri, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: 'base64',
     });
 
     const fileData = decode(base64);

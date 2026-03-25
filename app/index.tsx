@@ -3,9 +3,10 @@ import { Redirect, useRouter } from 'expo-router';
 import { View, ActivityIndicator } from 'react-native';
 import { useAuth } from '../src/context/AuthContext';
 import { useUser } from '../src/context/UserContext';
-import { colors } from '../src/theme/colors';
+import { useTheme } from '../src/context/ThemeContext';
 
 export default function Index() {
+  const { colors, isDark } = useTheme();
   const router = useRouter();
   const { user, isDemo, loading: authLoading } = useAuth();
   const { profile, loading: userLoading, role } = useUser();

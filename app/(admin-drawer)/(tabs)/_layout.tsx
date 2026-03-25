@@ -1,14 +1,16 @@
 import { Tabs } from 'expo-router';
 import { View, TouchableOpacity, Image, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { useNotificationBadge } from '../../../src/context/NotificationContext';
 import { useUser } from '../../../src/context/UserContext';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 
 function HeaderLeft() {
-  const navigation = useNavigation();
+  const { colors, isDark } = useTheme();
+  const badgeStyles = getBadgeStyles(colors); const styles = getStyles(colors);
+    const navigation = useNavigation();
   return (
     <TouchableOpacity
       style={{ marginLeft: 12, padding: 4 }}
@@ -24,7 +26,10 @@ function HeaderLeft() {
 }
 
 function HeaderRight() {
-  const router = useRouter();
+  const { colors, isDark } = useTheme(); 
+  const badgeStyles = getBadgeStyles(colors);
+  const styles = getStyles(colors);
+    const router = useRouter();
   const { unreadCount } = useNotificationBadge();
   const { profile } = useUser();
   return (
@@ -57,6 +62,7 @@ function HeaderRight() {
 }
 
 export default function AdminTabsLayout() {
+  const { colors, isDark } = useTheme();
   return (
     <Tabs
       screenOptions={{
@@ -119,25 +125,27 @@ export default function AdminTabsLayout() {
   );
 }
 
-const badgeStyles = StyleSheet.create({
+const getBadgeStyles = (colors: any) => StyleSheet.create({
   badge: {
     position: 'absolute',
-    top: 0,
-    right: -2,
-    backgroundColor: '#EF4444',
+    right: 2,
+    top: 2,
+    backgroundColor: colors.danger,
     borderRadius: 10,
     minWidth: 18,
     height: 18,
-    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: colors.primary,
+    borderColor: colors.white,
+    paddingHorizontal: 4,
   },
   badgeText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 10,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
+    fontWeight: 'bold',
+  }
 });
+
+
+function getStyles(colors: any) { return {}; }

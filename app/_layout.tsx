@@ -1,11 +1,12 @@
 import 'react-native-url-polyfill/auto';
 import React from 'react';
 import { Stack } from 'expo-router';
+import { ThemeProvider } from '../src/context/ThemeContext';
 import { AuthProvider } from '../src/context/AuthContext';
 import { UserProvider } from '../src/context/UserContext';
 import { NotificationProvider } from '../src/context/NotificationContext';
 import { StatusBar } from 'expo-status-bar';
-import { colors } from '../src/theme/colors';
+import { useTheme } from '../src/context/ThemeContext';
 import { View, Text } from 'react-native';
 import { AnimatedSplashScreen } from '../src/components/AnimatedSplashScreen';
 
@@ -42,10 +43,23 @@ class ErrorBoundary extends React.Component<
 export default function RootLayout() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <UserProvider>
-          <NotificationProvider>
-          <AnimatedSplashScreen>
+      <ThemeProvider>
+        <AuthProvider>
+          <UserProvider>
+             <NotificationProvider>
+               <RootLayoutNav />
+             </NotificationProvider>
+          </UserProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
+}
+
+function RootLayoutNav() {
+  const { colors, isDark } = useTheme();
+  return (
+    <AnimatedSplashScreen>
             <StatusBar style="light" />
             <Stack
               screenOptions={{
@@ -249,9 +263,5 @@ export default function RootLayout() {
             />
           </Stack>
           </AnimatedSplashScreen>
-          </NotificationProvider>
-        </UserProvider>
-      </AuthProvider>
-    </ErrorBoundary>
   );
 }

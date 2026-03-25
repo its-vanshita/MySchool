@@ -12,7 +12,7 @@ import { useRouter } from 'expo-router';
 import { useUser } from '../../src/context/UserContext';
 import { useDatesheet } from '../../src/hooks/useDatesheet';
 import { useSharedUploadedDatesheets } from '../../src/hooks/useSharedUploadedDatesheets';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { Image } from 'react-native';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { ExamGroup, ExamType } from '../../src/types';
@@ -49,7 +49,9 @@ function formatDateRange(start: string, end: string): string {
 }
 
 function ExamTypeCard({ group }: { group: ExamGroup }) {
-  const router = useRouter();
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
+const router = useRouter();
   const colorScheme = EXAM_COLORS[group.exam_type] ?? EXAM_COLORS.other;
   const icon = EXAM_ICONS[group.exam_type] ?? 'clipboard';
 
@@ -99,6 +101,8 @@ function ExamTypeCard({ group }: { group: ExamGroup }) {
 }
 
 export default function DatesheetScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { profile, isDemo } = useUser();
   const { examGroups, loading } = useDatesheet(profile?.school_id, isDemo);
   const { datesheets } = useSharedUploadedDatesheets();
@@ -157,7 +161,7 @@ export default function DatesheetScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import { useUser } from '../../src/context/UserContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,6 +26,8 @@ type FAQCategory = {
 };
 
 export default function FAQScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { role } = useUser();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -169,7 +171,7 @@ export default function FAQScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB', // Light gray background

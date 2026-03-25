@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { useUser } from '../../../src/context/UserContext';
 import { getTimetableForTeacher } from '../../../src/services/supabaseService';
-import { colors } from '../../../src/theme/colors';
+import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
 import type { TimetableEntry } from '../../../src/types';
 
@@ -29,6 +29,8 @@ interface SubjectClass {
 import { useSharedMarks, DEMO_EXAMS, type StudentMark } from '../../../src/hooks/useSharedMarks';
 
 export default function UploadMarksScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const { profile } = useUser();
 
   const { getMarksForClassAndExam, updateTeacherMarks, store } = useSharedMarks();
@@ -387,7 +389,7 @@ export default function UploadMarksScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.xl, paddingBottom: 100 },
 

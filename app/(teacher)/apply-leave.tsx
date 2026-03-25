@@ -18,7 +18,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import { decode } from 'base64-arraybuffer';
 import { uploadFile } from '../../src/services/supabaseService';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 // ── Leave types ──
@@ -58,6 +58,8 @@ function daysBetween(a: string, b: string) {
 }
 
 export default function ApplyLeaveScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { profile } = useUser();
   const { applyLeave } = useLeaveRequests(profile?.id);
@@ -212,7 +214,7 @@ export default function ApplyLeaveScreen() {
 
       if (attachmentUri && attachmentName) {
         const base64 = await FileSystem.readAsStringAsync(attachmentUri, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: 'base64',
         });
         const fileData = decode(base64);
         const safeName = attachmentName.replace(/[^a-zA-Z0-9.\-_]/g, '_');
@@ -440,7 +442,7 @@ export default function ApplyLeaveScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, paddingBottom: 120 },
 

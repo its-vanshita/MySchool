@@ -14,7 +14,7 @@ import {
   useAdminTeacherTimetable,
   useAdminStudentTimetable,
 } from '../../src/hooks/useAdminTimetable';
-import { colors } from '../../src/theme/colors';
+import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { DayOfWeek } from '../../src/types';
 
@@ -39,6 +39,8 @@ const MOCK_CLASSES = [
 ];
 
 export default function AdminManageTimetableScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   // Tab: teacher or student
   const [targetType, setTargetType] = useState<'teacher' | 'student'>('teacher');
 
@@ -444,7 +446,7 @@ export default function AdminManageTimetableScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F7FA' },
   content: { padding: spacing.lg, paddingBottom: 100 },
 

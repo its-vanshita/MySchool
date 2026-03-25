@@ -16,11 +16,13 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../src/context/AuthContext';
-import { colors } from '../src/theme/colors';
+import { useTheme } from '../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
 import type { UserRole } from '../src/types';
 
 export default function LoginScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const { signIn, changePassword, resetPassword, enterDemoMode, error, loading } = useAuth();
 
@@ -348,7 +350,7 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.white,
