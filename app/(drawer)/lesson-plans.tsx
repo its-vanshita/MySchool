@@ -333,38 +333,50 @@ export default function LessonPlansScreen() {
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Subject & Class</Text>
-            {subjectClasses.map((opt) => (
-              <TouchableOpacity
-                key={opt.label}
-                style={[
-                  styles.modalOption,
-                  selected?.label === opt.label && styles.modalOptionSelected,
-                ]}
-                onPress={() => {
-                  setSelected(opt);
-                  setShowPicker(false);
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  <Ionicons
-                    name="book-outline"
-                    size={20}
-                    color={selected?.label === opt.label ? colors.primary : colors.textSecondary}
-                  />
-                  <Text
-                    style={[
-                      styles.modalOptionText,
-                      selected?.label === opt.label && { color: colors.primary, fontWeight: '600' },
-                    ]}
-                  >
-                    {opt.label}
-                  </Text>
-                </View>
-                {selected?.label === opt.label && (
-                  <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
-                )}
-              </TouchableOpacity>
-            ))}
+            {subjectClasses.length > 0 ? (
+              subjectClasses.map((opt) => (
+                <TouchableOpacity
+                  key={opt.label}
+                  style={[
+                    styles.modalOption,
+                    selected?.label === opt.label && styles.modalOptionSelected,
+                  ]}
+                  onPress={() => {
+                    setSelected(opt);
+                    setShowPicker(false);
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                    <Ionicons
+                      name="book-outline"
+                      size={20}
+                      color={selected?.label === opt.label ? colors.primary : colors.textSecondary}
+                    />
+                    <Text
+                      style={[
+                        styles.modalOptionText,
+                        selected?.label === opt.label && { color: colors.primary, fontWeight: '600' },
+                      ]}
+                    >
+                      {opt.label}
+                    </Text>
+                  </View>
+                  {selected?.label === opt.label && (
+                    <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View style={{ paddingVertical: spacing.xl, alignItems: 'center', justifyContent: 'center' }}>
+                <Ionicons name="folder-open-outline" size={48} color={colors.textLight} style={{ marginBottom: spacing.md }} />
+                <Text style={{ color: colors.textPrimary, fontSize: fontSize.md, fontWeight: '600', marginBottom: spacing.xs }}>
+                  No classes available
+                </Text>
+                <Text style={{ color: colors.textSecondary, fontSize: fontSize.sm, textAlign: 'center' }}>
+                  You don't have any subjects assigned in the timetable.
+                </Text>
+              </View>
+            )}
           </View>
         </TouchableOpacity>
       </Modal>

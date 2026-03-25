@@ -59,22 +59,6 @@ function CustomDrawerContent(props: any) {
       fontWeight: '600',
       marginLeft: spacing.md,
     },
-    homeBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: spacing.xl,
-      paddingVertical: spacing.md,
-      marginHorizontal: spacing.sm,
-      marginBottom: spacing.xs,
-      borderRadius: 8,
-      backgroundColor: 'rgba(255,255,255,0.15)',
-    },
-    homeBtnText: {
-      color: colors.white,
-      fontSize: fontSize.md,
-      fontWeight: '600',
-      marginLeft: spacing.md,
-    },
   });
     const { profile, role } = useUser();
   const { signOut } = useAuth();
@@ -83,11 +67,6 @@ function CustomDrawerContent(props: any) {
   const handleLogout = async () => {
     await signOut();
     router.replace('/login');
-  };
-
-  const handleHomePress = () => {
-    router.replace('/(drawer)/(tabs)');
-    props.navigation.closeDrawer();
   };
 
   return (
@@ -101,12 +80,6 @@ function CustomDrawerContent(props: any) {
         <Text style={drawerStyles.role}>{role.charAt(0).toUpperCase() + role.slice(1)}</Text>
         <Text style={drawerStyles.email}>{profile?.email ?? ''}</Text>
       </View>
-
-      {/* Home button (custom to ensure it navigates to index tab) */}
-      <TouchableOpacity style={drawerStyles.homeBtn} onPress={handleHomePress}>
-        <Ionicons name="home" size={22} color={colors.white} />
-        <Text style={drawerStyles.homeBtnText}>Home</Text>
-      </TouchableOpacity>
 
       {/* Navigation Items */}
       <DrawerItemList {...props} />
@@ -164,7 +137,6 @@ export default function DrawerLayout() {
         options={{
           title: 'Home',
           headerShown: false,
-          drawerItemStyle: { display: 'none' },
           drawerIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
         }}
       />

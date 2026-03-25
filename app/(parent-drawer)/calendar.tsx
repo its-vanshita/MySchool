@@ -424,7 +424,7 @@ const getStyles = (colors: any) => StyleSheet.create({
     flexWrap: 'wrap',
   },
   dayCell: {
-    width: `${100 / 7}%` as any,
+    width: '14.28%' as any,
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',

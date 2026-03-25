@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
@@ -26,6 +26,7 @@ type FAQCategory = {
 };
 
 export default function FAQScreen() {
+  const router = useRouter();
   const { colors, isDark } = useTheme();
   const styles = getStyles(colors);
   const { role } = useUser();
@@ -130,8 +131,15 @@ export default function FAQScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ title: 'Help & FAQs', headerBackTitle: 'Back' }} />
+      
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
             <Text style={styles.headerTitle}>Frequently Asked Questions</Text>
@@ -176,8 +184,27 @@ const getStyles = (colors: any) => StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB', // Light gray background
   },
+  topBar: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   scrollContent: {
     padding: spacing.md,
+    paddingTop: 0,
     paddingBottom: spacing.xxl,
   },
   header: {

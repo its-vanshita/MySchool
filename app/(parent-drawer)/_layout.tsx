@@ -59,22 +59,6 @@ function ParentDrawerContent(props: any) {
       fontWeight: '600',
       marginLeft: spacing.md,
     },
-    homeBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: spacing.xl,
-      paddingVertical: spacing.md,
-      marginHorizontal: spacing.sm,
-      marginBottom: spacing.xs,
-      borderRadius: 8,
-      backgroundColor: 'rgba(255,255,255,0.15)',
-    },
-    homeBtnText: {
-      color: colors.white,
-      fontSize: fontSize.md,
-      fontWeight: '600',
-      marginLeft: spacing.md,
-    },
     navItemBtn: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -100,11 +84,6 @@ function ParentDrawerContent(props: any) {
     router.replace('/login');
   };
 
-  const handleHomePress = () => {
-    router.replace('/(parent-drawer)/(tabs)' as any);
-    props.navigation.closeDrawer();
-  };
-
   return (
     <DrawerContentScrollView {...props} style={{ backgroundColor: colors.drawerBg }}>
       {/* User Header */}
@@ -117,11 +96,6 @@ function ParentDrawerContent(props: any) {
         <Text style={drawerStyles.email}>{profile?.email ?? ''}</Text>
       </View>
 
-      {/* Home button */}
-      <TouchableOpacity style={drawerStyles.homeBtn} onPress={handleHomePress}>
-        <Ionicons name="home" size={22} color={colors.white} />
-        <Text style={drawerStyles.homeBtnText}>Home</Text>
-      </TouchableOpacity>
 
       {/* Navigation Items */}
       <DrawerItemList {...props} />
@@ -184,7 +158,6 @@ export default function ParentDrawerLayout() {
         options={{
           title: 'Home',
           headerShown: false,
-          drawerItemStyle: { display: 'none' },
           drawerIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
         }}
       />
