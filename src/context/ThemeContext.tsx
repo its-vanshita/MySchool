@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useColorScheme, Appearance } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { lightColors, darkColors } from '../theme/colors';
 
 type ThemeContextType = {
@@ -10,20 +10,44 @@ type ThemeContextType = {
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const THEME_STORAGE_KEY = '@app_theme_mode';
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const systemColorScheme = useColorScheme();
-  const [isDark, setIsDark] = useState(systemColorScheme === 'dark');
+  const [isDark, setIsDark] = useState(false); // Default to light mode
 
   useEffect(() => {
-    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      setIsDark(colorScheme === 'dark');
-    });
-    return () => subscription.remove();
+    // Load saved theme preference on start
+    const loadTheme = async () => {
+      try {
+        const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+        if (savedTheme !== null) {
+          setIsDark(savedTheme === 'dark');
+        }
+      } catch (e) {
+        console.error('Failed to load theme preference', e);
+      }
+    };
+    loadTheme();
   }, []);
 
-  const toggleTheme = () => setIsDark(!isDark);
-  const setTheme = (dark: boolean) => setIsDark(dark);
+  const toggleTheme = async () => {
+    const newDarkMode = !isDark;
+    setIsDark(newDarkMode);
+    try {
+      await AsyncStorage.setItem(THEME_STORAGE_KEY, newDarkMode ? 'dark' : 'light');
+    } catch (e) {
+      console.error('Failed to save theme preference', e);
+    }
+  };
+
+  const setTheme = async (dark: boolean) => {
+    setIsDark(dark);
+    try {
+      await AsyncStorage.setItem(THEME_STORAGE_KEY, dark ? 'dark' : 'light');
+    } catch (e) {
+      console.error('Failed to save theme preference', e);
+    }
+  };
 
   const colors = isDark ? darkColors : lightColors;
 
@@ -31,7 +55,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     <ThemeContext.Provider value={{ isDark, colors, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
-);
+  );
 };
 
 export const useTheme = () => {

@@ -16,12 +16,12 @@ import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 export default function SettingsScreen() {
-  const { colors, isDark } = useTheme();
+  const { colors, isDark, toggleTheme } = useTheme();
   const styles = getStyles(colors);
   const router = useRouter();
   const { signOut } = useAuth();
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to sign out?', [
@@ -72,10 +72,10 @@ export default function SettingsScreen() {
             <Text style={styles.settingsLabel}>Dark Mode</Text>
           </View>
           <Switch
-            value={darkMode}
-            onValueChange={setDarkMode}
+            value={isDark}
+            onValueChange={toggleTheme}
             trackColor={{ false: colors.border, true: colors.primaryLight }}
-            thumbColor={darkMode ? colors.primary : colors.textLight}
+            thumbColor={isDark ? colors.primary : colors.textLight}
           />
         </View>
       </View>
@@ -110,7 +110,7 @@ export default function SettingsScreen() {
           <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
         </TouchableOpacity>
         <View style={styles.divider} />
-        <TouchableOpacity style={styles.settingsRow}>
+        <TouchableOpacity style={styles.settingsRow} onPress={() => router.push('/privacy-policy')} >
           <View style={styles.settingsLeft}>
             <View style={[styles.iconBox, { backgroundColor: colors.primaryLight }]}>
               <Ionicons name="document-text" size={18} color={colors.primary} />

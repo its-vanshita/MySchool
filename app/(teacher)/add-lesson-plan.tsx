@@ -10,11 +10,14 @@ import {
   ActivityIndicator,
   Modal,
 } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../src/context/UserContext';
 import { useLessonPlans } from '../../src/hooks/useLessonPlans';
-import { getTimetableForTeacher } from '../../src/services/supabaseService';
+import { getTimetableForTeacher, uploadFile } from '../../src/services/supabaseService';
 import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { TimetableEntry } from '../../src/types';
@@ -45,6 +48,27 @@ export default function AddLessonPlanScreen() {
   const [topicName, setTopicName] = useState('');
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<{ uri: string; name: string; type: string } | null>(null);
+
+  const pickFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: '*/*',
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled === false && result.assets && result.assets.length > 0) {
+        setSelectedFile({
+          uri: result.assets[0].uri,
+          name: result.assets[0].name,
+          type: result.assets[0].mimeType || 'application/octet-stream',
+        });
+      }
+    } catch (err) {
+      console.error('Error picking document:', err);
+      Alert.alert('Error', 'Failed to pick document.');
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -86,13 +110,29 @@ export default function AddLessonPlanScreen() {
 
     setSubmitting(true);
     try {
+      let uploadedUrl = '';
+      if (selectedFile) {
+        try {
+          const base64 = await FileSystem.readAsStringAsync(selectedFile.uri, { encoding: FileSystem.EncodingType.Base64 });
+          const fileExt = selectedFile.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          
+          uploadedUrl = await uploadFile('lesson-plans', `${profile?.id}/${fileName}`, decode(base64), selectedFile.type);
+        } catch (uploadError) {
+          console.error("File upload failed:", uploadError);
+          Alert.alert('Upload Failed', 'Failed to upload your file. Ensure "lesson-plans" storage bucket exists and is public in Supabase.');
+          setSubmitting(false);
+          return;
+        }
+      }
+
       await addPlan({
         teacher_id: profile?.id ?? '',
         subject: selected.subject,
         topic: unitName.trim() ? `${unitName.trim()} — ${topicName.trim()}` : topicName.trim(),
         description: description.trim(),
         class_name: selected.className,
-        file_url: '',
+        file_url: uploadedUrl,
       });
       Alert.alert('Success', 'Topic added!', [
         { text: 'OK', onPress: () => router.back() },
@@ -150,6 +190,20 @@ export default function AddLessonPlanScreen() {
         numberOfLines={6}
         textAlignVertical="top"
       />
+
+      {/* Upload Document */}
+      <Text style={styles.label}>Attachment (Optional)</Text>
+      <TouchableOpacity style={styles.uploadBtn} onPress={pickFile}>
+        <Ionicons name="document-attach-outline" size={20} color={colors.primary} />
+        <Text style={[styles.uploadBtnText, { color: colors.primary }]}>
+          {selectedFile ? selectedFile.name : 'Upload Document or Image'}
+        </Text>
+      </TouchableOpacity>
+      {selectedFile && (
+        <TouchableOpacity style={{ marginTop: 8, marginBottom: 10 }} onPress={() => setSelectedFile(null)}>
+          <Text style={{ color: colors.danger, fontSize: 14 }}>Remove Attachment</Text>
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity
         style={[styles.submitBtn, submitting && styles.submitBtnDisabled]}
@@ -251,6 +305,22 @@ const getStyles = (colors: any) => StyleSheet.create({
     color: colors.textPrimary,
   },
   textArea: { minHeight: 120, textAlignVertical: 'top' },
+  uploadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primaryLight,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    marginTop: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderStyle: 'dashed',
+    gap: spacing.sm,
+  },
+  uploadBtnText: {
+    fontSize: fontSize.md,
+    fontWeight: '500',
+  },
   submitBtn: {
     backgroundColor: colors.primary,
     borderRadius: borderRadius.md,
