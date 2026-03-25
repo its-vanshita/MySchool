@@ -8,6 +8,7 @@ import {
   Image,
   Switch,
   Alert,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -127,23 +128,6 @@ export default function ParentProfileScreen() {
             thumbColor={colors.white}
           />
         </View>
-      </View>
-
-      {/* About */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>ABOUT</Text>
-        <NavRow
-          icon="information-circle-outline"
-          label="Version Information"
-          rightText="v1.0.0"
-          onPress={() => {}}
-        />
-        <NavRow
-          icon="help-circle-outline"
-          label="Help & Support"
-          onPress={() => Alert.alert('Help', 'Support coming soon.')}
-          isLast
-        />
       </View>
 
       {/* Logout */}

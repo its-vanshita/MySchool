@@ -423,7 +423,7 @@ const getStyles = (colors: any) => StyleSheet.create({
   },
   dayGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   dayCell: {
-    width: `${100 / 7}%`,
+    width: '14.28%',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,

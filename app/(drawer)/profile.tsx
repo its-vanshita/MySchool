@@ -8,6 +8,7 @@ import {
   Image,
   Switch,
   Alert,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -137,28 +138,6 @@ export default function ProfileScreen() {
             thumbColor={colors.white}
           />
         </View>
-      </View>
-
-      {/* ── About VidDarpan ── */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>ABOUT VIDDARPAN</Text>
-        <NavRow
-          icon="information-circle-outline"
-          label="Version Information"
-          rightText="v2.4.0"
-          onPress={() => {}}
-        />
-        <NavRow
-          icon="document-text-outline"
-          label="Privacy Policy"
-          onPress={() => Alert.alert('Privacy Policy', 'Privacy policy coming soon.')}
-        />
-        <NavRow
-          icon="help-circle-outline"
-          label="Help & Support"
-          onPress={() => Alert.alert('Help', 'Support coming soon.')}
-          isLast
-        />
       </View>
 
       {/* ── Logout ── */}

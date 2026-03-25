@@ -83,7 +83,7 @@ export default function ParentSettingsScreen() {
       <View style={styles.section}>
         <TouchableOpacity
           style={styles.settingsRow}
-          onPress={() => Linking.openURL('mailto:support@myschool.app')}
+          onPress={() => Linking.openURL('mailto:support@viddarpan.com')}
         >
           <View style={styles.settingsLeft}>
             <View style={[styles.iconBox, { backgroundColor: colors.successLight }]}>

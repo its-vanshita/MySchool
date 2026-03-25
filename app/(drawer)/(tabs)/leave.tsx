@@ -825,7 +825,7 @@ const getStyles = (colors: any) => StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 90, // moved up to be above bottom tabs
+    bottom: 20, // 20px above the bottom tab bar
     width: 60,
     height: 60,
     borderRadius: 30,
