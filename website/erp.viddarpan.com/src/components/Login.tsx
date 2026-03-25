@@ -14,12 +14,12 @@ export default function Login({ onLogin }: LoginProps) {
     e.preventDefault();
     setError('');
 
-    if (username === 'admin@viddarpan.edu' && password === 'password') {
+    if (username === 'admin@viddarpan.com' && password === 'password') {
       onLogin('admin');
-    } else if (username === 'teacher@viddarpan.edu' && password === 'password') {
+    } else if (username === 'teacher@viddarpan.com' && password === 'password') {
       onLogin('teacher');
     } else {
-      setError('Invalid credentials. Try admin@viddarpan.edu or teacher@viddarpan.edu with password "password".');
+      setError('Invalid credentials. Try admin@viddarpan.com or teacher@viddarpan.com with password "password".');
     }
   };
 
@@ -64,8 +64,8 @@ export default function Login({ onLogin }: LoginProps) {
             <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-800">
               <p className="font-semibold mb-1">Demo Credentials:</p>
               <ul className="list-disc pl-4 space-y-0.5">
-                <li>Admin: <strong>admin@viddarpan.edu</strong> / password</li>
-                <li>Teacher: <strong>teacher@viddarpan.edu</strong> / password</li>
+                <li>Admin: <strong>admin@viddarpan.com</strong> / password</li>
+                <li>Teacher: <strong>teacher@viddarpan.com</strong> / password</li>
               </ul>
             </div>
           </div>
@@ -94,7 +94,7 @@ export default function Login({ onLogin }: LoginProps) {
                 type="text" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin@school.edu" 
+                placeholder="admin@viddarpan.com" 
                 className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all bg-white text-sm placeholder:text-slate-400"
                 required
               />
