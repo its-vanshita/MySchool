@@ -16,7 +16,7 @@ import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
 export default function SettingsScreen() {
-  const { colors, isDark, toggleTheme } = useTheme();
+  const { colors, isDark } = useTheme();
   const styles = getStyles(colors);
   const router = useRouter();
   const { signOut } = useAuth();
@@ -61,21 +61,6 @@ export default function SettingsScreen() {
             onValueChange={setNotifications}
             trackColor={{ false: colors.border, true: colors.primaryLight }}
             thumbColor={notifications ? colors.primary : colors.textLight}
-          />
-        </View>
-        <View style={styles.divider} />
-        <View style={styles.settingsRow}>
-          <View style={styles.settingsLeft}>
-            <View style={[styles.iconBox, { backgroundColor: colors.purpleLight }]}>
-              <Ionicons name="moon" size={18} color={colors.purple} />
-            </View>
-            <Text style={styles.settingsLabel}>Dark Mode</Text>
-          </View>
-          <Switch
-            value={isDark}
-            onValueChange={toggleTheme}
-            trackColor={{ false: colors.border, true: colors.primaryLight }}
-            thumbColor={isDark ? colors.primary : colors.textLight}
           />
         </View>
       </View>

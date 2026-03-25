@@ -21,7 +21,6 @@ export default function ParentSettingsScreen() {
   const router = useRouter();
   const { signOut } = useAuth();
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to sign out?', [
@@ -61,21 +60,6 @@ export default function ParentSettingsScreen() {
             onValueChange={setNotifications}
             trackColor={{ false: colors.border, true: colors.primaryLight }}
             thumbColor={notifications ? colors.primary : colors.textLight}
-          />
-        </View>
-        <View style={styles.divider} />
-        <View style={styles.settingsRow}>
-          <View style={styles.settingsLeft}>
-            <View style={[styles.iconBox, { backgroundColor: colors.purpleLight }]}>
-              <Ionicons name="moon" size={18} color={colors.purple} />
-            </View>
-            <Text style={styles.settingsLabel}>Dark Mode</Text>
-          </View>
-          <Switch
-            value={darkMode}
-            onValueChange={setDarkMode}
-            trackColor={{ false: colors.border, true: colors.primaryLight }}
-            thumbColor={darkMode ? colors.primary : colors.textLight}
           />
         </View>
       </View>

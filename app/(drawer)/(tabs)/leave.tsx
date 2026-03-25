@@ -412,11 +412,9 @@ export default function LeaveScreen() {
       />
 
       {/* FAB for applying leave — always visible for teachers */}
-      {permissions.canRequestLeave && (
-        <TouchableOpacity style={styles.fab} onPress={() => router.push('/apply-leave')}>
-          <Ionicons name="add" size={28} color={colors.white} />
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity style={styles.fab} onPress={() => router.push('/apply-leave')}>
+        <Ionicons name="add" size={28} color={colors.white} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -826,18 +824,19 @@ const getStyles = (colors: any) => StyleSheet.create({
   // FAB
   fab: {
     position: 'absolute',
-    right: spacing.xl,
-    bottom: spacing.xl,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    right: 20,
+    bottom: 90, // moved up to be above bottom tabs
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 8,
-    shadowColor: colors.primary,
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
+    elevation: 10,
+    zIndex: 999, // Ensure it sits above scrollview
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
     shadowOffset: { width: 0, height: 4 },
   },
 });
