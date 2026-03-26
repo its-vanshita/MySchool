@@ -9,6 +9,8 @@ import AdminNoticesList from './AdminNoticesList';
 import AdminLeaveApprovals from './AdminLeaveApprovals';
 import AdminTimetable from './AdminTimetable';
 import AdminManageCalendar from './AdminManageCalendar';
+import AdminSyllabusTracking from './AdminSyllabusTracking';
+import AdminAnalytics from './AdminAnalytics';
 
 export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -30,6 +32,8 @@ export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {activeTab === 'leave-approvals' && <AdminLeaveApprovals />}
           {activeTab === 'manage-timetable' && <AdminTimetable />}
           {activeTab === 'manage-calendar' && <AdminManageCalendar />}
+          {activeTab === 'syllabus' && <AdminSyllabusTracking />}
+          {activeTab === 'analytics' && <AdminAnalytics />}
           {activeTab === 'assign-notice' && (
             <AssignNotice 
               onBroadcastSuccess={handleNoticeBroadcasted} 
