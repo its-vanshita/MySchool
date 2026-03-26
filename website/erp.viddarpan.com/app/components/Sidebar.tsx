@@ -3,7 +3,7 @@ import { LayoutDashboard, CalendarCheck, Megaphone, Users, Settings, GraduationC
 
 export default function Sidebar() {
   return (
-    <aside className="w-60 bg-white border-r border-slate-200 flex flex-col justify-between h-full shrink-0">
+    <aside className="hidden md:flex w-60 bg-white border-r border-slate-200 flex-col justify-between h-full shrink-0">
       <div>
         <div className="p-5 flex items-center gap-3">
           <img 

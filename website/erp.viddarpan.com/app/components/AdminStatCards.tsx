@@ -3,7 +3,7 @@ import { UserCheck, IdCard, Wallet, Megaphone } from 'lucide-react';
 
 export default function AdminStatCards() {
   return (
-    <div className="grid grid-cols-4 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       {/* Total Student Attendance */}
       <div className="bg-white rounded-xl p-5 border-l-4 border-l-slate-800 shadow-sm flex flex-col justify-between relative overflow-hidden">
         <div className="flex justify-between items-start mb-4">

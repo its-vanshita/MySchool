@@ -11,7 +11,7 @@ export default function Toolkit() {
         <p className="text-slate-500 text-[13px]">Streamline your daily administrative tasks with one-click actions optimized for your schedule.</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 relative z-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
         <button className="flex items-center gap-3 p-3.5 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors text-left border border-slate-100">
           <div className="bg-emerald-100 text-emerald-600 p-2.5 rounded-md shrink-0">
             <UserCheck className="w-4 h-4" />

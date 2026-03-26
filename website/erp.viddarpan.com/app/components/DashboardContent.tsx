@@ -7,8 +7,8 @@ import RightSidebar from './RightSidebar';
 
 export default function DashboardContent() {
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="flex justify-between items-end mb-6">
+    <div className="max-w-7xl mx-auto px-2 sm:px-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4 sm:gap-0">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 mb-1">Good morning, Sarah.</h2>
           <p className="text-[13px] text-slate-500">Monday, Oct 23rd • You have 4 classes scheduled today.</p>

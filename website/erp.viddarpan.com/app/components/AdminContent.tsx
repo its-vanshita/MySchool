@@ -12,14 +12,14 @@ export default function AdminContent() {
         <p className="text-[13px] text-slate-500">Real-time governance dashboard for Vidya Darpan International School</p>
       </div>
 
-      <div className="flex gap-6">
-        <div className="flex-1 flex flex-col gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-1 flex flex-col min-w-0 gap-6">
           <AdminStatCards />
           <PendingApprovals />
           <AdminAlerts />
         </div>
-        
-        <div className="w-[320px] flex flex-col gap-6 shrink-0">
+
+        <div className="w-full lg:w-[320px] flex flex-col gap-6 shrink-0">
           <AdminRightSidebar />
         </div>
       </div>

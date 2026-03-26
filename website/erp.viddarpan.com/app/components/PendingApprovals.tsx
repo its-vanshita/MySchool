@@ -16,7 +16,7 @@ export default function PendingApprovals() {
 
       <div className="space-y-4">
         {/* Approval 1 */}
-        <div className="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:border-slate-200 transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-slate-100 rounded-xl hover:border-slate-200 transition-colors gap-4 sm:gap-0">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-[13px] font-bold text-slate-600 shrink-0">
               SM
@@ -41,7 +41,7 @@ export default function PendingApprovals() {
         </div>
 
         {/* Approval 2 */}
-        <div className="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:border-slate-200 transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-slate-100 rounded-xl hover:border-slate-200 transition-colors gap-4 sm:gap-0">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-[13px] font-bold text-slate-600 shrink-0">
               AK

@@ -3,7 +3,7 @@ import { AlertTriangle, Banknote } from 'lucide-react'; // Need to check if Bank
 
 export default function AdminAlerts() {
   return (
-    <div className="grid grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Security Alert */}
       <div className="bg-[#fdf2f2] rounded-xl p-6 border-l-4 border-l-red-600 shadow-sm flex flex-col justify-between">
         <div>

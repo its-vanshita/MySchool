@@ -3,8 +3,8 @@ import { Search, Bell, HelpCircle, LogOut } from 'lucide-react';
 
 export default function AdminTopbar({ onLogout }: { onLogout: () => void }) {
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
-      <div className="relative w-[400px]">
+    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0 w-full overflow-hidden">
+      <div className="relative hidden md:block w-full max-w-[400px]">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
         <input 
           type="text" 
@@ -12,8 +12,8 @@ export default function AdminTopbar({ onLogout }: { onLogout: () => void }) {
           className="w-full pl-9 pr-4 py-2 bg-slate-100 border-transparent rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-[13px] text-slate-700"
         />
       </div>
-      
-      <div className="flex items-center gap-6">
+
+      <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto justify-end">
         <div className="flex items-center gap-4 text-slate-500">
           <button className="relative hover:text-slate-700 transition-colors">
             <Bell className="w-5 h-5" />
@@ -23,9 +23,9 @@ export default function AdminTopbar({ onLogout }: { onLogout: () => void }) {
             <HelpCircle className="w-5 h-5" />
           </button>
         </div>
-        
-        <div className="flex items-center gap-3 pl-6 border-l border-slate-200">
-          <div className="text-right">
+
+        <div className="flex items-center gap-3 pl-4 md:pl-6 border-l border-slate-200">
+          <div className="text-right hidden sm:block">
             <p className="text-[13px] font-bold text-slate-800">Dr. Rajesh Kumar</p>
             <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">Principal Administrator</p>
           </div>

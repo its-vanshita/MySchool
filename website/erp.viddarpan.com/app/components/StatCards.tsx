@@ -3,7 +3,7 @@ import { UserCheck, AlertCircle } from 'lucide-react';
 
 export default function StatCards() {
   return (
-    <div className="grid grid-cols-2 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
       <div className="bg-white rounded-xl p-5 border-l-4 border-l-slate-800 shadow-sm flex flex-col justify-between relative overflow-hidden">
         <div className="flex justify-between items-start mb-4">
           <div className="bg-blue-50 p-2 rounded-lg text-blue-700">
