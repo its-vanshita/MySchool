@@ -11,6 +11,10 @@ import AdminTimetable from './AdminTimetable';
 import AdminManageCalendar from './AdminManageCalendar';
 import AdminSyllabusTracking from './AdminSyllabusTracking';
 import AdminAnalytics from './AdminAnalytics';
+import AdminUpdateMarks from './AdminUpdateMarks';
+import AdminAssignDuties from './AdminAssignDuties';
+import AdminManageRecords from './AdminManageRecords';
+import AdminUploadDatesheet from './AdminUploadDatesheet';
 
 export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -34,6 +38,10 @@ export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {activeTab === 'manage-calendar' && <AdminManageCalendar />}
           {activeTab === 'syllabus' && <AdminSyllabusTracking />}
           {activeTab === 'analytics' && <AdminAnalytics />}
+          {activeTab === 'update-marks' && <AdminUpdateMarks />}
+          {activeTab === 'assign-duties' && <AdminAssignDuties />}
+          {activeTab === 'manage-records' && <AdminManageRecords />}
+          {activeTab === 'upload-datesheet' && <AdminUploadDatesheet />}
           {activeTab === 'assign-notice' && (
             <AssignNotice 
               onBroadcastSuccess={handleNoticeBroadcasted} 
