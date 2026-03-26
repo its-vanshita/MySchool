@@ -1,10 +1,11 @@
-# VidDarpan ERP Dashboard
+# VidDarpan ERP
 
-The institutional administrative portal for VidDarpan.
+The institutional management portal, built with Next.js 15, React 19, and Tailwind CSS 4.
 
-## Getting Started
-
+## Setup
 ```bash
 npm install
 npm run dev
 ```
+
+The ERP runs on port **3001**.
