@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Banknotes } from 'lucide-react'; // Need to check if Banknotes exists, let's use Wallet or Coins or Banknote
+import { AlertTriangle, Banknote } from 'lucide-react'; // Need to check if Banknotes exists, let's use Wallet or Coins or Banknote
 
 export default function AdminAlerts() {
   return (
@@ -24,7 +24,7 @@ export default function AdminAlerts() {
       <div className="bg-[#fff7ed] rounded-xl p-6 border-l-4 border-l-orange-500 shadow-sm flex flex-col justify-between">
         <div>
           <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-500"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-500"><rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></svg>
             Financial Alert
           </h3>
           <p className="text-[14px] text-slate-700 leading-relaxed mb-6">
