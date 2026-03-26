@@ -1,9 +1,8 @@
-# VidDarpan Marketing Website
+# VidDarpan Website
 
-The primary landing page for VidDarpan.
+VidDarpan Marketing Website, built with Next.js 15, React 19, and Tailwind CSS 4.
 
-## Getting Started
-
+## Setup
 ```bash
 npm install
 npm run dev
