@@ -1,7 +1,14 @@
 import React from 'react';
-import { LayoutDashboard, CalendarCheck, Megaphone, Users, Settings, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, CalendarCheck, Megaphone, Users, Settings, GraduationCap, BookOpen } from 'lucide-react';
 
-export default function Sidebar() {
+export default function Sidebar({ activeTab, setActiveTab }: { activeTab?: string, setActiveTab?: (tab: string) => void }) {
+  const handleNavClick = (e: React.MouseEvent, label: string) => {
+    e.preventDefault();
+    if (setActiveTab) {
+      setActiveTab(label);
+    }
+  };
+
   return (
     <aside className="hidden md:flex w-60 bg-white border-r border-slate-200 flex-col justify-between h-full shrink-0">
       <div>
@@ -18,11 +25,12 @@ export default function Sidebar() {
         </div>
         
         <nav className="mt-6 flex flex-col gap-1 px-4">
-          <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" active />
-          <NavItem icon={<CalendarCheck size={20} />} label="Attendance" />
-          <NavItem icon={<Megaphone size={20} />} label="Notices" />
-          <NavItem icon={<Users size={20} />} label="Staff Management" />
-          <NavItem icon={<Settings size={20} />} label="Settings" />
+          <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" active={activeTab === 'Dashboard'} onClick={(e) => handleNavClick(e, 'Dashboard')} />
+          <NavItem icon={<CalendarCheck size={20} />} label="Attendance" active={activeTab === 'Attendance'} onClick={(e) => handleNavClick(e, 'Attendance')} />
+          <NavItem icon={<BookOpen size={20} />} label="Homework" active={activeTab === 'Homework'} onClick={(e) => handleNavClick(e, 'Homework')} />
+          <NavItem icon={<Megaphone size={20} />} label="Notices" active={activeTab === 'Notices'} onClick={(e) => handleNavClick(e, 'Notices')} />
+          <NavItem icon={<Users size={20} />} label="Staff Management" active={activeTab === 'Staff Management'} onClick={(e) => handleNavClick(e, 'Staff Management')} />
+          <NavItem icon={<Settings size={20} />} label="Settings" active={activeTab === 'Settings'} onClick={(e) => handleNavClick(e, 'Settings')} />
         </nav>
       </div>
 
@@ -39,9 +47,9 @@ export default function Sidebar() {
   );
 }
 
-function NavItem({ icon, label, active = false }: { icon: React.ReactNode, label: string, active?: boolean }) {
+function NavItem({ icon, label, active = false, onClick }: { icon: React.ReactNode, label: string, active?: boolean, onClick?: (e: React.MouseEvent) => void }) {
   return (
-    <a href="#" className={`flex items-center gap-3 px-3 py-2.5 text-[13px] rounded-lg transition-colors relative ${active ? 'text-blue-700 bg-blue-50/50 font-medium' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+    <a href="#" onClick={onClick} className={`flex items-center gap-3 px-3 py-2.5 text-[13px] rounded-lg transition-colors relative ${active ? 'text-blue-700 bg-blue-50/50 font-medium' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
       {active && <div className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-blue-700 rounded-r-full" />}
       {icon}
       <span>{label}</span>
