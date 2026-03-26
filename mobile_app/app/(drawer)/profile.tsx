@@ -8,41 +8,34 @@ import {
   Image,
   Switch,
   Alert,
-  Linking,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
 import { useUser } from '../../src/context/UserContext';
-import { useTheme } from '../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import { Drawer } from 'expo-router/drawer';
+
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const RED_MUTED = '#E11D48';
 
 export default function ProfileScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
   const { profile, role } = useUser();
   const { signOut } = useAuth();
   const router = useRouter();
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [emailAlerts, setEmailAlerts] = useState(false);
+  const [pushNotifications, setNotifications] = useState(true);
 
-  const designation = profile?.designation || 'Teacher';
-  const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : '';
-  const roleLabel = `${designation.toUpperCase()} / ${displayRole.toUpperCase()}`;
-
-  const joiningDate = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      })
-    : '—';
+  // Fallbacks per high-fidelity spec requirement if null
+  const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Teacher';
+  const designation = profile?.designation ? profile.designation : `Subject ${displayRole}`;
+  const userName = profile?.name ? profile.name : 'Gaurav Daultani';
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Logout',
+        text: 'Sign Out',
         style: 'destructive',
         onPress: async () => {
           await signOut();
@@ -52,344 +45,262 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const initials = profile?.name
-    ? profile.name
-        .split(' ')
-        .map((n: string) => n[0])
-        .join('')
-        .toUpperCase()
-    : '?';
-
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* ── Profile Header ── */}
-      <View style={styles.headerSection}>
-        <View style={styles.avatarRing}>
-          <View style={styles.avatarInner}>
-            {profile?.avatar_url ? (
-              <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
-            ) : (
-              <View style={[styles.avatarImage, { backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center' }]}>
-                <Ionicons name="person" size={54} color={colors.primary} />
+    <View style={styles.container}>
+      <Drawer.Screen 
+        options={{ 
+           headerTitle: 'Profile',
+           headerStyle: {
+              backgroundColor: BRAND_NAVY,
+              borderBottomWidth: 0,
+              elevation: 0,
+              shadowOpacity: 0,
+           },
+           headerTintColor: '#FFFFFF',
+           headerTitleStyle: {
+              fontWeight: '700',
+              fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+              fontSize: 20
+           }
+        }} 
+      />
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        
+        {/* ── PROFILE HERO SECTION ── */}
+        <View style={styles.heroCard}>
+          <View style={styles.avatarRingGlow}>
+             <View style={styles.avatarBorder}>
+                {profile?.avatar_url ? (
+                  <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
+                ) : (
+                  <View style={[styles.avatarImage, { backgroundColor: '#E0F2FE', justifyContent: 'center', alignItems: 'center' }]}>
+                    <Ionicons name="person" size={54} color={BRAND_NAVY} />
+                  </View>
+                )}
+             </View>
+          </View>
+          <Text style={styles.profileName}>{userName}</Text>
+          <Text style={styles.profileRole}>{designation}</Text>
+        </View>
+
+        {/* ── PERSONAL DETAILS CARD ── */}
+        <View style={styles.detailCard}>
+           {/* Full Name */}
+           <View style={[styles.detailRow, styles.divider]}>
+              <Text style={styles.detailLabel}>FULL NAME</Text>
+              <Text style={styles.detailValue}>{userName}</Text>
+           </View>
+           {/* Email */}
+           <View style={[styles.detailRow, styles.divider]}>
+              <Text style={styles.detailLabel}>EMAIL ADDRESS</Text>
+              <Text style={styles.detailValue}>{profile?.email || 'gaurav@viddarpan.com'}</Text>
+           </View>
+           {/* Phone */}
+           <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>PHONE NUMBER</Text>
+              <Text style={styles.detailValue}>{profile?.phone || '+91 98765 43210'}</Text>
+           </View>
+        </View>
+
+        {/* ── SECURITY & SETTINGS CARDS ── */}
+        <View style={styles.actionCard}>
+           {/* Security */}
+           <TouchableOpacity 
+              style={[styles.actionRow, styles.divider]} 
+              activeOpacity={0.7}
+              onPress={() => Alert.alert('Security', 'Security settings coming soon.')}
+            >
+              <View style={styles.actionLeft}>
+                 <View style={styles.iconCircle}>
+                    <Ionicons name="shield-checkmark-outline" size={20} color={BRAND_NAVY} />
+                 </View>
+                 <Text style={styles.actionLabel}>Security & Privacy</Text>
               </View>
-            )}
-          </View>
+              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+           </TouchableOpacity>
+           
+           {/* Notifications */}
+           <View style={styles.actionRow}>
+              <View style={styles.actionLeft}>
+                 <View style={styles.iconCircle}>
+                    <Ionicons name="notifications-outline" size={20} color={BRAND_NAVY} />
+                 </View>
+                 <Text style={styles.actionLabel}>Push Notifications</Text>
+              </View>
+              <Switch
+                value={pushNotifications}
+                onValueChange={setNotifications}
+                trackColor={{ false: '#E2E8F0', true: '#BAE6FD' }}
+                thumbColor={pushNotifications ? BRAND_NAVY : '#94A3B8'}
+                ios_backgroundColor="#E2E8F0"
+              />
+           </View>
         </View>
-        <Text style={styles.profileName}>{profile?.name || 'Unknown'}</Text>
-        <Text style={styles.profileRole}>{roleLabel}</Text>
-        <Text style={styles.profileId}>ID: {profile?.unique_id || '—'}</Text>
-      </View>
 
-      {/* ── Personal Details ── */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>PERSONAL DETAILS</Text>
+        {/* ── LOG OUT BUTTON ── */}
+        <TouchableOpacity style={styles.logoutCard} onPress={handleLogout} activeOpacity={0.8}>
+           <Ionicons name="log-out-outline" size={22} color={RED_MUTED} />
+           <Text style={styles.logoutText}>Sign Out</Text>
+        </TouchableOpacity>
 
-        <DetailField label="Full Name" value={profile?.name || '—'} />
-        <DetailField label="Email Address" value={profile?.email || '—'} />
-        <DetailField label="Phone Number" value={profile?.phone || '—'} />
-        <DetailField label="Designation" value={designation} />
-        <DetailField label="Joining Date" value={joiningDate} isLast />
-      </View>
-
-      {/* ── Password & Security ── */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>PASSWORD & SECURITY</Text>
-        <NavRow
-          icon="lock-closed-outline"
-          label="Change Password"
-          onPress={() => Alert.alert('Change Password', 'Password change coming soon.')}
-        />
-        <NavRow
-          icon="shield-checkmark-outline"
-          label="Two-Factor Authentication"
-          onPress={() => Alert.alert('2FA', 'Two-factor authentication coming soon.')}
-          isLast
-        />
-      </View>
-
-      {/* ── Notifications ── */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>NOTIFICATIONS</Text>
-        <View style={styles.toggleRow}>
-          <View style={styles.toggleLeft}>
-            <View style={[styles.toggleIcon, { backgroundColor: colors.primaryLight }]}>
-              <Ionicons name="notifications-outline" size={18} color={colors.primary} />
-            </View>
-            <Text style={styles.toggleLabel}>Push Notifications</Text>
-          </View>
-          <Switch
-            value={pushNotifications}
-            onValueChange={setPushNotifications}
-            trackColor={{ false: '#E5E7EB', true: colors.primary }}
-            thumbColor={colors.white}
-          />
-        </View>
-        <View style={[styles.toggleRow, { borderBottomWidth: 0 }]}>
-          <View style={styles.toggleLeft}>
-            <View style={[styles.toggleIcon, { backgroundColor: colors.primaryLight }]}>
-              <Ionicons name="mail-outline" size={18} color={colors.primary} />
-            </View>
-            <Text style={styles.toggleLabel}>Email Alerts</Text>
-          </View>
-          <Switch
-            value={emailAlerts}
-            onValueChange={setEmailAlerts}
-            trackColor={{ false: '#E5E7EB', true: colors.primary }}
-            thumbColor={colors.white}
-          />
-        </View>
-      </View>
-
-      {/* ── Logout ── */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
-        <View style={styles.logoutIconWrap}>
-          <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-        </View>
-        <Text style={styles.logoutText}>Log Out</Text>
-      </TouchableOpacity>
-    </ScrollView>
-  );
-}
-
-// ── Sub-components ──────────────────────────────────────────
-
-function DetailField({
-  label,
-  value,
-  isLast,
-}: {
-  label: string;
-  value: string;
-  isLast?: boolean;
-}) {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-return (
-    <View style={[styles.detailField, !isLast && styles.detailFieldBorder]}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>{value}</Text>
+      </ScrollView>
     </View>
   );
 }
 
-function NavRow({
-  icon,
-  label,
-  rightText,
-  onPress,
-  isLast,
-}: {
-  icon: string;
-  label: string;
-  rightText?: string;
-  onPress: () => void;
-  isLast?: boolean;
-}) {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-return (
-    <TouchableOpacity
-      style={[styles.navRow, !isLast && styles.navRowBorder]}
-      onPress={onPress}
-      activeOpacity={0.6}
-    >
-      <View style={styles.navLeft}>
-        <View style={[styles.toggleIcon, { backgroundColor: colors.primaryLight }]}>
-          <Ionicons name={icon as any} size={18} color={colors.primary} />
-        </View>
-        <Text style={styles.navLabel}>{label}</Text>
-      </View>
-      {rightText ? (
-        <Text style={styles.navRightText}>{rightText}</Text>
-      ) : (
-        <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
-      )}
-    </TouchableOpacity>
-  );
-}
-
-// ── Styles ──────────────────────────────────────────────────
-
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: 100 },
-
-  // Header
-  headerSection: {
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: BG_LIGHT,
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 60,
+  },
+  
+  // Hero section
+  heroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingVertical: 32,
     alignItems: 'center',
-    paddingTop: spacing.xxl,
-    paddingBottom: spacing.xl,
-    backgroundColor: colors.white,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    marginBottom: spacing.lg,
-    elevation: 2,
+    marginBottom: 24,
     shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 16,
+    elevation: 4,
   },
-  avatarRing: {
-    width: 108,
-    height: 108,
-    borderRadius: 54,
-    borderWidth: 3,
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
+  avatarRingGlow: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: '#FFFFFF',
+      shadowColor: BRAND_NAVY,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 12,
+      elevation: 6,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 20,
   },
-  avatarInner: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    overflow: 'hidden',
-    backgroundColor: colors.primaryLight,
+  avatarBorder: {
+      width: 110,
+      height: 110,
+      borderRadius: 55,
+      borderWidth: 2,
+      borderColor: '#FFFFFF',
+      overflow: 'hidden',
   },
   avatarImage: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: '100%',
+    height: '100%',
   },
   profileName: {
     fontSize: 22,
     fontWeight: '800',
-    color: colors.textPrimary,
-    marginBottom: 4,
+    color: '#1E293B',
+    marginBottom: 6,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
   profileRole: {
-    fontSize: fontSize.xs,
-    fontWeight: '700',
-    color: colors.primary,
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  profileId: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
+    fontSize: 15,
+    fontWeight: '500',
+    color: BRAND_NAVY,
   },
 
-  // Cards
-  card: {
-    backgroundColor: colors.white,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-    borderRadius: borderRadius.xl,
-    padding: spacing.lg,
-    elevation: 1,
+  // Detail Maps
+  detailCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 24,
+    paddingVertical: 8,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  cardTitle: {
-    fontSize: fontSize.xs,
-    fontWeight: '700',
-    color: colors.primary,
-    letterSpacing: 0.8,
-    marginBottom: spacing.md,
+  detailRow: {
+      paddingVertical: 20,
+      paddingHorizontal: 24,
   },
-
-  // Detail fields
-  detailField: {
-    paddingVertical: spacing.md,
-  },
-  detailFieldBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
+  divider: {
+      borderBottomWidth: 1,
+      borderBottomColor: '#F1F5F9', // Ultra-lite interior line
   },
   detailLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textLight,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 4,
+      fontSize: 11,
+      fontWeight: '700',
+      color: '#94A3B8',
+      letterSpacing: 1.2,
+      marginBottom: 6,
   },
   detailValue: {
-    fontSize: fontSize.md,
-    fontWeight: '600',
-    color: colors.textPrimary,
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#0F172A',
   },
 
-  // Nav rows
-  navRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
+  // Action Cards
+  actionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  navRowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
+  actionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 18,
+      paddingHorizontal: 24,
   },
-  navLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
+  actionLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
   },
-  navLabel: {
-    fontSize: fontSize.md,
-    fontWeight: '500',
-    color: colors.textPrimary,
+  iconCircle: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: '#F1F5F9', // Softer pale background
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 16,
   },
-  navRightText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-  },
-
-  // Toggle rows
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
-  toggleLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  toggleIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  toggleLabel: {
-    fontSize: fontSize.md,
-    fontWeight: '500',
-    color: colors.textPrimary,
+  actionLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#1E293B',
+      fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
 
-  // Logout
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.md,
-    marginBottom: 40,
-    paddingVertical: spacing.lg,
-    backgroundColor: '#FEE2E2',
-    borderRadius: borderRadius.xl,
-    gap: spacing.sm,
-  },
-  logoutIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: '#FECACA',
-    alignItems: 'center',
-    justifyContent: 'center',
+  // Log Out
+  logoutCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#FFFFFF',
+      paddingVertical: 20,
+      borderRadius: 16,
+      shadowColor: RED_MUTED, // Red tinted inner shadow
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 3,
   },
   logoutText: {
-    fontSize: fontSize.md,
-    fontWeight: '700',
-    color: '#EF4444',
+      color: RED_MUTED,
+      fontSize: 16,
+      fontWeight: '700',
+      marginLeft: 10,
+      fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
 });
-

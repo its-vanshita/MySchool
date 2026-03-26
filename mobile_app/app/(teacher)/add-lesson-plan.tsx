@@ -92,6 +92,9 @@ export default function AddLessonPlanScreen() {
           });
         }
       }
+      
+      opts.sort((a, b) => a.label.localeCompare(b.label));
+      
       setSubjectClasses(opts);
       if (opts.length > 0) setSelected(opts[0]);
     };
@@ -113,7 +116,7 @@ export default function AddLessonPlanScreen() {
       let uploadedUrl = '';
       if (selectedFile) {
         try {
-          const base64 = await FileSystem.readAsStringAsync(selectedFile.uri, { encoding: FileSystem.EncodingType.Base64 });
+          const base64 = await FileSystem.readAsStringAsync(selectedFile.uri, { encoding: 'base64' });
           const fileExt = selectedFile.name.split('.').pop();
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
           
@@ -229,38 +232,46 @@ export default function AddLessonPlanScreen() {
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Subject & Class</Text>
-            {subjectClasses.map((opt) => (
-              <TouchableOpacity
-                key={opt.label}
-                style={[
-                  styles.modalOption,
-                  selected?.label === opt.label && styles.modalOptionSelected,
-                ]}
-                onPress={() => {
-                  setSelected(opt);
-                  setShowPicker(false);
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  <Ionicons
-                    name="book-outline"
-                    size={20}
-                    color={selected?.label === opt.label ? colors.primary : colors.textSecondary}
-                  />
-                  <Text
-                    style={[
-                      styles.modalOptionText,
-                      selected?.label === opt.label && { color: colors.primary, fontWeight: '600' },
-                    ]}
-                  >
-                    {opt.label}
-                  </Text>
-                </View>
-                {selected?.label === opt.label && (
-                  <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
-                )}
-              </TouchableOpacity>
-            ))}
+            {subjectClasses.length === 0 ? (
+              <View style={{ padding: spacing.xl, alignItems: 'center' }}>
+                <Ionicons name="folder-open-outline" size={32} color={colors.textLight} style={{ marginBottom: 8 }} />
+                <Text style={{ color: colors.textSecondary, fontSize: 16, fontWeight: '600' }}>No classes available</Text>
+                <Text style={{ color: colors.textLight, fontSize: 12, textAlign: 'center', marginTop: 4 }}>You need subjects assigned in your timetable to add lesson plans.</Text>
+              </View>
+            ) : (
+              subjectClasses.map((opt) => (
+                <TouchableOpacity
+                  key={opt.label}
+                  style={[
+                    styles.modalOption,
+                    selected?.label === opt.label && styles.modalOptionSelected,
+                  ]}
+                  onPress={() => {
+                    setSelected(opt);
+                    setShowPicker(false);
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                    <Ionicons
+                      name="book-outline"
+                      size={20}
+                      color={selected?.label === opt.label ? colors.primary : colors.textSecondary}
+                    />
+                    <Text
+                      style={[
+                        styles.modalOptionText,
+                        selected?.label === opt.label && { color: colors.primary, fontWeight: '600' },
+                      ]}
+                    >
+                      {opt.label}
+                    </Text>
+                  </View>
+                  {selected?.label === opt.label && (
+                    <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              ))
+            )}
           </View>
         </TouchableOpacity>
       </Modal>

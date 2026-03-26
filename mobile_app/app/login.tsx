@@ -10,21 +10,26 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  Image,
+  Dimensions,
   Modal,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../src/context/AuthContext';
-import { useTheme } from '../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../src/theme/spacing';
-import type { UserRole } from '../src/types';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { width, height } = Dimensions.get('window');
+
+const BRAND_NAVY = '#153462';
+const BRAND_NAVY_LIGHT = '#1E4886';
+const BRAND_NAVY_DARK = '#0D2140';
+const ACCENT_BLUE = '#60A5FA';
+const PURE_WHITE = '#FFFFFF';
 
 export default function LoginScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
   const router = useRouter();
-  const { signIn, changePassword, resetPassword, enterDemoMode, error, loading } = useAuth();
+  const { signIn, changePassword, resetPassword } = useAuth();
 
   const [uniqueId, setUniqueId] = useState('');
   const [password, setPassword] = useState('');
@@ -63,9 +68,7 @@ export default function LoginScreen() {
 
     setSubmitting(true);
     try {
-      // Auto-detect if user entered an email
       const isEmailLogin = uniqueId.includes('@');
-
       const { isFirstLogin, role } = await signIn(uniqueId, password, isEmailLogin);
 
       if (isFirstLogin) {
@@ -119,7 +122,7 @@ export default function LoginScreen() {
       await resetPassword(forgotUniqueId.trim());
       Alert.alert(
         'Password Reset',
-        'A password reset link has been sent to the email associated with your account. Please contact your administrator if you need help.',
+        'A password reset link has been sent to the email associated with your account.',
         [{ text: 'OK', onPress: () => setShowForgotPassword(false) }]
       );
       setForgotUniqueId('');
@@ -131,463 +134,417 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        bounces={false}
+    <View style={styles.container}>
+      <StatusBar style="light" translucent backgroundColor="transparent" />
+      
+      {/* Mesh Gradient Background */}
+      <LinearGradient
+        colors={[BRAND_NAVY, BRAND_NAVY_DARK, BRAND_NAVY_LIGHT]}
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+      {/* Decorative Orbs for Mesh Effect */}
+      <View style={[styles.orb, styles.orb1]} />
+      <View style={[styles.orb, styles.orb2]} />
+
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Top Brand Section */}
-        <View style={styles.topSection}>
-          <View style={styles.logoContainer}>
-            <Ionicons name="school" size={36} color={colors.primary} />
-          </View>
-          <Text style={styles.appName}>VidDarpan</Text>
-        </View>
-
-        {/* School Image Banner */}
-        <View style={styles.imageBanner}>
-          <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&q=80' }}
-            style={styles.schoolImage}
-            resizeMode="cover"
-          />
-          <View style={styles.imageOverlay} />
-        </View>
-
-        {/* Form Section */}
-        <View style={styles.formSection}>
-          <Text style={styles.welcomeText}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Please sign in to access your dashboard</Text>
-
-          {error ? (
-            <View style={styles.errorBox}>
-              <Ionicons name="alert-circle" size={18} color={colors.danger} />
-              <Text style={styles.errorText}>{error}</Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          {/* Logo Section */}
+          <View style={styles.logoSection}>
+            <View style={styles.logoIconWrap}>
+                <Ionicons name="book-outline" size={48} color={PURE_WHITE} style={styles.bookIcon} />
+                <View style={styles.waterReflection}>
+                    <Ionicons name="water-outline" size={28} color={PURE_WHITE} style={{ opacity: 0.6 }} />
+                </View>
             </View>
-          ) : null}
-
-          {/* Unique ID Input */}
-          <Text style={styles.inputLabel}>Unique ID</Text>
-          <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color={colors.textLight} style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. MS-2024-001 or Email"
-              placeholderTextColor={colors.textLight}
-              value={uniqueId}
-              onChangeText={setUniqueId}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+            <Text style={styles.brandTitle}>VidDarpan</Text>
+            <Text style={styles.brandSubtitle}>School ERP System</Text>
           </View>
 
-          {/* Password Input */}
-          <Text style={styles.inputLabel}>Password</Text>
-          <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color={colors.textLight} style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor={colors.textLight}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
-              <Ionicons
-                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                size={20}
-                color={colors.textLight}
-              />
-            </TouchableOpacity>
-          </View>
+          {/* Glassmorphism Form Card */}
+          <View style={styles.glassCard}>
+            <Text style={styles.welcomeText}>Welcome</Text>
+            <Text style={styles.instructionText}>Sign in to continue</Text>
 
-          {/* Login Button */}
-          <TouchableOpacity
-            style={[styles.loginBtn, submitting && styles.loginBtnDisabled]}
-            onPress={handleLogin}
-            disabled={submitting}
-          >
-            {submitting ? (
-              <ActivityIndicator color={colors.white} />
-            ) : (
-              <Text style={styles.loginBtnText}>Login</Text>
-            )}
-          </TouchableOpacity>
-
-          {/* Forgot Password */}
-          <TouchableOpacity
-            style={styles.forgotBtn}
-            onPress={() => setShowForgotPassword(true)}
-          >
-            <Text style={styles.forgotBtnText}>Forgot Password?</Text>
-          </TouchableOpacity>
-
-          {/* Demo Credentials removed for production */}
-
-          {/* Footer */}
-          <Text style={styles.trustedText}>TRUSTED BY 300+ SCHOOLS</Text>
-          <Text style={styles.footerText}>
-            By logging in, you agree to our{' '}
-            <Text style={styles.footerLink}>Terms of Service</Text> and{' '}
-            <Text style={styles.footerLink}>Privacy Policy</Text>
-          </Text>
-        </View>
-      </ScrollView>
-
-      {/* ── Change Password Modal (First Login) ── */}
-      <Modal visible={showChangePassword} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalIconContainer}>
-              <Ionicons name="key-outline" size={32} color={colors.primary} />
-            </View>
-            <Text style={styles.modalTitle}>Create Your Password</Text>
-            <Text style={styles.modalSubtitle}>
-              This is your first login. Please create a new password for your account.
-            </Text>
-
+            {/* Unique ID */}
             <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color={colors.textLight} style={styles.inputIcon} />
+              <Ionicons name="person-outline" size={20} color={PURE_WHITE} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="New Password"
-                placeholderTextColor={colors.textLight}
-                value={newPassword}
-                onChangeText={setNewPassword}
-                secureTextEntry={!showNewPassword}
-              />
-              <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)} style={styles.eyeBtn}>
-                <Ionicons
-                  name={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
-                  size={20}
-                  color={colors.textLight}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color={colors.textLight} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm Password"
-                placeholderTextColor={colors.textLight}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-              />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.loginBtn, changingPassword && styles.loginBtnDisabled]}
-              onPress={handleChangePassword}
-              disabled={changingPassword}
-            >
-              {changingPassword ? (
-                <ActivityIndicator color={colors.white} />
-              ) : (
-                <Text style={styles.loginBtnText}>Set Password</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* ── Forgot Password Modal ── */}
-      <Modal visible={showForgotPassword} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalIconContainer}>
-              <Ionicons name="help-circle-outline" size={32} color={colors.primary} />
-            </View>
-            <Text style={styles.modalTitle}>Forgot Password</Text>
-            <Text style={styles.modalSubtitle}>
-              Enter your Unique ID and we'll send a password reset link to your registered email.
-            </Text>
-
-            <View style={styles.inputContainer}>
-              <Ionicons name="person-outline" size={20} color={colors.textLight} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. MS-2024-001"
-                placeholderTextColor={colors.textLight}
-                value={forgotUniqueId}
-                onChangeText={setForgotUniqueId}
-                autoCapitalize="characters"
+                placeholder="Unique ID or Email"
+                placeholderTextColor="rgba(255,255,255,0.5)"
+                value={uniqueId}
+                onChangeText={setUniqueId}
+                autoCapitalize="none"
                 autoCorrect={false}
               />
             </View>
 
+            {/* Password */}
+            <View style={styles.inputContainer}>
+              <Ionicons name="lock-closed-outline" size={20} color={PURE_WHITE} style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor="rgba(255,255,255,0.5)"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
+                <Ionicons
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color={PURE_WHITE}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Login Button */}
             <TouchableOpacity
-              style={[styles.loginBtn, resettingPassword && styles.loginBtnDisabled]}
-              onPress={handleForgotPassword}
-              disabled={resettingPassword}
+              style={[styles.loginBtn, submitting && styles.loginBtnDisabled]}
+              onPress={handleLogin}
+              disabled={submitting}
+              activeOpacity={0.8}
             >
-              {resettingPassword ? (
-                <ActivityIndicator color={colors.white} />
+              {submitting ? (
+                <ActivityIndicator color={BRAND_NAVY} />
               ) : (
-                <Text style={styles.loginBtnText}>Reset Password</Text>
+                <Text style={styles.loginBtnText}>Login</Text>
               )}
             </TouchableOpacity>
 
+            {/* Forgot Password */}
             <TouchableOpacity
-              style={styles.cancelBtn}
-              onPress={() => {
-                setShowForgotPassword(false);
-                setForgotUniqueId('');
-              }}
+              style={styles.forgotBtn}
+              onPress={() => setShowForgotPassword(true)}
             >
-              <Text style={styles.cancelBtnText}>Back to Login</Text>
+              <Text style={styles.forgotBtnText}>Forgot Password?</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <View style={styles.footerDivider} />
+            <Text style={styles.footerText}>TRUSTED BY 300+ EDUCATIONAL INSTITUTIONS</Text>
+          </View>
+
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* ── Change Password Modal ── */}
+      <Modal visible={showChangePassword} animationType="fade" transparent>
+        <View style={styles.modalOverlay}>
+            <View style={[styles.glassCard, styles.modalGlassCard]}>
+                <View style={styles.modalIconContainer}>
+                    <Ionicons name="key-outline" size={32} color={PURE_WHITE} />
+                </View>
+                <Text style={styles.modalTitle}>Create Password</Text>
+                <Text style={styles.instructionText}>First login requires a new password.</Text>
+
+                <View style={styles.inputContainer}>
+                    <Ionicons name="lock-closed-outline" size={20} color={PURE_WHITE} style={styles.inputIcon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="New Password"
+                        placeholderTextColor="rgba(255,255,255,0.5)"
+                        value={newPassword}
+                        onChangeText={setNewPassword}
+                        secureTextEntry={!showNewPassword}
+                    />
+                    <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)} style={styles.eyeBtn}>
+                        <Ionicons name={showNewPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={PURE_WHITE} />
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.inputContainer}>
+                    <Ionicons name="lock-closed-outline" size={20} color={PURE_WHITE} style={styles.inputIcon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Confirm Password"
+                        placeholderTextColor="rgba(255,255,255,0.5)"
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        secureTextEntry
+                    />
+                </View>
+
+                <TouchableOpacity
+                    style={[styles.loginBtn, changingPassword && styles.loginBtnDisabled]}
+                    onPress={handleChangePassword}
+                    disabled={changingPassword}
+                >
+                    {changingPassword ? <ActivityIndicator color={BRAND_NAVY} /> : <Text style={styles.loginBtnText}>Set Password</Text>}
+                </TouchableOpacity>
+            </View>
         </View>
       </Modal>
-    </KeyboardAvoidingView>
+
+      {/* ── Forgot Password Modal ── */}
+      <Modal visible={showForgotPassword} animationType="fade" transparent>
+        <View style={styles.modalOverlay}>
+             <View style={[styles.glassCard, styles.modalGlassCard]}>
+                <View style={styles.modalIconContainer}>
+                    <Ionicons name="help-circle-outline" size={32} color={PURE_WHITE} />
+                </View>
+                <Text style={styles.modalTitle}>Reset Password</Text>
+                <Text style={styles.instructionText}>Enter ID to receive a reset link.</Text>
+
+                <View style={styles.inputContainer}>
+                    <Ionicons name="person-outline" size={20} color={PURE_WHITE} style={styles.inputIcon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Unique ID"
+                        placeholderTextColor="rgba(255,255,255,0.5)"
+                        value={forgotUniqueId}
+                        onChangeText={setForgotUniqueId}
+                        autoCapitalize="characters"
+                        autoCorrect={false}
+                    />
+                </View>
+
+                <TouchableOpacity
+                    style={[styles.loginBtn, resettingPassword && styles.loginBtnDisabled]}
+                    onPress={handleForgotPassword}
+                    disabled={resettingPassword}
+                >
+                    {resettingPassword ? <ActivityIndicator color={BRAND_NAVY} /> : <Text style={styles.loginBtnText}>Send Link</Text>}
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowForgotPassword(false)}>
+                    <Text style={styles.cancelBtnText}>Cancel</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+      </Modal>
+
+    </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: BRAND_NAVY,
+  },
+  orb: {
+    position: 'absolute',
+    borderRadius: 999,
+    opacity: 0.4,
+  },
+  orb1: {
+    width: width * 1.2,
+    height: width * 1.2,
+    backgroundColor: '#1E4886',
+    top: -width * 0.3,
+    left: -width * 0.3,
+  },
+  orb2: {
+    width: width * 0.8,
+    height: width * 0.8,
+    backgroundColor: '#0D2140',
+    bottom: -width * 0.2,
+    right: -width * 0.2,
+  },
+  keyboardView: {
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-  },
-  // ── Top Brand ──
-  topSection: {
-    alignItems: 'center',
-    paddingTop: Platform.OS === 'ios' ? 60 : 44,
-    paddingBottom: spacing.lg,
-    backgroundColor: colors.white,
-  },
-  logoContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: colors.primaryLight,
-    alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.sm,
+    paddingHorizontal: 24,
+    paddingTop: height * 0.1,
+    paddingBottom: 40,
   },
-  appName: {
-    color: colors.primary,
-    fontSize: fontSize.xxl,
+  
+  // ── Logo Section ──
+  logoSection: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logoIconWrap: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  bookIcon: {
+    marginBottom: -8,
+    zIndex: 2,
+  },
+  waterReflection: {
+    alignItems: 'center',
+    transform: [{ scaleY: 0.6 }],
+  },
+  brandTitle: {
+    fontSize: 32,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    color: PURE_WHITE,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+    letterSpacing: 1,
   },
-  // ── School Image Banner ──
-  imageBanner: {
-    height: 180,
-    marginHorizontal: spacing.xxl,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
-    marginBottom: spacing.xxl,
+  brandSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    fontWeight: '500',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginTop: 4,
   },
-  schoolImage: {
-    width: '100%',
-    height: '100%',
-  },
-  imageOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(21, 101, 192, 0.08)',
-  },
-  // ── Form ──
-  formSection: {
-    paddingHorizontal: spacing.xxl,
-    paddingBottom: spacing.xxxl,
+
+  // ── Glass Card ──
+  glassCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 10,
   },
   welcomeText: {
-    fontSize: fontSize.xxl,
-    fontWeight: '800',
-    color: colors.textPrimary,
+    fontSize: 24,
+    fontWeight: '700',
+    color: PURE_WHITE,
+    marginBottom: 4,
   },
-  subtitle: {
-    fontSize: fontSize.md,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-    marginBottom: spacing.xxl,
+  instructionText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: 24,
   },
-  errorBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.dangerLight,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  errorText: {
-    color: colors.danger,
-    fontSize: fontSize.sm,
-    marginLeft: spacing.sm,
-    flex: 1,
-  },
-  inputLabel: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-  },
+
+  // ── Inputs ──
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    height: 52,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    marginBottom: 16,
+    height: 56,
+    paddingHorizontal: 16,
   },
   inputIcon: {
-    marginRight: spacing.md,
+    marginRight: 12,
+    opacity: 0.9,
   },
   input: {
     flex: 1,
-    fontSize: fontSize.md,
-    color: colors.textPrimary,
+    color: PURE_WHITE,
+    fontSize: 16,
+    height: '100%',
   },
   eyeBtn: {
-    padding: spacing.xs,
+    padding: 8,
+    opacity: 0.8,
   },
+
+  // ── Buttons ──
   loginBtn: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.xl,
-    height: 52,
+    backgroundColor: PURE_WHITE,
+    borderRadius: 16,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: spacing.sm,
-    shadowColor: colors.primary,
+    marginTop: 8,
+    shadowColor: PURE_WHITE,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
   },
   loginBtnDisabled: {
     opacity: 0.7,
   },
   loginBtnText: {
-    color: colors.white,
-    fontSize: fontSize.lg,
-    fontWeight: '700',
+    color: BRAND_NAVY,
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   forgotBtn: {
     alignItems: 'center',
-    marginTop: spacing.xl,
-    marginBottom: spacing.xxl,
+    marginTop: 20,
   },
   forgotBtnText: {
-    color: colors.primary,
-    fontSize: fontSize.md,
+    color: ACCENT_BLUE,
+    fontSize: 14,
     fontWeight: '600',
   },
-  // ── Demo Credentials ──
-  demoBox: {
-    backgroundColor: colors.background,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-    marginBottom: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderStyle: 'dashed',
-  },
-  demoTitle: {
-    fontSize: fontSize.sm,
-    fontWeight: '700',
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  demoRow: {
-    flexDirection: 'row',
+
+  // ── Footer ──
+  footer: {
+    position: 'absolute',
+    bottom: 40,
+    left: 24,
+    right: 24,
     alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
-  demoRoleText: {
-    fontSize: fontSize.sm,
-    fontWeight: '700',
-    color: colors.primary,
-    marginLeft: spacing.sm,
+  footerDivider: {
     width: 60,
-  },
-  demoCred: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginLeft: spacing.sm,
-    flex: 1,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-  },
-  trustedText: {
-    textAlign: 'center',
-    color: colors.textLight,
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-    letterSpacing: 1.5,
-    marginBottom: spacing.md,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    marginBottom: 16,
   },
   footerText: {
-    textAlign: 'center',
-    color: colors.textLight,
-    fontSize: fontSize.xs,
-    lineHeight: 18,
-  },
-  footerLink: {
-    color: colors.primary,
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 11,
+    letterSpacing: 1.5,
     fontWeight: '600',
+    textAlign: 'center',
   },
-  // ── Modal ──
+
+  // ── Modals ──
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(13, 33, 64, 0.85)',
     justifyContent: 'center',
-    paddingHorizontal: spacing.xxl,
+    paddingHorizontal: 24,
   },
-  modalContent: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.xl,
-    padding: spacing.xxl,
-    paddingBottom: spacing.xxl + 25,
+  modalGlassCard: {
+    paddingTop: 32,
+    paddingBottom: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   modalIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primaryLight,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   modalTitle: {
-    fontSize: fontSize.xl,
-    fontWeight: '800',
-    color: colors.textPrimary,
+    fontSize: 22,
+    fontWeight: '700',
+    color: PURE_WHITE,
     textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  modalSubtitle: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.xxl,
-    lineHeight: 20,
+    marginBottom: 8,
   },
   cancelBtn: {
     alignItems: 'center',
-    marginTop: spacing.lg,
+    marginTop: 16,
+    padding: 8,
   },
   cancelBtnText: {
-    color: colors.textSecondary,
-    fontSize: fontSize.md,
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 15,
     fontWeight: '600',
   },
 });
-

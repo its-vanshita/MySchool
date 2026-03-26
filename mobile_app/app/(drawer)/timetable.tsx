@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,13 +6,21 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Stack, useRouter } from 'expo-router';
 import { useUser } from '../../src/context/UserContext';
 import { useTimetable } from '../../src/hooks/useTimetable';
-import { useTheme } from '../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { DayOfWeek, TimetableEntry } from '../../src/types';
+
+// Premium Theme Variables
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const DARK_TEXT = '#1E293B';
 
 // ── Day config ──
 const DAY_LABELS: { key: DayOfWeek; short: string; full: string }[] = [
@@ -25,19 +33,19 @@ const DAY_LABELS: { key: DayOfWeek; short: string; full: string }[] = [
 ];
 
 // ── Subject color palette ──
-const SUBJECT_COLORS: Record<string, { bg: string; accent: string; text: string; badge: string; badgeText: string }> = {
-  Mathematics: { bg: '#FFFFFF', accent: '#F97316', text: '#1F2937', badge: '#FFF7ED', badgeText: '#EA580C' },
-  Science:     { bg: '#FFFFFF', accent: '#10B981', text: '#1F2937', badge: '#ECFDF5', badgeText: '#059669' },
-  English:     { bg: '#FFFFFF', accent: '#7C3AED', text: '#1F2937', badge: '#F5F3FF', badgeText: '#7C3AED' },
-  Hindi:       { bg: '#FFFFFF', accent: '#EC4899', text: '#1F2937', badge: '#FDF2F8', badgeText: '#DB2777' },
-  History:     { bg: '#FFFFFF', accent: '#F59E0B', text: '#1F2937', badge: '#FFFBEB', badgeText: '#D97706' },
-  Geography:   { bg: '#FFFFFF', accent: '#14B8A6', text: '#1F2937', badge: '#F0FDFA', badgeText: '#0D9488' },
-  Physics:     { bg: '#FFFFFF', accent: '#3B82F6', text: '#1F2937', badge: '#EFF6FF', badgeText: '#2563EB' },
-  Chemistry:   { bg: '#FFFFFF', accent: '#EF4444', text: '#1F2937', badge: '#FEF2F2', badgeText: '#DC2626' },
-  Biology:     { bg: '#FFFFFF', accent: '#22C55E', text: '#1F2937', badge: '#F0FDF4', badgeText: '#16A34A' },
-  Computer:    { bg: '#FFFFFF', accent: '#8B5CF6', text: '#1F2937', badge: '#F5F3FF', badgeText: '#7C3AED' },
+const SUBJECT_COLORS: Record<string, { accent: string; badge: string; badgeText: string }> = {
+  Mathematics: { accent: '#F97316', badge: '#FFF7ED', badgeText: '#EA580C' },
+  Science:     { accent: '#10B981', badge: '#ECFDF5', badgeText: '#059669' },
+  English:     { accent: '#7C3AED', badge: '#F5F3FF', badgeText: '#7C3AED' },
+  Hindi:       { accent: '#EC4899', badge: '#FDF2F8', badgeText: '#DB2777' },
+  History:     { accent: '#F59E0B', badge: '#FFFBEB', badgeText: '#D97706' },
+  Geography:   { accent: '#14B8A6', badge: '#F0FDFA', badgeText: '#0D9488' },
+  Physics:     { accent: '#3B82F6', badge: '#EFF6FF', badgeText: '#2563EB' },
+  Chemistry:   { accent: '#EF4444', badge: '#FEF2F2', badgeText: '#DC2626' },
+  Biology:     { accent: '#22C55E', badge: '#F0FDF4', badgeText: '#16A34A' },
+  Computer:    { accent: '#8B5CF6', badge: '#F5F3FF', badgeText: '#7C3AED' },
 };
-const DEFAULT_COLOR = { bg: '#FFFFFF', accent: '#6B7280', text: '#1F2937', badge: '#F3F4F6', badgeText: '#4B5563' };
+const DEFAULT_COLOR = { accent: '#64748B', badge: '#F1F5F9', badgeText: '#475569' };
 
 function getSubjectColor(subject: string) {
   for (const key of Object.keys(SUBJECT_COLORS)) {
@@ -116,8 +124,8 @@ function hasBreakBetween(a: TimetableEntry, b: TimetableEntry): { has: boolean; 
 }
 
 export default function TimetableScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { profile } = useUser();
   const { allEntries, loading, getEntriesForDay } = useTimetable(profile?.id);
 
@@ -130,93 +138,95 @@ export default function TimetableScreen() {
   const entries = getEntriesForDay(selectedDay);
   const occasions = getOccasionsForDay(selectedDay, weekOffset);
   const isHoliday = occasions.some((o) => o.type === 'holiday');
-  const selectedDate = getDateForDay(selectedDay, weekOffset);
 
   // Week range label
   const weekStart = getDateForDay('monday', weekOffset);
   const weekEnd = getDateForDay('saturday', weekOffset);
   const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const weekLabel = `${SHORT_MONTHS[weekStart.getMonth()]} ${weekStart.getDate()} – ${SHORT_MONTHS[weekEnd.getMonth()]} ${weekEnd.getDate()}, ${weekEnd.getFullYear()}`;
+  const weekLabel = `${SHORT_MONTHS[weekStart.getMonth()]} ${weekStart.getDate()} - ${SHORT_MONTHS[weekEnd.getMonth()]} ${weekEnd.getDate()}, ${weekEnd.getFullYear()}`;
 
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={BRAND_NAVY} />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {/* ── Day Selector Strip ── */}
-      <View style={styles.dayStrip}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayStripScroll}>
-          {DAY_LABELS.map((d) => {
-            const isActive = d.key === selectedDay;
-            const date = getDateForDay(d.key, weekOffset);
-            const dayNum = date.getDate();
-            const dayIsHoliday = getOccasionsForDay(d.key, weekOffset).some((o) => o.type === 'holiday');
-            const hasOccasion = getOccasionsForDay(d.key, weekOffset).length > 0;
+      <Stack.Screen 
+        options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: BRAND_NAVY },
+          headerTintColor: PURE_WHITE,
+          headerTitle: 'Timetable',
+          headerTitleStyle: { 
+             fontWeight: '700', 
+             fontSize: 20, 
+             fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+          },
+          headerLeft: () => (
+             <TouchableOpacity style={{ marginLeft: 8, padding: 8 }} onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={24} color={PURE_WHITE} />
+             </TouchableOpacity>
+          )
+        }} 
+      />
 
-            return (
-              <TouchableOpacity
-                key={d.key}
-                style={[styles.dayCol, isActive && styles.dayColActive]}
-                onPress={() => setSelectedDay(d.key)}
-                activeOpacity={0.7}
-              >
-                <Text style={[
-                  styles.dayAbbr,
-                  isActive && styles.dayAbbrActive,
-                  dayIsHoliday && !isActive && { color: colors.danger },
-                ]}>
-                  {d.short}
-                </Text>
-                <View style={[styles.dayNumCircle, isActive && styles.dayNumCircleActive]}>
-                  <Text style={[
-                    styles.dayNum,
-                    isActive && styles.dayNumActive,
-                    dayIsHoliday && !isActive && { color: colors.danger },
-                  ]}>
-                    {dayNum}
-                  </Text>
-                </View>
-                {hasOccasion && !isActive && (
-                  <View style={[
-                    styles.dayDot,
-                    dayIsHoliday ? { backgroundColor: colors.danger } : { backgroundColor: colors.primary },
-                  ]} />
-                )}
+      {/* ── Floating Calendar Strip ── */}
+      <View style={styles.calendarFloatWrap}>
+        <View style={styles.calendarCard}>
+           {/* Week Navigator */}
+           <View style={styles.weekNav}>
+              <TouchableOpacity onPress={() => setWeekOffset(weekOffset - 1)} style={styles.navHit}>
+                 <Ionicons name="chevron-back" size={20} color={BRAND_NAVY} />
               </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+              <Text style={styles.weekLabelText}>{weekLabel}</Text>
+              <TouchableOpacity onPress={() => setWeekOffset(weekOffset + 1)} style={styles.navHit}>
+                 <Ionicons name="chevron-forward" size={20} color={BRAND_NAVY} />
+              </TouchableOpacity>
+           </View>
 
-        {/* Week nav arrows */}
-        <View style={styles.weekNavRow}>
-          <TouchableOpacity onPress={() => setWeekOffset(weekOffset - 1)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="chevron-back" size={18} color={colors.textSecondary} />
-          </TouchableOpacity>
-          <Text style={styles.weekLabel}>{weekLabel}</Text>
-          <TouchableOpacity onPress={() => setWeekOffset(weekOffset + 1)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
-          </TouchableOpacity>
+           {/* Days Row */}
+           <View style={styles.daysRow}>
+              {DAY_LABELS.map((d) => {
+                 const isActive = d.key === selectedDay;
+                 const date = getDateForDay(d.key, weekOffset);
+                 const dayNum = date.getDate();
+                 
+                 return (
+                    <TouchableOpacity
+                       key={d.key}
+                       style={[styles.dayItem, isActive && styles.dayItemActive]}
+                       onPress={() => setSelectedDay(d.key)}
+                       activeOpacity={0.8}
+                    >
+                       <Text style={[styles.dayShortName, isActive && styles.dayShortNameActive]}>
+                          {d.short}
+                       </Text>
+                       <Text style={[styles.dayNumber, isActive && styles.dayNumberActive]}>
+                          {dayNum}
+                       </Text>
+                    </TouchableOpacity>
+                 );
+              })}
+           </View>
         </View>
       </View>
 
-      {/* ── Section Header ── */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>
-          {isHoliday ? "Holiday" : "Today's Schedule"}
-        </Text>
-        <Text style={styles.sectionCount}>
-          {isHoliday
-            ? occasions[0]?.title ?? 'Holiday'
-            : `${entries.length} Class${entries.length !== 1 ? 'es' : ''}`}
-        </Text>
-      </View>
-
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        
+        {/* ── Section Header ── */}
+        <View style={styles.sectionHeader}>
+           <Text style={styles.sectionTitle}>Today's Schedule</Text>
+           <View style={styles.badgeWrap}>
+               <Text style={styles.badgeTextCount}>
+                  {isHoliday ? occasions[0]?.title : `${entries.length} Classes`}
+               </Text>
+           </View>
+        </View>
+
         {/* ── Occasion Banners ── */}
         {occasions.map((occ, i) => (
           <View
@@ -228,18 +238,18 @@ export default function TimetableScreen() {
           >
             <View style={[
               styles.occasionIcon,
-              { backgroundColor: occ.type === 'holiday' ? '#FEE2E2' : '#DBEAFE' },
+              { backgroundColor: occ.type === 'holiday' ? '#FEF2F2' : '#EFF6FF' },
             ]}>
               <Ionicons
                 name={occ.type === 'holiday' ? 'sunny' : 'calendar'}
                 size={22}
-                color={occ.type === 'holiday' ? colors.danger : colors.primary}
+                color={occ.type === 'holiday' ? '#EF4444' : BRAND_NAVY}
               />
             </View>
             <View style={styles.occasionTextWrap}>
               <Text style={[
                 styles.occasionTitle,
-                { color: occ.type === 'holiday' ? colors.danger : colors.primary },
+                { color: occ.type === 'holiday' ? '#EF4444' : BRAND_NAVY },
               ]}>
                 {occ.title}
               </Text>
@@ -258,51 +268,56 @@ export default function TimetableScreen() {
               const duration = getDuration(entry.start_time, entry.end_time);
               const subjectLabel = entry.subject.split(' ')[0].toUpperCase();
 
-              // Check if there's a break before this entry
               const brk = idx > 0 ? hasBreakBetween(entries[idx - 1], entry) : { has: false, label: '', time: '' };
 
               return (
                 <React.Fragment key={entry.id || idx}>
                   {brk.has && (
                     <View style={styles.breakRow}>
-                      <Text style={styles.breakTime}>{brk.time}</Text>
-                      <View style={styles.breakLine} />
-                      <Text style={styles.breakLabel}>{brk.label}</Text>
-                      <View style={styles.breakLine} />
+                      <View style={styles.breakDot} />
+                      <View style={styles.breakLineWrap}>
+                         <View style={styles.breakLine} />
+                      </View>
+                      <View style={styles.breakPill}>
+                         <Ionicons name="cafe-outline" size={14} color="#94A3B8" />
+                         <Text style={styles.breakLabel}>{brk.label}</Text>
+                      </View>
+                      <View style={styles.breakLineWrap}>
+                         <View style={styles.breakLine} />
+                      </View>
                     </View>
                   )}
                   <View style={styles.classRow}>
-                    {/* Time label */}
-                    <Text style={styles.classTime}>{formatTime12(entry.start_time)}</Text>
+                    <View style={styles.timelineCol}>
+                       <Text style={styles.classTimeText}>{formatTime12(entry.start_time)}</Text>
+                       <Text style={styles.classDurationSide}>{duration}</Text>
+                    </View>
 
-                    {/* Card */}
-                    <View style={[styles.classCard, { borderLeftColor: sc.accent }]}>
-                      {/* Top row: badge + duration */}
-                      <View style={styles.cardTopRow}>
-                        <View style={[styles.subjectBadge, { backgroundColor: sc.badge }]}>
-                          <Text style={[styles.subjectBadgeText, { color: sc.badgeText }]}>
-                            {subjectLabel}
-                          </Text>
-                        </View>
-                        <Text style={styles.durationText}>{duration}</Text>
-                      </View>
-
-                      {/* Subject name */}
-                      <Text style={styles.subjectName}>{entry.subject}</Text>
-
-                      {/* Details row */}
-                      <View style={styles.detailsRow}>
-                        <View style={styles.detailItem}>
-                          <Ionicons name="people-outline" size={14} color={colors.textSecondary} />
-                          <Text style={styles.detailText}>{entry.class_name}</Text>
-                        </View>
-                        {entry.room ? (
-                          <View style={styles.detailItem}>
-                            <Ionicons name="business-outline" size={14} color={colors.textSecondary} />
-                            <Text style={styles.detailText}>{entry.room}</Text>
+                    <View style={styles.cardContainer}>
+                       <View style={[styles.cardAccent, { backgroundColor: sc.accent }]} />
+                       <View style={styles.classCard}>
+                          <View style={styles.cardHeaderRow}>
+                             <View style={[styles.subjectTag, { backgroundColor: sc.badge }]}>
+                                <Text style={[styles.subjectTagText, { color: sc.badgeText }]}>{subjectLabel}</Text>
+                             </View>
+                             <Text style={styles.endTimeText}>ends {formatTime12(entry.end_time)}</Text>
                           </View>
-                        ) : null}
-                      </View>
+                          
+                          <Text style={styles.subjectTextFull}>{entry.subject}</Text>
+                          
+                          <View style={styles.metaRow}>
+                             <View style={styles.metaItem}>
+                                <Ionicons name="people-outline" size={16} color={SLATE_GREY} />
+                                <Text style={styles.metaText}>{entry.class_name}</Text>
+                             </View>
+                             {entry.room ? (
+                                <View style={styles.metaItem}>
+                                   <Ionicons name="business-outline" size={16} color={SLATE_GREY} />
+                                   <Text style={styles.metaText}>{entry.room}</Text>
+                                </View>
+                             ) : null}
+                          </View>
+                       </View>
                     </View>
                   </View>
                 </React.Fragment>
@@ -311,281 +326,317 @@ export default function TimetableScreen() {
           </View>
         )}
 
-        {/* ── Empty: No classes (non-holiday) ── */}
+        {/* ── Empty: No classes ── */}
         {!isHoliday && entries.length === 0 && occasions.length === 0 && (
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconCircle}>
-              <Ionicons name="cafe-outline" size={44} color={colors.textLight} />
-            </View>
-            <Text style={styles.emptyTitle}>No Classes Scheduled</Text>
-            <Text style={styles.emptySubtext}>Enjoy your free day!</Text>
+          <View style={styles.emptyWrap}>
+             <Ionicons name="cafe" size={80} color="#DBEAFE" />
+             <Text style={styles.emptyTitle}>No Classes Scheduled</Text>
+             <Text style={styles.emptySubTitle}>Enjoy your free day!</Text>
           </View>
         )}
+        
       </ScrollView>
     </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F9FB' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+const styles = StyleSheet.create({
+  container: {
+     flex: 1, 
+     backgroundColor: BG_LIGHT 
+  },
+  center: {
+     flex: 1, 
+     alignItems: 'center', 
+     justifyContent: 'center' 
+  },
+  
+  // Floating Calendar
+  calendarFloatWrap: {
+     paddingHorizontal: 20,
+     paddingTop: 16,
+     paddingBottom: 8,
+     zIndex: 10,
+  },
+  calendarCard: {
+     backgroundColor: PURE_WHITE,
+     borderRadius: 16,
+     paddingTop: 16,
+     paddingBottom: 20,
+     shadowColor: '#000',
+     shadowOffset: { width: 0, height: 6 },
+     shadowOpacity: 0.04,
+     shadowRadius: 10,
+     elevation: 4,
+  },
+  weekNav: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     justifyContent: 'space-between',
+     paddingHorizontal: 20,
+     marginBottom: 20,
+  },
+  navHit: {
+     padding: 4,
+  },
+  weekLabelText: {
+     fontSize: 14,
+     fontWeight: '700',
+     color: BRAND_NAVY,
+     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  daysRow: {
+     flexDirection: 'row',
+     justifyContent: 'space-around',
+     paddingHorizontal: 12,
+  },
+  dayItem: {
+     alignItems: 'center',
+     justifyContent: 'center',
+     paddingVertical: 12,
+     paddingHorizontal: 8,
+     borderRadius: 12,
+     width: 46,
+  },
+  dayItemActive: {
+     backgroundColor: BRAND_NAVY,
+     shadowColor: BRAND_NAVY,
+     shadowOffset: { width: 0, height: 4 },
+     shadowOpacity: 0.25,
+     shadowRadius: 6,
+     elevation: 4,
+  },
+  dayShortName: {
+     fontSize: 10,
+     fontWeight: '600',
+     color: SLATE_GREY,
+     marginBottom: 6,
+     textTransform: 'uppercase',
+  },
+  dayShortNameActive: {
+     color: '#93C5FD', // soft blue inner text
+  },
+  dayNumber: {
+     fontSize: 16,
+     fontWeight: '800',
+     color: BRAND_NAVY,
+  },
+  dayNumberActive: {
+     color: PURE_WHITE,
+  },
 
-  // ── Day strip ──
-  dayStrip: {
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    paddingBottom: spacing.sm,
+  content: {
+     paddingBottom: 40,
+     paddingHorizontal: 20,
   },
-  dayStripScroll: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xs,
-  },
-  dayCol: {
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    marginHorizontal: 2,
-  },
-  dayColActive: {
-    // active column gets highlighted circle on number
-  },
-  dayAbbr: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: colors.textSecondary,
-    letterSpacing: 0.5,
-    marginBottom: 6,
-  },
-  dayAbbrActive: {
-    color: colors.primary,
-  },
-  dayNumCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayNumCircleActive: {
-    backgroundColor: '#F97316',
-  },
-  dayNum: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  dayNumActive: {
-    color: colors.white,
-  },
-  dayDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 3,
-    marginTop: 4,
-  },
-  weekNavRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: spacing.xs,
-    gap: spacing.md,
-  },
-  weekLabel: {
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-
-  // ── Section header ──
+  
+  // Section Header
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.sm,
+     flexDirection: 'row',
+     justifyContent: 'space-between',
+     alignItems: 'center',
+     paddingTop: 16,
+     paddingBottom: 20,
   },
   sectionTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: '800',
-    color: colors.textPrimary,
+     fontSize: 16,
+     fontWeight: '800',
+     color: BRAND_NAVY,
+     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
-  sectionCount: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.textSecondary,
+  badgeWrap: {
+     backgroundColor: '#E2E8F0',
+     paddingHorizontal: 10,
+     paddingVertical: 4,
+     borderRadius: 12,
   },
-
-  // ── Content ──
-  content: {
-    paddingBottom: 100,
-  },
-
-  // ── Occasion banners ──
-  occasionBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  occasionHoliday: {
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FECACA',
-  },
-  occasionEvent: {
-    backgroundColor: '#EFF6FF',
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
-  },
-  occasionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  occasionTextWrap: {
-    flex: 1,
-  },
-  occasionTitle: {
-    fontSize: fontSize.md,
-    fontWeight: '700',
-  },
-  occasionSubtext: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    marginTop: 2,
+  badgeTextCount: {
+     fontSize: 11,
+     fontWeight: '700',
+     color: SLATE_GREY,
   },
 
-  // ── Schedule list ──
+  // List & Cards
   scheduleList: {
-    paddingHorizontal: spacing.lg,
+     marginTop: 4,
+  },
+  classRow: {
+     flexDirection: 'row',
+     marginBottom: 20,
+  },
+  timelineCol: {
+     width: 65,
+     paddingTop: 12,
+     alignItems: 'flex-start',
+  },
+  classTimeText: {
+     fontSize: 14,
+     fontWeight: '800',
+     color: BRAND_NAVY,
+  },
+  classDurationSide: {
+     fontSize: 11,
+     color: SLATE_GREY,
+     fontWeight: '600',
+     marginTop: 4,
+  },
+  cardContainer: {
+     flex: 1,
+     flexDirection: 'row',
+     backgroundColor: PURE_WHITE,
+     borderRadius: 16,
+     overflow: 'hidden',
+     shadowColor: '#000',
+     shadowOffset: { width: 0, height: 4 },
+     shadowOpacity: 0.03,
+     shadowRadius: 8,
+     elevation: 2,
+  },
+  cardAccent: {
+     width: 4,
+     height: '100%',
+  },
+  classCard: {
+     flex: 1,
+     padding: 16,
+  },
+  cardHeaderRow: {
+     flexDirection: 'row',
+     justifyContent: 'space-between',
+     alignItems: 'center',
+     marginBottom: 10,
+  },
+  subjectTag: {
+     paddingHorizontal: 8,
+     paddingVertical: 4,
+     borderRadius: 6,
+  },
+  subjectTagText: {
+     fontSize: 10,
+     fontWeight: '800',
+     letterSpacing: 0.5,
+  },
+  endTimeText: {
+     fontSize: 11,
+     color: '#94A3B8',
+     fontWeight: '500',
+  },
+  subjectTextFull: {
+     fontSize: 18,
+     fontWeight: '800',
+     color: DARK_TEXT,
+     marginBottom: 12,
+     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  metaRow: {
+     flexDirection: 'row',
+     gap: 16,
+  },
+  metaItem: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     gap: 6,
+  },
+  metaText: {
+     fontSize: 13,
+     color: SLATE_GREY,
+     fontWeight: '500',
   },
 
-  // ── Break / Recess row ──
+  // Break Row
   breakRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: spacing.md,
-    paddingLeft: 60,
-    gap: spacing.sm,
+     flexDirection: 'row',
+     alignItems: 'center',
+     marginBottom: 20,
+     paddingLeft: 60,
   },
-  breakTime: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textLight,
+  breakDot: {
+     width: 6,
+     height: 6,
+     borderRadius: 3,
+     backgroundColor: '#CBD5E1',
+     position: 'absolute',
+     left: 20,
+  },
+  breakLineWrap: {
+     flex: 1,
+     height: 1,
+     justifyContent: 'center',
   },
   breakLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border,
+     height: 1,
+     backgroundColor: '#E2E8F0',
+  },
+  breakPill: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     gap: 6,
+     paddingHorizontal: 12,
+     paddingVertical: 6,
+     backgroundColor: '#F1F5F9',
+     borderRadius: 16,
+     marginHorizontal: 8,
   },
   breakLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.textLight,
-    letterSpacing: 1,
+     fontSize: 10,
+     fontWeight: '800',
+     color: '#94A3B8',
+     letterSpacing: 0.5,
   },
 
-  // ── Class row ──
-  classRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: spacing.md,
+  // Occasions / Events
+  occasionBanner: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     padding: 16,
+     borderRadius: 16,
+     marginBottom: 20,
   },
-  classTime: {
-    width: 52,
-    fontSize: fontSize.md,
-    fontWeight: '800',
-    color: colors.textPrimary,
-    marginTop: spacing.lg,
+  occasionHoliday: {
+     backgroundColor: '#FEF2F2',
   },
-
-  // ── Class card ──
-  classCard: {
-    flex: 1,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    borderLeftWidth: 4,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+  occasionEvent: {
+     backgroundColor: '#EFF6FF',
   },
-  cardTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
+  occasionIcon: {
+     width: 44,
+     height: 44,
+     borderRadius: 22,
+     alignItems: 'center',
+     justifyContent: 'center',
+     marginRight: 16,
   },
-  subjectBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 6,
+  occasionTextWrap: {
+     flex: 1,
   },
-  subjectBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
+  occasionTitle: {
+     fontSize: 16,
+     fontWeight: '800',
+     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
-  durationText: {
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  subjectName: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-  },
-  detailsRow: {
-    flexDirection: 'row',
-    gap: spacing.lg,
-  },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  detailText: {
-    fontSize: fontSize.xs,
-    fontWeight: '500',
-    color: colors.textSecondary,
+  occasionSubtext: {
+     fontSize: 13,
+     color: SLATE_GREY,
+     marginTop: 4,
+     fontWeight: '500',
   },
 
-  // ── Empty state ──
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 80,
-  },
-  emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
+  // Empty State
+  emptyWrap: {
+     alignItems: 'center',
+     paddingTop: 60,
   },
   emptyTitle: {
-    color: colors.textSecondary,
-    fontSize: fontSize.lg,
-    fontWeight: '700',
+     fontSize: 20,
+     fontWeight: '800',
+     color: BRAND_NAVY,
+     marginTop: 20,
+     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
-  emptySubtext: {
-    color: colors.textLight,
-    fontSize: fontSize.sm,
-    marginTop: spacing.xs,
-  },
+  emptySubTitle: {
+     fontSize: 15,
+     color: SLATE_GREY,
+     marginTop: 8,
+     fontWeight: '500',
+  }
 });

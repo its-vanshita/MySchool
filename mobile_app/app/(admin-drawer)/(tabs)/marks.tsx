@@ -10,28 +10,31 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSharedMarks, DEMO_EXAMS } from '../../../src/hooks/useSharedMarks';
+import { useClasses } from '../../../src/hooks/useClasses';
+import { useClassSubjects } from '../../../src/hooks/useClassSubjects';
 import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
-
-const CLASSES = ['Class 10A', 'Class 9C', 'Class 8B'];
-const CLASS_SUBJECTS: Record<string, string[]> = {
-  'Class 10A': ['Mathematics', 'English'],
-  'Class 9C': ['Science'],
-  'Class 8B': ['Social Studies'],
-};
 
 export default function AdminUpdateMarksTab() {
   const { colors, isDark } = useTheme();
   const styles = getStyles(colors);
   const { store, adminUpdateMarks, adminUnlockPortal } = useSharedMarks();
+  const { classes, loading: classesLoading } = useClasses();
 
-  const [selectedClass, setSelectedClass] = useState(CLASSES[0]);
+  const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedExam, setSelectedExam] = useState(DEMO_EXAMS[0].id);
+
+  // Set default selected class when classes load
+  React.useEffect(() => {
+    if (classes.length > 0 && !selectedClass) {
+      setSelectedClass(classes[0].name);
+    }
+  }, [classes, selectedClass]);
+
+  const { subjects, loading: subjectsLoading } = useClassSubjects(selectedClass);
 
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
   const [editingMark, setEditingMark] = useState('');
-
-  const subjects = CLASS_SUBJECTS[selectedClass] || [];
 
   const handleAdminMarkSave = (classKey: string, studentId: string) => {
     if (!editingMark) return;
@@ -50,13 +53,16 @@ export default function AdminUpdateMarksTab() {
         {/* Global Filters */}
         <View style={styles.filterRow}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-            {CLASSES.map(c => (
+            {classesLoading && (
+               <Text style={{ marginVertical: 8, color: colors.textLight }}>Loading classes...</Text>
+            )}
+            {classes.map(c => (
               <TouchableOpacity
-                key={c}
-                style={[styles.chip, selectedClass === c && styles.chipSelected]}
-                onPress={() => setSelectedClass(c)}
+                key={c.id}
+                style={[styles.chip, selectedClass === c.name && styles.chipSelected]}
+                onPress={() => setSelectedClass(c.name)}
               >
-                <Text style={[styles.chipText, selectedClass === c && styles.chipTextSelected]}>{c}</Text>
+                <Text style={[styles.chipText, selectedClass === c.name && styles.chipTextSelected]}>{c.name}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>

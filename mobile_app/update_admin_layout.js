@@ -1,6 +1,8 @@
-import React from 'react';
+const fs = require('fs');
+
+const content = `import React from 'react';
 import { Tabs } from 'expo-router';
-import { View, TouchableOpacity, Image, Text, StyleSheet, Platform } from 'react-native';
+import { View, TouchableOpacity, Image, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../src/context/ThemeContext';
 import { useNotificationBadge } from '../../../src/context/NotificationContext';
@@ -118,7 +120,6 @@ export default function AdminTabsLayout() {
         <Tabs.Screen
           name="users"
           options={{
-            headerShown: false,
             title: 'Users',
             headerTitle: 'Users',
             tabBarIcon: ({ color, size }) => (
@@ -152,3 +153,5 @@ const badgeStyles = StyleSheet.create({
     fontWeight: 'bold',
   }
 });
+`
+fs.writeFileSync('app/(admin-drawer)/(tabs)/_layout.tsx', content);

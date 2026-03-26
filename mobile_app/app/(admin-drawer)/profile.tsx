@@ -1,386 +1,298 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  Switch,
-  Alert,
-  Linking,
-} from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image } from 'react-native';
+import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useAuth } from '../../src/context/AuthContext';
-import { useUser } from '../../src/context/UserContext';
-import { useTheme } from '../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const DARK_TEXT = '#1E293B';
 
 export default function AdminProfileScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-  const { profile, role } = useUser();
-  const { signOut } = useAuth();
   const router = useRouter();
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [emailAlerts, setEmailAlerts] = useState(false);
-
-  const designation = profile?.designation || 'System Admin';
-  const displayRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Admin';
-  const roleLabel = `${designation.toUpperCase()} / ${displayRole.toUpperCase()}`;
-
-  const joiningDate = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      })
-    : '—';
-
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: async () => {
-          await signOut();
-          router.replace('/login');
-        },
-      },
-    ]);
-  };
+  const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* ── Profile Header ── */}
-      <View style={styles.headerSection}>
-        <View style={styles.avatarRing}>
-          <View style={styles.avatarInner}>
-            {profile?.avatar_url ? (
-              <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
-            ) : (
-              <View style={[styles.avatarImage, { backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center' }]}>
-                <Ionicons name="person" size={54} color={colors.primary} />
+    <View style={styles.container}>
+      <StatusBar style="light" backgroundColor="transparent" translucent />
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/* Header Area */}
+      <View style={[styles.headerArea, { paddingTop: insets.top }]}>
+        <View style={styles.headerTop}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Admin Profile</Text>
+            <View style={{ width: 40 }} />
+        </View>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        
+        {/* The Identity Hero */}
+        <View style={styles.heroCard}>
+            <View style={styles.portraitWrap}>
+               {/* High-quality circular professional portrait of a male executive */}
+               <Image 
+                 source={{ uri: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400&h=400' }} 
+                 style={styles.portraitImage} 
+               />
+               <View style={styles.statusGlow} />
+            </View>
+            <Text style={styles.heroName}>Gaurav Daultani</Text>
+            <Text style={styles.heroRole}>System Administrator</Text>
+        </View>
+
+        {/* Administrator Details */}
+        <View style={styles.detailCard}>
+            <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>FULL NAME</Text>
+                <Text style={styles.infoValue}>Gaurav Daultani</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>EMAIL ADDRESS</Text>
+                <Text style={styles.infoValue}>admin@school.edu</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>PHONE NUMBER</Text>
+                <Text style={styles.infoValue}>+91 98765 43210</Text>
+            </View>
+        </View>
+
+        {/* System Access Card */}
+        <View style={styles.detailCard}>
+           <View style={styles.systemAccessWrap}>
+              <View style={styles.systemAccessIconBox}>
+                 <Ionicons name="globe-outline" size={24} color={BRAND_NAVY} />
               </View>
-            )}
-          </View>
+              <View style={styles.systemAccessTextWrap}>
+                 <Text style={styles.systemAccessTitle}>Global Dashboard Access</Text>
+                 <Text style={styles.systemAccessDesc}>Full read/write privileges granted across all school modules.</Text>
+              </View>
+              <Ionicons name="checkmark-circle" size={24} color={BRAND_NAVY} style={styles.checkIcon} />
+           </View>
         </View>
-        <Text style={styles.profileName}>{profile?.name || 'Administrator'}</Text>
-        <Text style={styles.profileRole}>{roleLabel}</Text>
-        <Text style={styles.profileId}>ID: {profile?.unique_id || '—'}</Text>
-      </View>
 
-      {/* ── Personal Details ── */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>ADMINISTRATOR DETAILS</Text>
+        {/* Security Protocols */}
+        <View style={styles.detailCard}>
+           
+           <TouchableOpacity style={styles.actionRow} activeOpacity={0.7}>
+               <View style={styles.actionIconPill}>
+                  <Ionicons name="shield-checkmark-outline" size={20} color={BRAND_NAVY} />
+               </View>
+               <View style={styles.actionTextWrap}>
+                  <Text style={styles.actionTitle}>Two-Factor Authentication</Text>
+                  <Text style={styles.actionSub}>Currently enabled via SMS</Text>
+               </View>
+               <Ionicons name="chevron-forward" size={18} color="#CBD5E1" strokeWidth={0.5} />
+           </TouchableOpacity>
 
-        <DetailField label="Full Name" value={profile?.name || 'Admin User'} />
-        <DetailField label="Email Address" value={profile?.email || 'admin@school.com'} />
-        <DetailField label="Designation" value={designation} />
-        <DetailField label="System Access" value={'Global Dashboard Access'} isLast />
-      </View>
+           <View style={styles.divider} />
 
-      {/* ── Password & Security ── */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>SECURITY PROTOCOLS</Text>
-        <NavRow
-          icon="lock-closed-outline"
-          label="Change Password"
-          onPress={() => Alert.alert('Change Password', 'Password change coming soon.')}
-        />
-        <NavRow
-          icon="shield-checkmark-outline"
-          label="Two-Factor Authentication"
-          onPress={() => Alert.alert('2FA', 'Two-factor authentication coming soon.')}
-          isLast
-        />
-      </View>
+           <TouchableOpacity style={styles.actionRow} activeOpacity={0.7}>
+               <View style={styles.actionIconPill}>
+                  <Ionicons name="lock-closed-outline" size={20} color={BRAND_NAVY} />
+               </View>
+               <View style={styles.actionTextWrap}>
+                  <Text style={styles.actionTitle}>Change Password</Text>
+                  <Text style={styles.actionSub}>Last updated 45 days ago</Text>
+               </View>
+               <Ionicons name="chevron-forward" size={18} color="#CBD5E1" strokeWidth={0.5} />
+           </TouchableOpacity>
 
-      {/* ── Notifications ── */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>ALERTS & NOTIFICATIONS</Text>
-        <View style={styles.toggleRow}>
-          <View style={styles.toggleLeft}>
-            <View style={[styles.toggleIcon, { backgroundColor: colors.primaryLight }]}>
-              <Ionicons name="notifications-outline" size={18} color={colors.primary} />
-            </View>
-            <Text style={styles.toggleLabel}>Push Notifications</Text>
-          </View>
-          <Switch
-            value={pushNotifications}
-            onValueChange={setPushNotifications}
-            trackColor={{ false: '#E5E7EB', true: colors.primary }}
-            thumbColor={colors.white}
-          />
         </View>
-        <View style={[styles.toggleRow, { borderBottomWidth: 0 }]}>
-          <View style={styles.toggleLeft}>
-            <View style={[styles.toggleIcon, { backgroundColor: colors.primaryLight }]}>
-              <Ionicons name="mail-outline" size={18} color={colors.primary} />
-            </View>
-            <Text style={styles.toggleLabel}>System Email Alerts</Text>
-          </View>
-          <Switch
-            value={emailAlerts}
-            onValueChange={setEmailAlerts}
-            trackColor={{ false: '#E5E7EB', true: colors.primary }}
-            thumbColor={colors.white}
-          />
-        </View>
-      </View>
 
-      {/* ── Logout ── */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
-        <View style={styles.logoutIconWrap}>
-          <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-        </View>
-        <Text style={styles.logoutText}>Secure Log Out</Text>
-      </TouchableOpacity>
-    </ScrollView>
-  );
-}
-
-// ── Sub-components ──────────────────────────────────────────
-
-function DetailField({
-  label,
-  value,
-  isLast,
-}: {
-  label: string;
-  value: string;
-  isLast?: boolean;
-}) {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-return (
-    <View style={[styles.detailField, !isLast && styles.detailFieldBorder]}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>{value}</Text>
+      </ScrollView>
     </View>
   );
 }
 
-function NavRow({
-  icon,
-  label,
-  rightText,
-  onPress,
-  isLast,
-}: {
-  icon: string;
-  label: string;
-  rightText?: string;
-  onPress: () => void;
-  isLast?: boolean;
-}) {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-return (
-    <TouchableOpacity
-      style={[styles.navRow, !isLast && styles.navRowBorder]}
-      onPress={onPress}
-      activeOpacity={0.6}
-    >
-      <View style={styles.navLeft}>
-        <View style={[styles.toggleIcon, { backgroundColor: colors.primaryLight }]}>
-          <Ionicons name={icon as any} size={18} color={colors.primary} />
-        </View>
-        <Text style={styles.navLabel}>{label}</Text>
-      </View>
-      {rightText ? (
-        <Text style={styles.navRightText}>{rightText}</Text>
-      ) : (
-        <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
-      )}
-    </TouchableOpacity>
-  );
-}
-
-// ── Styles ──────────────────────────────────────────────────
-
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: 100 },
-
-  // Header
-  headerSection: {
-    alignItems: 'center',
-    paddingTop: spacing.xxl,
-    paddingBottom: spacing.xl,
-    backgroundColor: colors.white,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    marginBottom: spacing.lg,
-    elevation: 2,
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: BG_LIGHT,
+  },
+  headerArea: {
+    backgroundColor: BRAND_NAVY,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
     shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    zIndex: 10,
   },
-  avatarRing: {
-    width: 108,
-    height: 108,
-    borderRadius: 54,
-    borderWidth: 3,
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
-  },
-  avatarInner: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    overflow: 'hidden',
-    backgroundColor: colors.primaryLight,
-  },
-  avatarImage: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-  },
-  profileName: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: colors.textPrimary,
-    marginBottom: 4,
-  },
-  profileRole: {
-    fontSize: fontSize.xs,
-    fontWeight: '700',
-    color: colors.primary,
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  profileId: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-  },
-
-  // Cards
-  card: {
-    backgroundColor: colors.white,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-    borderRadius: borderRadius.xl,
-    padding: spacing.lg,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 1 },
-  },
-  cardTitle: {
-    fontSize: fontSize.xs,
-    fontWeight: '700',
-    color: colors.primary,
-    letterSpacing: 0.8,
-    marginBottom: spacing.md,
-  },
-
-  // Detail fields
-  detailField: {
-    paddingVertical: spacing.md,
-  },
-  detailFieldBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
-  detailLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textLight,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  detailValue: {
-    fontSize: fontSize.md,
-    fontWeight: '600',
-    color: colors.textPrimary,
-  },
-
-  // Nav rows
-  navRow: {
+  headerTop: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  navRowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
-  navLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  navLabel: {
-    fontSize: fontSize.md,
-    fontWeight: '500',
-    color: colors.textPrimary,
-  },
-  navRightText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-  },
-
-  // Toggle rows
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
-  toggleLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  toggleIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
+  backButton: {
+    width: 40,
+    height: 40,
     justifyContent: 'center',
-  },
-  toggleLabel: {
-    fontSize: fontSize.md,
-    fontWeight: '500',
-    color: colors.textPrimary,
-  },
-
-  // Logout
-  logoutButton: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.md,
-    marginBottom: 40,
-    paddingVertical: spacing.lg,
-    backgroundColor: '#FEE2E2',
-    borderRadius: borderRadius.xl,
-    gap: spacing.sm,
   },
-  logoutIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: '#FECACA',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoutText: {
-    fontSize: fontSize.md,
+  headerTitle: {
+    color: PURE_WHITE,
+    fontSize: 20,
     fontWeight: '700',
-    color: '#EF4444',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 40,
+  },
+  heroCard: {
+     backgroundColor: PURE_WHITE,
+     borderRadius: 24,
+     alignItems: 'center',
+     paddingVertical: 32,
+     paddingHorizontal: 20,
+     marginBottom: 20,
+     shadowColor: '#000',
+     shadowOffset: { width: 0, height: 10 },
+     shadowOpacity: 0.04,
+     shadowRadius: 20,
+     elevation: 5,
+  },
+  portraitWrap: {
+     position: 'relative',
+     marginBottom: 16,
+  },
+  portraitImage: {
+     width: 100,
+     height: 100,
+     borderRadius: 50,
+     borderWidth: 2,
+     borderColor: PURE_WHITE,
+  },
+  statusGlow: {
+     position: 'absolute',
+     bottom: 4,
+     right: 4,
+     width: 18,
+     height: 18,
+     borderRadius: 9,
+     backgroundColor: '#10B981', // green status
+     borderWidth: 3,
+     borderColor: PURE_WHITE,
+     shadowColor: '#10B981',
+     shadowOffset: { width: 0, height: 0 },
+     shadowOpacity: 0.8,
+     shadowRadius: 6,
+     elevation: 4,
+  },
+  heroName: {
+     fontSize: 22,
+     fontWeight: '800',
+     color: BRAND_NAVY,
+     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+     marginBottom: 4,
+  },
+  heroRole: {
+     fontSize: 15,
+     fontWeight: '500',
+     color: SLATE_GREY,
+  },
+  detailCard: {
+     backgroundColor: PURE_WHITE,
+     borderRadius: 24,
+     padding: 20,
+     marginBottom: 20,
+     shadowColor: '#000',
+     shadowOffset: { width: 0, height: 8 },
+     shadowOpacity: 0.03,
+     shadowRadius: 16,
+     elevation: 3,
+  },
+  infoRow: {
+     paddingVertical: 8,
+  },
+  infoLabel: {
+     fontSize: 10,
+     fontWeight: '800',
+     color: '#94A3B8',
+     letterSpacing: 1.2,
+     marginBottom: 4,
+  },
+  infoValue: {
+     fontSize: 15,
+     fontWeight: '600',
+     color: DARK_TEXT,
+  },
+  divider: {
+     height: 1,
+     backgroundColor: '#F1F5F9',
+     marginVertical: 12,
+  },
+  systemAccessWrap: {
+     flexDirection: 'row',
+     alignItems: 'center',
+  },
+  systemAccessIconBox: {
+     width: 48,
+     height: 48,
+     borderRadius: 24,
+     backgroundColor: '#F1F5F9',
+     alignItems: 'center',
+     justifyContent: 'center',
+     marginRight: 16,
+  },
+  systemAccessTextWrap: {
+     flex: 1,
+     paddingRight: 12,
+  },
+  systemAccessTitle: {
+     fontSize: 15,
+     fontWeight: '700',
+     color: BRAND_NAVY,
+     marginBottom: 2,
+  },
+  systemAccessDesc: {
+     fontSize: 12,
+     color: SLATE_GREY,
+     lineHeight: 18,
+  },
+  checkIcon: {
+     opacity: 0.8,
+  },
+  actionRow: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     paddingVertical: 4,
+  },
+  actionIconPill: {
+     width: 44,
+     height: 44,
+     borderRadius: 22,
+     backgroundColor: '#F8FAFC',
+     alignItems: 'center',
+     justifyContent: 'center',
+     marginRight: 16,
+  },
+  actionTextWrap: {
+     flex: 1,
+  },
+  actionTitle: {
+     fontSize: 15,
+     fontWeight: '600',
+     color: DARK_TEXT,
+     marginBottom: 2,
+  },
+  actionSub: {
+     fontSize: 12,
+     color: SLATE_GREY,
+  }
 });
-

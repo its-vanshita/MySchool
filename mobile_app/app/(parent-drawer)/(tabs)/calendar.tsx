@@ -7,9 +7,9 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
-import { useAdminStudentCalendarEvents } from '../../src/hooks/useAdminCalendar';
+import { useTheme } from '../../../src/context/ThemeContext';
+import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
+import { useAdminStudentCalendarEvents } from '../../../src/hooks/useAdminCalendar';
 
 // Student-centric event types only (no meetings)
 type StudentEventType = 'exam' | 'holiday' | 'event';

@@ -1,15 +1,23 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Image } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  RefreshControl,
+  Platform,
+  Image,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../../src/context/UserContext';
 import { useSharedUsers } from '../../../src/hooks/useSharedUsers';
-import { useTheme } from '../../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
+
+const BRAND_NAVY = '#153462';
+const BG_COLOR = '#F8F9FB';
 
 export default function AdminDashboardScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
   const router = useRouter();
   const { profile } = useUser();
   const { teachers, students } = useSharedUsers();
@@ -22,60 +30,20 @@ export default function AdminDashboardScreen() {
     return 'Good Evening';
   };
 
-  const todayString = () => {
-    const d = new Date();
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `Today is ${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
-  };
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => { setRefreshing(false); }, 1000);
+  }, []);
 
-  // Admin Quick Actions (6 items)
   const quickActions = [
-    {
-      icon: 'notifications' as const,
-      label: 'Assign\nNotice',
-      color: colors.primary,
-      bgColor: '#E3F2FD',
-      route: '/assign-notice',
-    },
-    {
-      icon: 'document-text' as const,
-      label: 'Leave\nApprovals',
-      color: '#D97706',
-      bgColor: '#FFFBEB',
-      route: '/admin-leave-approvals',
-    },
-    {
-      icon: 'calendar' as const,
-      label: 'Manage\nTimetable',
-      color: colors.warning,
-      bgColor: '#FFF8E1',
-      route: '/admin-manage-timetable',
-    },
-    {
-      icon: 'calendar-outline' as const,
-      label: 'Manage\nCalendar',
-      color: colors.purple,
-      bgColor: '#F3E5F5',
-      route: '/admin-manage-calendar',
-    },
-    {
-      icon: 'bar-chart' as const,
-      label: 'Syllabus\nTracking',
-      color: colors.info,
-      bgColor: '#E0F7FA',
-      route: '/admin-lesson-plans',
-    },
-    {
-      icon: 'pie-chart' as const,
-      label: 'Analytics\nDashboard',
-      color: colors.success,
-      bgColor: '#E8F5E9',
-      route: '/admin-analytics',
-    },
+    { icon: 'notifications' as const, label: 'Assign Notice', route: '/assign-notice' },
+    { icon: 'document-text-outline' as const, label: 'Leave Approvals', route: '/admin-leave-approvals' },
+    { icon: 'calendar-outline' as const, label: 'Manage Timetable', route: '/admin-manage-timetable' },
+    { icon: 'calendar' as const, label: 'Manage Calendar', route: '/admin-manage-calendar' },
+    { icon: 'bar-chart-outline' as const, label: 'Syllabus Tracking', route: '/admin-lesson-plans' },
+    { icon: 'pie-chart-outline' as const, label: 'Analytics Dashboard', route: '/admin-analytics' },
   ];
 
-  // Daily changing pseudo-metrics
   const dailyStats = React.useMemo(() => {
     const d = new Date();
     const seed = d.getFullYear() * 1000 + d.getMonth() * 100 + d.getDate();
@@ -84,249 +52,424 @@ export default function AdminDashboardScreen() {
     const teacherAttendance = 94 + (seed % 5) + ((seed % 8) / 10);
 
     return {
-      totalStudents: students.length,
+      totalStudents: students?.length || '450+',
       studentAttendance: studentAttendance.toFixed(1),
-      totalTeachers: teachers.length,
+      totalTeachers: teachers?.length || '35',
       teacherAttendance: teacherAttendance.toFixed(1),
     };
-  }, [students.length, teachers.length]);
+  }, [students, teachers]);
+
+  const adminName = profile?.name?.split(' ').pop() || 'Admin';
 
   return (
-    <ScrollView
-      style={styles.container}
+    <ScrollView 
+      style={styles.container} 
       contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={() => {
-            setRefreshing(true);
-            setTimeout(() => setRefreshing(false), 600);
-          }}
-          colors={[colors.primary]}
-          tintColor={colors.primary}
-        />
-      }
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      showsVerticalScrollIndicator={false}
     >
-      {/* Profile / Greeting Section */}
-      <View style={styles.greetingSection}>
-        <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80' }}
-          style={styles.profileImage}
-        />
-        <View style={styles.greetingTextContainer}>
-          <Text style={styles.greetingText}>
-            {greeting()}, {profile?.name?.split(' ').pop() || 'Admin'}
-          </Text>
-          <Text style={styles.roleSubtitle}>School Administrator</Text>
-          <View style={styles.todayPill}>
-            <Text style={styles.todayPillText}>{todayString()}</Text>
-          </View>
+      {/* Profile Card */}
+      <View style={styles.profileCard}>
+        <View style={styles.profileInfo}>
+          <Text style={styles.greetingHeader}>{greeting()}, {adminName}</Text>
+          <Text style={styles.roleText}>School Administrator</Text>
+        </View>
+        <View style={styles.avatarWrapper}>
+          <Image 
+            source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80' }} 
+            style={styles.avatarImage} 
+          />
+          <View style={styles.statusIndicator} />
         </View>
       </View>
 
-      <View style={styles.separator} />
-
-      {/* Quick Actions */}
+      {/* Quick Actions Scroll */}
       <Text style={styles.sectionTitle}>Quick Actions</Text>
-      <View style={styles.actionsGrid}>
-        {quickActions.map((action, idx) => (
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false} 
+        contentContainerStyle={styles.actionScrollContent}
+        style={styles.actionScroll}
+      >
+        {quickActions.map((action, index) => (
           <TouchableOpacity
-            key={idx}
+            key={index}
             style={styles.actionCard}
+            activeOpacity={0.7}
             onPress={() => {
-              if (action.route !== '#') {
-                router.push(action.route as any);
-              }
+                if (action.route && action.route !== '#') {
+                    router.push(action.route as any);
+                }
             }}
           >
-            <View style={[styles.actionIcon, { backgroundColor: action.bgColor }]}>
-              <Ionicons name={action.icon} size={28} color={action.color} />
-            </View>
-            <Text style={styles.actionLabel}>{action.label}</Text>
+            <Ionicons name={action.icon} size={28} color={BRAND_NAVY} style={{ marginBottom: 12, fontWeight: '300' }} />
+            <Text style={styles.actionCardLabel}>{action.label}</Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
 
-      {/* Daily Overview Stats */}
-      <Text style={styles.sectionTitle}>Daily Overview</Text>
-      <View style={styles.statsContainer}>
-        <TouchableOpacity 
-          style={[styles.statCard, { borderLeftColor: colors.primary }]}
-          onPress={() => router.push('/admin-attendance-list?type=students')}
-        >
-          <View style={styles.statHeader}>
-            <Ionicons name="people" size={20} color={colors.primary} />
-            <Text style={styles.statLabel}>Total Students</Text>
-          </View>
-          <Text style={styles.statValue}>{dailyStats.totalStudents}</Text>
-          <View style={styles.statFooter}>
-            <Ionicons name="trending-up" size={14} color={colors.success} />
-            <Text style={[styles.statFooterText, { color: colors.success }]}>{dailyStats.studentAttendance}% Present Today</Text>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.statCard, { borderLeftColor: colors.purple }]}
-          onPress={() => router.push('/admin-attendance-list?type=teachers')}
-        >
-          <View style={styles.statHeader}>
-            <Ionicons name="school" size={20} color={colors.purple} />
-            <Text style={styles.statLabel}>Total Teachers</Text>
-          </View>
-          <Text style={styles.statValue}>{dailyStats.totalTeachers}</Text>
-          <View style={styles.statFooter}>
-            <Ionicons name="trending-up" size={14} color={colors.success} />
-            <Text style={[styles.statFooterText, { color: colors.success }]}>{dailyStats.teacherAttendance}% Present Today</Text>
-          </View>
+      {/* Daily Overview List */}
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitleNoMargin}>Daily Overview</Text>
+        <TouchableOpacity onPress={() => router.push('/admin-attendance-list?type=students' as any)}>
+          <Text style={styles.viewAllText}>View Lists</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={{ height: 30 }} />
+      {/* Featured Overview Card - Students */}
+      <TouchableOpacity activeOpacity={0.8} onPress={() => router.push('/admin-attendance-list?type=students' as any)}>
+        <View style={styles.featuredClassCard}>
+            <View style={styles.featuredClassHeader}>
+            <Text style={styles.timeText}>Students</Text>
+            <View style={styles.liveBadge}>
+                <View style={styles.liveDotAnimated} />
+                <Text style={styles.liveText}>{dailyStats.studentAttendance}% Present</Text>
+            </View>
+            </View>
+            <View style={styles.featuredClassBody}>
+            <View style={styles.accentLine} />
+            <View style={styles.featuredClassInfo}>
+                <Text style={styles.featuredSubjectText}>Total Enrolled: {dailyStats.totalStudents}</Text>
+                <Text style={styles.featuredMetaText}>Campus Wide Overview</Text>
+            </View>
+            </View>
+        </View>
+      </TouchableOpacity>
+      
+      {/* Secondary Overview Card - Teachers */}
+       <TouchableOpacity activeOpacity={0.8} onPress={() => router.push('/admin-attendance-list?type=teachers' as any)}>
+        <View style={[styles.scheduleCard, styles.scheduleCardDimmed]}>
+            <View style={[styles.timelineStatus, { backgroundColor: '#E2E8F0' }]} />
+            <View style={styles.scheduleInfo}>
+            <View style={styles.scheduleHeaderRow}>
+                <Text style={[styles.timeText, styles.textDimmed]}>Teachers & Staff</Text>
+                <Text style={[styles.timeText, { color: '#059669', fontSize: 12 }]}>{dailyStats.teacherAttendance}% Present</Text>
+            </View>
+            <Text style={[styles.subjectText, styles.textDimmed]}>Total Faculty: {dailyStats.totalTeachers}</Text>
+            <View style={styles.scheduleMeta}>
+                <View style={styles.metaBadge}>
+                <Ionicons name="briefcase-outline" size={14} color="#64748B" />
+                <Text style={styles.metaLabel}>Academic Staff</Text>
+                </View>
+            </View>
+            </View>
+        </View>
+       </TouchableOpacity>
+
+
+      {/* Reminders Tile */}
+      <Text style={styles.sectionTitle}>Priority Reminders</Text>
+      <View style={styles.infoTile}>
+        <View style={styles.infoWrapper}>
+          <Ionicons name="alert-circle-outline" size={24} color="#D97706" />
+        </View>
+        <View style={styles.infoContent}>
+          <Text style={styles.infoContentTitle}>Approve Leave Requests</Text>
+          <Text style={styles.infoContentDesc}>You have pending leave requests from staff.</Text>
+        </View>
+      </View>
+
+      <View style={{ height: 40 }} />
     </ScrollView>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.white },
-  content: { paddingBottom: 100 },
-
-  greetingSection: {
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: BG_COLOR,
+  },
+  content: {
+    paddingTop: 16,
+  },
+  profileCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    marginHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.xxl,
-    paddingBottom: spacing.md,
-    backgroundColor: colors.white,
+    justifyContent: 'space-between',
+    marginBottom: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.02)',
   },
-  profileImage: {
+  profileInfo: {
+    flex: 1,
+    paddingRight: 16,
+  },
+  greetingHeader: {
+    fontSize: 22,
+    color: '#1E293B',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+    fontWeight: '800',
+    marginBottom: 6,
+    letterSpacing: -0.5,
+  },
+  roleText: {
+    fontSize: 15,
+    color: '#64748B',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+    fontWeight: '500',
+  },
+  avatarWrapper: {
+    position: 'relative',
+  },
+  avatarImage: {
     width: 64,
     height: 64,
-    borderRadius: 14,
+    borderRadius: 32,
     borderWidth: 2,
-    borderColor: colors.primary,
-    marginRight: spacing.lg,
+    borderColor: '#F8FAFC',
   },
-  greetingTextContainer: {
-    flex: 1,
+  statusIndicator: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#10B981',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
-  greetingText: {
-    fontSize: fontSize.xl,
-    fontWeight: '800',
-    color: colors.textPrimary,
-  },
-  roleSubtitle: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-  todayPill: {
-    backgroundColor: '#E8F5E9',
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    alignSelf: 'flex-start',
-    marginTop: spacing.sm,
-  },
-  todayPillText: {
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-    color: '#2E7D32',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginHorizontal: spacing.xl,
-    marginTop: spacing.md,
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: fontSize.lg,
+    fontSize: 18,
     fontWeight: '700',
-    color: colors.textPrimary,
-    paddingHorizontal: spacing.xl,
-    marginTop: spacing.xl,
-    marginBottom: spacing.md,
+    color: BRAND_NAVY,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+    letterSpacing: -0.3,
   },
-  actionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: spacing.lg,
-    justifyContent: 'space-between',
+  sectionTitleNoMargin: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: BRAND_NAVY,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+    letterSpacing: -0.3,
+  },
+  viewAllText: {
+    fontSize: 14,
+    color: '#3B82F6',
+    fontWeight: '600',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  actionScroll: {
+    flexGrow: 0,
+    marginBottom: 28,
+  },
+  actionScrollContent: {
+    paddingHorizontal: 20,
+    gap: 16,
   },
   actionCard: {
-    width: '31%',
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    alignItems: 'center',
-    marginBottom: spacing.md,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  actionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    width: 104,
+    paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.sm,
-  },
-  actionLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    lineHeight: 14,
-  },
-  statsContainer: {
-    paddingHorizontal: spacing.xl,
-    flexDirection: 'column',
-    gap: 0,
-  },
-  statCard: {
-    backgroundColor: '#FAFAFA',
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderLeftWidth: 4,
-    marginBottom: spacing.md,
+    borderColor: 'rgba(0,0,0,0.03)',
   },
-  statHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  statLabel: {
-    fontSize: fontSize.sm,
+  actionCardLabel: {
+    fontSize: 13,
+    color: '#334155',
     fontWeight: '600',
-    color: colors.textSecondary,
-    marginLeft: 8,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+    textAlign: 'center',
   },
-  statValue: {
-    fontSize: fontSize.xxxl,
+  featuredClassCard: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.03)',
+  },
+  featuredClassHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  featuredClassBody: {
+    flexDirection: 'row',
+  },
+  accentLine: {
+    width: 4,
+    backgroundColor: '#3B82F6',
+    borderRadius: 2,
+    marginRight: 16,
+  },
+  featuredClassInfo: {
+    flex: 1,
+  },
+  featuredSubjectText: {
+    fontSize: 20,
     fontWeight: '800',
-    color: colors.textPrimary,
+    color: '#1E293B',
     marginBottom: 8,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+    letterSpacing: -0.5,
   },
-  statFooter: {
+  featuredMetaText: {
+    fontSize: 14,
+    color: '#64748B',
+    fontWeight: '500',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  scheduleCard: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 28,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.02)',
+  },
+  scheduleCardDimmed: {
+    backgroundColor: '#F8FAFC',
+    opacity: 0.7,
+  },
+  timelineStatus: {
+    width: 6,
+    backgroundColor: BRAND_NAVY,
+  },
+  scheduleInfo: {
+    flex: 1,
+    padding: 16,
+  },
+  scheduleHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  timeText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: BRAND_NAVY,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  subjectText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#334155',
+    marginBottom: 12,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  textDimmed: {
+    color: '#94A3B8',
+  },
+  liveBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8F5E9',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 12,
+    gap: 6,
   },
-  statFooterText: {
+  liveDotAnimated: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+  },
+  liveText: {
     fontSize: 11,
     fontWeight: '700',
-    marginLeft: 4,
-    color: colors.success,
+    color: '#059669',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
+  scheduleMeta: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  metaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 6,
+  },
+  metaLabel: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  infoTile: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFFDF5',
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#FEF3C7',
+  },
+  infoWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoContentTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#92400E',
+    marginBottom: 4,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  infoContentDesc: {
+    fontSize: 13,
+    color: '#B45309',
+    lineHeight: 18,
+    fontWeight: '500',
+  }
 });
-

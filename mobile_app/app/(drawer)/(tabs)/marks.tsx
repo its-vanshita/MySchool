@@ -83,6 +83,10 @@ export default function UploadMarksScreen() {
           });
         }
       }
+      
+      // Sort the options alphabetically by label
+      opts.sort((a, b) => a.label.localeCompare(b.label));
+      
       setSubjectClasses(opts);
       if (opts.length > 0) setSelectedClass(opts[0]);
     };
@@ -305,38 +309,46 @@ export default function UploadMarksScreen() {
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Class & Section</Text>
-            {subjectClasses.map((opt) => (
-              <TouchableOpacity
-                key={opt.label}
-                style={[
-                  styles.modalOption,
-                  selectedClass?.label === opt.label && styles.modalOptionSelected,
-                ]}
-                onPress={() => {
-                  setSelectedClass(opt);
-                  setShowClassPicker(false);
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  <Ionicons
-                    name="school-outline"
-                    size={20}
-                    color={selectedClass?.label === opt.label ? colors.primary : colors.textSecondary}
-                  />
-                  <Text
-                    style={[
-                      styles.modalOptionText,
-                      selectedClass?.label === opt.label && { color: colors.primary, fontWeight: '600' },
-                    ]}
-                  >
-                    {opt.label}
-                  </Text>
-                </View>
-                {selectedClass?.label === opt.label && (
-                  <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
-                )}
-              </TouchableOpacity>
-            ))}
+            {subjectClasses.length === 0 ? (
+              <View style={{ padding: spacing.xl, alignItems: 'center' }}>
+                <Ionicons name="alert-circle-outline" size={32} color={colors.textLight} style={{ marginBottom: 8 }} />
+                <Text style={{ color: colors.textSecondary, fontSize: 16 }}>No classes assigned to you.</Text>
+                <Text style={{ color: colors.textLight, fontSize: 12, textAlign: 'center', marginTop: 4 }}>You need a timetable to enter marks.</Text>
+              </View>
+            ) : (
+              subjectClasses.map((opt) => (
+                <TouchableOpacity
+                  key={opt.label}
+                  style={[
+                    styles.modalOption,
+                    selectedClass?.label === opt.label && styles.modalOptionSelected,
+                  ]}
+                  onPress={() => {
+                    setSelectedClass(opt);
+                    setShowClassPicker(false);
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                    <Ionicons
+                      name="school-outline"
+                      size={20}
+                      color={selectedClass?.label === opt.label ? colors.primary : colors.textSecondary}
+                    />
+                    <Text
+                      style={[
+                        styles.modalOptionText,
+                        selectedClass?.label === opt.label && { color: colors.primary, fontWeight: '600' },
+                      ]}
+                    >
+                      {opt.label}
+                    </Text>
+                  </View>
+                  {selectedClass?.label === opt.label && (
+                    <Ionicons name="checkmark-circle" size={22} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              ))
+            )}
           </View>
         </TouchableOpacity>
       </Modal>

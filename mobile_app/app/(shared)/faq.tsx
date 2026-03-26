@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, LayoutAnimation, Platform, UIManager, TextInput } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import { useUser } from '../../src/context/UserContext';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 if (
   Platform.OS === 'android' &&
@@ -14,23 +13,24 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
+const BRAND_NAVY = '#153462';
+const BRAND_NAVY_LIGHT = '#214d8c';
+const BG_LIGHT = '#F8F9FB';
+
 type FAQItem = {
   id: string;
   question: string;
   answer: string;
 };
 
-type FAQCategory = {
-  title: string;
-  items: FAQItem[];
-};
-
 export default function FAQScreen() {
   const router = useRouter();
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
   const { role } = useUser();
+  const insets = useSafeAreaInsets();
+  
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>('General');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const toggleExpand = (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -56,217 +56,332 @@ export default function FAQScreen() {
   ];
 
   const studentParentFAQs: FAQItem[] = [
-    {
-      id: 'sp1',
-      question: 'How can I check my attendance?',
-      answer: 'Go to the Attendance tab. You can view your daily attendance status and monthly summary.',
-    },
-    {
-      id: 'sp2',
-      question: 'Where can I see exam results?',
-      answer: 'Exam results are published in the Marks/Results tab. You will also receive a notification when new results are declared.',
-    },
-    {
-      id: 'sp3',
-      question: 'How do I apply for leave?',
-      answer: 'Go to the Leave tab and tap on "Apply Leave". Fill in the dates and reason, then submit. You will be notified once it is approved.',
-    },
-     {
-      id: 'sp4',
-      question: 'How do I view the class timetable?',
-      answer: 'Navigate to the Timetable section from the drawer menu to see the weekly schedule.',
-    },
+    { id: 'sp1', question: 'How can I check my attendance?', answer: 'Go to the Attendance tab. You can view your daily attendance status and monthly summary.' },
+    { id: 'sp2', question: 'Where can I see exam results?', answer: 'Exam results are published in the Marks/Results tab. You will also receive a notification.' },
   ];
 
+
   const teacherFAQs: FAQItem[] = [
-    {
-      id: 't1',
-      question: 'How do I mark attendance for my class?',
-      answer: 'Go to the Attendance tab, select your class and section, then tap on the students to toggle their status. Click Submit to save.',
-    },
-    {
-      id: 't2',
-      question: 'How can I upload homework?',
-      answer: 'Navigate to "Add Homework" from your dashboard. Select the class, subject, enter details, and attach any files if necessary.',
-    },
-    {
-      id: 't3',
-      question: 'Where can I see my leave balance?',
-      answer: 'Your leave balance is displayed at the top of the "Apply Leave" screen.',
-    },
-    {
-      id: 't4',
-      question: 'How do I enter marks for students?',
-      answer: 'Go to the Marks tab, select the exam and subject. You can then enter obtained marks for each student in the list.',
-    },
+    { id: 't1', question: 'How do I mark attendance for my class?', answer: 'Go to the Attendance tab, select your class and section, then tap on the students.' },
+    { id: 't2', question: 'How can I upload homework?', answer: 'Navigate to "Add Homework" from your dashboard. Select the class, subject, enter details.' },
+    { id: 't3', question: 'How do I enter marks?', answer: 'Navigate to the Marks module on your dashboard. Select your assigned subject, class, and the exam term to input and submit the scores.' },
   ];
 
   const adminFAQs: FAQItem[] = [
-    {
-      id: 'a1',
-      question: 'How do I approve leave requests?',
-      answer: 'Go to "Leave Approvals" dashboard. You will see a list of pending requests. Swipe or tap to approve or reject.',
-    },
-    {
-      id: 'a2',
-      question: 'How can I send a notice to the whole school?',
-      answer: 'Use the "Create Notice" feature. Select "All" as the recipient group to broadcast the message to all students and staff.',
-    },
-    {
-        id: 'a3',
-        question: 'How to manage user accounts?',
-        answer: 'You can add or deactivate users from the User Management section in your admin dashboard.',
-    }
+    { id: 'a1', question: 'How do I approve leave requests?', answer: 'Go to "Leave Approvals" dashboard. You will see a list of pending requests. Swipe or tap to approve.' },
+    { id: 'a2', question: 'How can I send a notice?', answer: 'Use the "Create Notice" feature. Select "All" as the recipient group to broadcast the message.' },
   ];
-
+  
+  const allCategories = ['General', 'Account', 'Attendance', 'Marks', 'Leave'];
+  
   let faqsToDisplay = [...commonFAQs];
+  if (role === 'admin') faqsToDisplay = [...faqsToDisplay, ...adminFAQs];
+  else if (role === 'teacher') faqsToDisplay = [...faqsToDisplay, ...teacherFAQs];
+  else faqsToDisplay = [...faqsToDisplay, ...studentParentFAQs];
 
-  if (role === 'admin') {
-    faqsToDisplay = [...faqsToDisplay, ...adminFAQs];
-  } else if (role === 'teacher') {
-    faqsToDisplay = [...faqsToDisplay, ...teacherFAQs];
-  } else {
-    // Parent or Student
-    faqsToDisplay = [...faqsToDisplay, ...studentParentFAQs];
+  // Simple search filter
+  if (searchQuery.trim().length > 0) {
+    faqsToDisplay = faqsToDisplay.filter(f => 
+       f.question.toLowerCase().includes(searchQuery.toLowerCase()) || 
+       f.answer.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ title: 'Help & FAQs', headerBackTitle: 'Back' }} />
+    <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
       
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
-        </TouchableOpacity>
+      {/* Header Area */}
+      <View style={[styles.headerArea, { paddingTop: insets.top }]}>
+        <View style={styles.headerTop}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Support Hub</Text>
+            <View style={{ width: 40 }} />
+        </View>
+
+        <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color="#64748B" style={styles.searchIcon} />
+            <TextInput 
+               style={styles.searchInput}
+               placeholder="Search for help..."
+               placeholderTextColor="#94A3B8"
+               value={searchQuery}
+               onChangeText={setSearchQuery}
+            />
+        </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-            <Text style={styles.headerTitle}>Frequently Asked Questions</Text>
-            <Text style={styles.headerSubtitle}>
-                Find answers to common questions about using the app.
-            </Text>
-        </View>
+      {/* Categories */}
+      <View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
+              {allCategories.map(cat => (
+                  <TouchableOpacity 
+                     key={cat} 
+                     style={[styles.categoryChip, activeCategory === cat && styles.categoryChipActive]}
+                     onPress={() => setActiveCategory(cat)}
+                  >
+                      <Text style={[styles.categoryChipText, activeCategory === cat && styles.categoryChipTextActive]}>
+                          {cat}
+                      </Text>
+                  </TouchableOpacity>
+              ))}
+          </ScrollView>
+      </View>
 
-        {faqsToDisplay.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <TouchableOpacity
-              style={styles.questionHeader}
-              onPress={() => toggleExpand(item.id)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.questionText}>{item.question}</Text>
-              <Ionicons
-                name={expandedId === item.id ? 'chevron-up' : 'chevron-down'}
-                size={20}
-                color={colors.textLight}
-              />
-            </TouchableOpacity>
-            {expandedId === item.id && (
-              <View style={styles.answerContainer}>
-                <Text style={styles.answerText}>{item.answer}</Text>
-              </View>
-            )}
-          </View>
-        ))}
-        
-        <View style={styles.supportContainer}>
-            <Ionicons name="headset-outline" size={24} color={colors.primary} />
-            <Text style={styles.supportText}>Still need help? Contact support</Text>
-        </View>
+      {/* FAQ List */}
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {faqsToDisplay.map((item) => {
+          const isExpanded = expandedId === item.id;
+          return (
+            <View key={item.id} style={styles.cardWrapper}>
+                {isExpanded && <View style={styles.activeBar} />}
+                <TouchableOpacity
+                style={[styles.card, isExpanded && styles.cardExpanded]}
+                onPress={() => toggleExpand(item.id)}
+                activeOpacity={0.8}
+                >
+                <View style={styles.questionHeader}>
+                    <Text style={[styles.questionText, isExpanded && { color: BRAND_NAVY }]}>{item.question}</Text>
+                    <Ionicons
+                    name={isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'}
+                    size={20}
+                    color={isExpanded ? BRAND_NAVY : '#64748B'}
+                    style={{ opacity: 0.8 }}
+                    />
+                </View>
+                {isExpanded && (
+                    <View style={styles.answerContainer}>
+                        <Text style={styles.answerText}>{item.answer}</Text>
+                    </View>
+                )}
+                </TouchableOpacity>
+            </View>
+          );
+        })}
       </ScrollView>
-    </SafeAreaView>
+
+      {/* Support Card */}
+      <View style={[styles.footerContainer, { paddingBottom: Math.max(insets.bottom, 20) + 16 }]}>
+          <LinearGradient
+            colors={[BRAND_NAVY, BRAND_NAVY_LIGHT]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.supportCard}
+          >
+              <View style={styles.supportIconWrapper}>
+                 <Ionicons name="headset" size={28} color="#FFFFFF" />
+              </View>
+              <View style={styles.supportTextContent}>
+                  <Text style={styles.supportCardText}>Still have questions? Our team is here to help!</Text>
+                  <TouchableOpacity style={styles.supportButton} activeOpacity={0.9}>
+                      <Text style={styles.supportButtonText}>Contact Support</Text>
+                  </TouchableOpacity>
+              </View>
+          </LinearGradient>
+      </View>
+    </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB', // Light gray background
+    backgroundColor: BG_LIGHT,
   },
-  topBar: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+  headerArea: {
+    backgroundColor: BRAND_NAVY,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    zIndex: 10,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  scrollContent: {
-    padding: spacing.md,
-    paddingTop: 0,
-    paddingBottom: spacing.xxl,
-  },
-  header: {
-    marginBottom: spacing.lg,
   },
   headerTitle: {
-    fontSize: fontSize.xl,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
-  headerSubtitle: {
-    fontSize: fontSize.md,
-    color: colors.textLight,
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 52,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.sm,
-    overflow: 'hidden',
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#0F172A',
+    height: '100%',
+  },
+  categoryScroll: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 16,
+  },
+  categoryChip: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    marginRight: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    elevation: 2, // Android shadow
-    shadowColor: '#000', // iOS shadow
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
+    elevation: 1,
+  },
+  categoryChipActive: {
+    backgroundColor: '#E0F2FE', // Light blue background
+    borderColor: '#BAE6FD',
+  },
+  categoryChipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  categoryChipTextActive: {
+    color: BRAND_NAVY,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 180, // High clearance ensure nothing hides behind floating absolute card
+  },
+  cardWrapper: {
+      flexDirection: 'row',
+      marginBottom: 16,
+      backgroundColor: '#FFFFFF',
+      borderRadius: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.06,
+      shadowRadius: 12,
+      elevation: 3,
+  },
+  activeBar: {
+      width: 4,
+      backgroundColor: BRAND_NAVY,
+      borderTopLeftRadius: 16,
+      borderBottomLeftRadius: 16,
+  },
+  card: {
+    flex: 1,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+  },
+  cardExpanded: {
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
   },
   questionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: spacing.md,
-    backgroundColor: colors.white,
+    padding: 20,
   },
   questionText: {
-    fontSize: fontSize.md,
-    fontWeight: '600',
-    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1E293B',
     flex: 1,
-    paddingRight: spacing.sm,
+    paddingRight: 16,
+    lineHeight: 22,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
   answerContainer: {
-    padding: spacing.md,
-    paddingTop: 0,
-    backgroundColor: colors.white,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   answerText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    lineHeight: 20,
+    fontSize: 15,
+    color: '#475569',
+    lineHeight: 24,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
-  supportContainer: {
-      marginTop: spacing.xl,
-      alignItems: 'center',
-      justifyContent: 'center',
+  footerContainer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      paddingHorizontal: 16,
+      paddingTop: 24, // extra shadow space
+      zIndex: 100, // keep on top
+  },
+  supportCard: {
       flexDirection: 'row',
-      gap: spacing.sm,
-      opacity: 0.7
+      alignItems: 'center',
+      borderRadius: 24,
+      padding: 20,
+      shadowColor: '#153462',
+      shadowOffset: { width: 0, height: 12 },
+      shadowOpacity: 0.35,
+      shadowRadius: 24,
+      elevation: 12,
   },
-  supportText: {
-      color: colors.primary,
-      fontWeight: '600'
+  supportIconWrapper: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 16,
+  },
+  supportTextContent: {
+      flex: 1,
+  },
+  supportCardText: {
+      color: '#FFFFFF',
+      fontSize: 15,
+      fontWeight: '600',
+      marginBottom: 12,
+      lineHeight: 22,
+  },
+  supportButton: {
+      backgroundColor: '#FFFFFF',
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 20,
+      alignSelf: 'flex-start',
+  },
+  supportButtonText: {
+      color: BRAND_NAVY,
+      fontSize: 14,
+      fontWeight: '700',
   }
 });

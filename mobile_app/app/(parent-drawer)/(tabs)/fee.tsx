@@ -1,14 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Platform,
+  StatusBar
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
+import { Stack } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// Premium Theme Variables
+const BRAND_NAVY = '#153462';
+const EMERALD = '#10B981';
+const CORAL_RED = '#EF4444';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const DARK_TEXT = '#1E293B';
+const SOFT_BG = '#F1F5F9';
 
 const DEMO_FEE_STRUCTURE = [
   {
@@ -51,287 +64,366 @@ const DEMO_FEE_STRUCTURE = [
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const STATUS_CONFIG = {
-  paid: { label: 'Paid', color: '#2E7D32', bgColor: '#E8F5E9', icon: 'checkmark-circle' as const },
-  pending: { label: 'Pending', color: '#E65100', bgColor: '#FFF3E0', icon: 'time' as const },
-  upcoming: { label: 'Upcoming', color: '#1565C0', bgColor: '#E3F2FD', icon: 'calendar' as const },
-  overdue: { label: 'Overdue', color: '#C62828', bgColor: '#FFEBEE', icon: 'alert-circle' as const },
-};
+function isOverdue(dateStr: string) {
+  return new Date(dateStr) < new Date();
+}
 
-export default function ParentFeeScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
+export default function FeeManagementScreen() {
+  const insets = useSafeAreaInsets();
+  
   const totalFee = DEMO_FEE_STRUCTURE.reduce((sum, f) => sum + f.amount, 0);
   const paidAmount = DEMO_FEE_STRUCTURE
     .filter((f) => f.status === 'paid')
     .reduce((sum, f) => sum + f.amount, 0);
   const pendingAmount = totalFee - paidAmount;
+  const progressPercent = Math.round((paidAmount / totalFee) * 100);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Summary Card */}
-      <View style={styles.summaryCard}>
-        <Text style={styles.summaryTitle}>Fee Summary</Text>
-        <Text style={styles.summarySubtitle}>Arjun Sharma • Class 8-B</Text>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: BRAND_NAVY },
+          headerShadowVisible: false,
+          headerTintColor: PURE_WHITE,
+          headerTitle: 'Fee Management',
+          headerTitleStyle: {
+            fontWeight: '700',
+            fontSize: 20,
+            fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+          },
+        }}
+      />
 
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryItem}>
-            <View style={[styles.summaryDot, { backgroundColor: '#2E7D32' }]} />
-            <View>
-              <Text style={styles.summaryAmount}>₹{paidAmount.toLocaleString()}</Text>
-              <Text style={styles.summaryLabel}>Paid</Text>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        
+        {/* Background Extension for Hero Card Integration */}
+        <View style={styles.headerExtension} />
+
+        {/* Hero Summary Card */}
+        <View style={styles.heroCard}>
+          <Text style={styles.heroTitle}>Academic Year 2025-2026</Text>
+          <Text style={styles.heroSubtitle}>Arjun Sharma • Class 8-B</Text>
+
+          <View style={styles.metricsRow}>
+            <View style={styles.metricItem}>
+              <Text style={styles.metricLabel}>PAID</Text>
+              <Text style={styles.metricValue}>₹{paidAmount.toLocaleString()}</Text>
+            </View>
+            <View style={styles.metricDivider} />
+            <View style={styles.metricItem}>
+              <Text style={styles.metricLabel}>PENDING</Text>
+              <Text style={styles.metricValuePending}>₹{pendingAmount.toLocaleString()}</Text>
+            </View>
+            <View style={styles.metricDivider} />
+            <View style={styles.metricItem}>
+              <Text style={styles.metricLabel}>TOTAL</Text>
+              <Text style={styles.metricValue}>₹{totalFee.toLocaleString()}</Text>
             </View>
           </View>
-          <View style={styles.summaryDivider} />
-          <View style={styles.summaryItem}>
-            <View style={[styles.summaryDot, { backgroundColor: '#E65100' }]} />
-            <View>
-              <Text style={styles.summaryAmount}>₹{pendingAmount.toLocaleString()}</Text>
-              <Text style={styles.summaryLabel}>Pending</Text>
+
+          {/* Progress Bar Container */}
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBarTrack}>
+              <LinearGradient
+                colors={[BRAND_NAVY, EMERALD]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.progressBarFill, { width: `${progressPercent}%` }]}
+              />
             </View>
-          </View>
-          <View style={styles.summaryDivider} />
-          <View style={styles.summaryItem}>
-            <View style={[styles.summaryDot, { backgroundColor: '#1565C0' }]} />
-            <View>
-              <Text style={styles.summaryAmount}>₹{totalFee.toLocaleString()}</Text>
-              <Text style={styles.summaryLabel}>Total</Text>
-            </View>
+            <Text style={styles.progressIndicator}>{progressPercent}% Funded</Text>
           </View>
         </View>
 
-        {/* Progress Bar */}
-        <View style={styles.progressBg}>
-          <View
-            style={[
-              styles.progressFill,
-              { width: `${Math.round((paidAmount / totalFee) * 100)}%` as any },
-            ]}
-          />
+        {/* Payment Details List */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Payment Details</Text>
         </View>
-        <Text style={styles.progressText}>
-          {Math.round((paidAmount / totalFee) * 100)}% paid
-        </Text>
-      </View>
 
-      {/* Fee Items */}
-      <Text style={styles.sectionTitle}>Payment Details</Text>
+        <View style={styles.listContainer}>
+          {DEMO_FEE_STRUCTURE.map((fee) => {
+            const dueDate = new Date(fee.dueDate + 'T00:00:00');
+            const dueDateStr = `${MONTHS[dueDate.getMonth()]} ${dueDate.getDate()}, ${dueDate.getFullYear()}`;
+            const overdue = fee.status !== 'paid' && isOverdue(fee.dueDate);
 
-      {DEMO_FEE_STRUCTURE.map((fee) => {
-        const config = STATUS_CONFIG[fee.status];
-        const dueDate = new Date(fee.dueDate + 'T00:00:00');
-        const dueDateStr = `${MONTHS[dueDate.getMonth()]} ${dueDate.getDate()}, ${dueDate.getFullYear()}`;
+            return (
+              <View key={fee.id} style={styles.feeCard}>
+                <View style={styles.feeTopRow}>
+                  <View style={styles.feeTitleContainer}>
+                    <Text style={styles.feeTerm}>{fee.term}</Text>
+                    <Text style={[styles.feeDue, overdue ? styles.feeDueOverdue : null]}>
+                      Due: {dueDateStr}
+                    </Text>
+                  </View>
 
-        return (
-          <View key={fee.id} style={styles.feeCard}>
-            <View style={styles.feeTop}>
-              <View style={[styles.feeIcon, { backgroundColor: config.bgColor }]}>
-                <Ionicons name={config.icon} size={22} color={config.color} />
+                  {fee.status === 'paid' && (
+                    <View style={styles.paidBadge}>
+                      <Ionicons name="checkmark-circle" size={16} color={EMERALD} />
+                      <Text style={styles.paidBadgeText}>Paid</Text>
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.feeBottomRow}>
+                  <Text style={styles.feeAmount}>₹{fee.amount.toLocaleString()}</Text>
+                  
+                  {fee.status === 'paid' && fee.receiptNo && (
+                    <TouchableOpacity style={styles.receiptButton} activeOpacity={0.7}>
+                      <Ionicons name="document-text-outline" size={16} color={BRAND_NAVY} style={{ strokeWidth: 1.5 } as any} />
+                      <Text style={styles.receiptButtonText}>Receipt</Text>
+                    </TouchableOpacity>
+                  )}
+                  
+                  {fee.status === 'pending' && (
+                    <TouchableOpacity style={styles.payNowButton} activeOpacity={0.8}>
+                      <View style={styles.payNowInner}>
+                        <Text style={styles.payNowText}>Pay Now</Text>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                  
+                  {fee.status === 'upcoming' && (
+                    <View style={styles.upcomingBadge}>
+                      <Text style={styles.upcomingText}>Upcoming</Text>
+                    </View>
+                  )}
+                </View>
               </View>
-              <View style={styles.feeInfo}>
-                <Text style={styles.feeTerm}>{fee.term}</Text>
-                <Text style={styles.feeDue}>Due: {dueDateStr}</Text>
-              </View>
-              <View style={[styles.statusBadge, { backgroundColor: config.bgColor }]}>
-                <Text style={[styles.statusText, { color: config.color }]}>{config.label}</Text>
-              </View>
-            </View>
+            );
+          })}
+        </View>
 
-            <View style={styles.feeBottom}>
-              <Text style={styles.feeAmount}>₹{fee.amount.toLocaleString()}</Text>
-              {fee.status === 'paid' && fee.receiptNo && (
-                <TouchableOpacity style={styles.receiptBtn}>
-                  <Ionicons name="receipt-outline" size={14} color={colors.primary} />
-                  <Text style={styles.receiptText}>{fee.receiptNo}</Text>
-                </TouchableOpacity>
-              )}
-              {fee.status === 'pending' && (
-                <TouchableOpacity style={styles.payBtn}>
-                  <Text style={styles.payBtnText}>Pay Now</Text>
-                  <Ionicons name="arrow-forward" size={14} color={colors.white} />
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-        );
-      })}
-
-      <View style={{ height: 30 }} />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F7FA' },
-  content: { paddingBottom: 100 },
-
-  summaryCard: {
-    backgroundColor: colors.white,
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 20,
-    padding: 20,
-    elevation: 3,
-    shadowColor: '#1565C0',
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: BG_LIGHT,
   },
-  summaryTitle: {
+  headerExtension: {
+    backgroundColor: BRAND_NAVY,
+    height: 60,
+    width: '100%',
+    position: 'absolute',
+    top: 0,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  content: {
+    paddingBottom: 100,
+  },
+  
+  // Hero Card
+  heroCard: {
+    backgroundColor: PURE_WHITE,
+    marginHorizontal: 20,
+    marginTop: 10,
+    borderRadius: 24,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
+    elevation: 5,
+  },
+  heroTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: colors.textPrimary,
+    color: DARK_TEXT,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
-  summarySubtitle: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    marginTop: 2,
-    marginBottom: 16,
+  heroSubtitle: {
+    fontSize: 14,
+    color: SLATE_GREY,
+    marginTop: 4,
+    marginBottom: 24,
+    fontWeight: '500',
   },
-  summaryRow: {
+  metricsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  summaryItem: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 24,
   },
-  summaryDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+  metricItem: {
+    alignItems: 'center',
   },
-  summaryAmount: {
-    fontSize: 15,
+  metricLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: SLATE_GREY,
+    letterSpacing: 1,
+    marginBottom: 6,
+  },
+  metricValue: {
+    fontSize: 16,
     fontWeight: '800',
-    color: colors.textPrimary,
+    color: DARK_TEXT,
   },
-  summaryLabel: {
-    fontSize: 11,
-    color: colors.textLight,
+  metricValuePending: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: BRAND_NAVY,
   },
-  summaryDivider: {
+  metricDivider: {
     width: 1,
-    height: 30,
-    backgroundColor: '#E5E7EB',
-  },
-  progressBg: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#F3F4F6',
+    height: 24,
+    backgroundColor: '#E2E8F0',
     marginTop: 16,
+  },
+  progressContainer: {
+    marginTop: 4,
+  },
+  progressBarTrack: {
+    height: 10,
+    backgroundColor: SOFT_BG,
+    borderRadius: 5,
     overflow: 'hidden',
   },
-  progressFill: {
+  progressBarFill: {
     height: '100%',
-    borderRadius: 4,
-    backgroundColor: '#2E7D32',
+    borderRadius: 5,
   },
-  progressText: {
-    fontSize: 11,
-    color: colors.textLight,
-    marginTop: 6,
+  progressIndicator: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: SLATE_GREY,
+    marginTop: 8,
     textAlign: 'right',
   },
 
+  // Payment Details Section
+  sectionHeader: {
+    paddingHorizontal: 24,
+    marginTop: 32,
+    marginBottom: 16,
+  },
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: DARK_TEXT,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  listContainer: {
     paddingHorizontal: 20,
-    marginTop: 22,
-    marginBottom: 12,
+    gap: 16,
   },
-
   feeCard: {
-    backgroundColor: colors.white,
-    marginHorizontal: 16,
-    marginBottom: 10,
-    borderRadius: 16,
-    padding: 14,
-    elevation: 1,
+    backgroundColor: PURE_WHITE,
+    borderRadius: 20,
+    padding: 20,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
+    borderWidth: 0,
   },
-  feeTop: {
+  feeTopRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
-  feeIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
+  feeTitleContainer: {
+    flex: 1,
+    paddingRight: 12,
   },
-  feeInfo: { flex: 1 },
   feeTerm: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: DARK_TEXT,
+    marginBottom: 4,
   },
   feeDue: {
-    fontSize: 12,
-    color: colors.textLight,
-    marginTop: 2,
+    fontSize: 13,
+    color: SLATE_GREY,
+    fontWeight: '500',
   },
-  statusBadge: {
+  feeDueOverdue: {
+    color: CORAL_RED,
+    fontWeight: '600',
+  },
+  paidBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  feeBottom: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-  },
-  feeAmount: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: colors.textPrimary,
-  },
-  receiptBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: 4,
-    backgroundColor: '#E3F2FD',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
   },
-  receiptText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.primary,
-  },
-  payBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: colors.primary,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 10,
-  },
-  payBtnText: {
+  paidBadgeText: {
     fontSize: 12,
     fontWeight: '700',
-    color: colors.white,
+    color: EMERALD,
   },
+  feeBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: SOFT_BG,
+  },
+  feeAmount: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: DARK_TEXT,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  receiptButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  receiptButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: BRAND_NAVY,
+  },
+  payNowButton: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: BRAND_NAVY,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  payNowInner: {
+    backgroundColor: BRAND_NAVY,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.15)', // Subtle inner glow effect
+  },
+  payNowText: {
+    color: PURE_WHITE,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  upcomingBadge: {
+    backgroundColor: SOFT_BG,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  upcomingText: {
+    color: SLATE_GREY,
+    fontSize: 13,
+    fontWeight: '600',
+  }
 });
-

@@ -5,12 +5,21 @@ import {
   StyleSheet,
   SectionList,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import { Stack, useRouter } from 'expo-router';
 import { useNotificationBadge } from '../../src/context/NotificationContext';
 import { useUser } from '../../src/context/UserContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// Premium Theme Variables
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const DARK_TEXT = '#1E293B';
+const SUCCESS_GREEN = '#10B981';
 
 interface Notification {
   id: string;
@@ -22,15 +31,15 @@ interface Notification {
   read: boolean;
 }
 
-const ICON_MAP: Record<Notification['type'], { name: keyof typeof Ionicons.glyphMap; color: string; bg: string }> = {
-  leave: { name: 'checkmark-circle', color: '#10B981', bg: '#D1FAE5' },
-  homework: { name: 'document-text', color: '#3B82F6', bg: '#DBEAFE' },
-  message: { name: 'chatbubble-ellipses', color: '#3B82F6', bg: '#DBEAFE' },
-  notice: { name: 'megaphone', color: '#7C3AED', bg: '#EDE9FE' },
-  urgent: { name: 'alert-circle', color: '#EF4444', bg: '#FEE2E2' },
-  announcement: { name: 'megaphone', color: '#3B82F6', bg: '#DBEAFE' },
-  attendance: { name: 'checkmark-circle', color: '#10B981', bg: '#D1FAE5' },
-  general: { name: 'notifications', color: '#6B7280', bg: '#F3F4F6' },
+const ICON_MAP: Record<Notification['type'], { name: keyof typeof Ionicons.glyphMap }> = {
+  leave: { name: 'document-text-outline' },
+  homework: { name: 'book-outline' },
+  message: { name: 'chatbubble-outline' },
+  notice: { name: 'megaphone-outline' },
+  urgent: { name: 'alert-circle-outline' },
+  announcement: { name: 'megaphone-outline' },
+  attendance: { name: 'checkmark-circle-outline' },
+  general: { name: 'notifications-outline' },
 };
 
 const ADMIN_NOTIFICATIONS: Notification[] = [
@@ -139,31 +148,46 @@ const DUMMY_NOTIFICATIONS: Notification[] = [
 ];
 
 function NotificationItem({ item, onPress }: { item: Notification; onPress: () => void }) {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-const icon = ICON_MAP[item.type] ?? ICON_MAP.general;
+  const icon = ICON_MAP[item.type] ?? ICON_MAP.general;
+
+  // Clean title
+  let cleanTitle = item.title;
+  if (cleanTitle.startsWith('New Announcement: ')) {
+    cleanTitle = cleanTitle.replace('New Announcement: ', '');
+  } else if (cleanTitle.startsWith('New Announcement:')) {
+    cleanTitle = cleanTitle.replace('New Announcement:', '');
+  }
+
+  const isLeaveApproved = cleanTitle.toLowerCase() === 'leave approved';
 
   return (
     <TouchableOpacity
-      style={[styles.card, !item.read && styles.cardUnread]}
+      style={styles.card}
       activeOpacity={0.7}
       onPress={onPress}
     >
-      <View style={[styles.iconCircle, { backgroundColor: icon.bg }]}>
-        <Ionicons name={icon.name} size={20} color={icon.color} />
-      </View>
-      <View style={styles.cardContent}>
-        <View style={styles.cardHeader}>
-          <Text style={[styles.cardTitle, !item.read && styles.cardTitleUnread]} numberOfLines={1}>
-            {item.title}
-          </Text>
-          <Text style={styles.cardTime}>{item.time}</Text>
+      {isLeaveApproved && <View style={styles.cardAccentLine} />}
+      <View style={styles.cardInner}>
+        <View style={styles.iconContainer}>
+          <Ionicons name={icon.name} size={24} color={BRAND_NAVY} />
         </View>
-        <Text style={styles.cardMessage} numberOfLines={2}>
-          {item.message}
-        </Text>
+        <View style={styles.cardContent}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle} numberOfLines={1}>
+              {cleanTitle}
+            </Text>
+            <Text style={styles.cardTime}>{item.time}</Text>
+          </View>
+          <Text style={styles.cardMessage} numberOfLines={2}>
+            {item.message}
+          </Text>
+        </View>
+        {!item.read && (
+          <View style={styles.unreadContainer}>
+             <View style={styles.unreadDot} />
+          </View>
+        )}
       </View>
-      {!item.read && <View style={styles.unreadDot} />}
     </TouchableOpacity>
   );
 }
@@ -174,8 +198,8 @@ interface NotifSection {
 }
 
 export default function NotificationsScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { role } = useUser();
   const { notifications: ctxNotifications, setUnreadCount } = useNotificationBadge();
   const baseDummies = role === 'admin' ? ADMIN_NOTIFICATIONS : DUMMY_NOTIFICATIONS;
@@ -240,22 +264,38 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Top bar */}
-      <View style={styles.topBar}>
-        <View style={styles.topBarLeft}>
-          {unreadCount > 0 && (
-            <View style={styles.newBadge}>
-              <Text style={styles.newBadgeText}>{unreadCount} NEW</Text>
-            </View>
-          )}
+      <Stack.Screen 
+        options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: BRAND_NAVY },
+          headerTintColor: PURE_WHITE,
+          headerTitle: 'Notifications',
+          headerTitleStyle: { 
+             fontWeight: '700', 
+             fontSize: 20, 
+             fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+          },
+          headerLeft: () => (
+             <TouchableOpacity style={{ marginLeft: 8, padding: 8 }} onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={24} color={PURE_WHITE} />
+             </TouchableOpacity>
+          )
+        }} 
+      />
+
+      {/* Top Utility Bar */}
+      <View style={styles.topUtilityBar}>
+        <View style={styles.badgeContainer}>
+          <Text style={styles.badgeText}>{unreadCount} NEW</Text>
         </View>
         {unreadCount > 0 && (
-          <TouchableOpacity onPress={markAllAsRead}>
+          <TouchableOpacity onPress={markAllAsRead} activeOpacity={0.7}>
             <Text style={styles.markAllText}>Mark all as read</Text>
           </TouchableOpacity>
         )}
       </View>
 
+      {/* Notification Feed */}
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}
@@ -265,7 +305,7 @@ export default function NotificationsScreen() {
         renderItem={({ item }) => (
           <NotificationItem item={item} onPress={() => markAsRead(item.id)} />
         )}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={styles.feedContent}
         showsVerticalScrollIndicator={false}
         stickySectionHeadersEnabled={false}
       />
@@ -273,126 +313,133 @@ export default function NotificationsScreen() {
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FB',
+    backgroundColor: BG_LIGHT,
   },
-
-  /* Top bar */
-  topBar: {
+  topUtilityBar: {
+    backgroundColor: PURE_WHITE,
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
+    zIndex: 10,
   },
-  topBarLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  newBadge: {
-    backgroundColor: '#DBEAFE',
-    borderRadius: 12,
+  badgeContainer: {
+    backgroundColor: BRAND_NAVY,
     paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
-  newBadgeText: {
-    fontSize: 11,
+  badgeText: {
+    color: PURE_WHITE,
+    fontSize: 12,
     fontWeight: '800',
-    color: colors.primary,
+    letterSpacing: 0.5,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
   markAllText: {
-    fontSize: fontSize.sm,
-    color: colors.primary,
-    fontWeight: '600',
+    color: BRAND_NAVY,
+    fontSize: 13,
+    fontWeight: '700',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
-
-  /* List */
-  list: {
-    paddingHorizontal: spacing.lg,
+  feedContent: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
     paddingBottom: 40,
   },
-
-  /* Section header */
   sectionHeader: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
-    color: colors.textLight,
-    letterSpacing: 1,
-    marginTop: spacing.xl,
-    marginBottom: spacing.sm,
-    paddingLeft: 2,
+    color: SLATE_GREY,
+    letterSpacing: 1.2,
+    marginTop: 24,
+    marginBottom: 16,
+    marginLeft: 4,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
-
-  /* Card */
   card: {
+    backgroundColor: PURE_WHITE,
+    borderRadius: 16,
+    marginBottom: 16,
     flexDirection: 'row',
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.sm,
-    alignItems: 'flex-start',
-    borderWidth: 1,
-    borderColor: 'transparent',
-    elevation: 1,
+    overflow: 'hidden',
     shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.04,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 16,
+    elevation: 3,
   },
-  cardUnread: {
-    backgroundColor: '#EBF2FF',
-    borderColor: '#BDD4F7',
+  cardAccentLine: {
+    width: 4,
+    backgroundColor: SUCCESS_GREEN,
   },
-  iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  cardInner: {
+    flex: 1,
+    flexDirection: 'row',
+    padding: 20,
+    alignItems: 'center',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F8FAFC',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing.md,
-    marginTop: 2,
+    marginRight: 16,
   },
   cardContent: {
     flex: 1,
+    justifyContent: 'center',
   },
   cardHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    alignItems: 'center',
+    marginBottom: 6,
   },
   cardTitle: {
-    fontSize: fontSize.md,
-    fontWeight: '600',
-    color: colors.textPrimary,
+    fontSize: 15,
+    fontWeight: '700',
+    color: DARK_TEXT,
     flex: 1,
-    marginRight: spacing.sm,
-  },
-  cardTitleUnread: {
-    fontWeight: '800',
-    color: '#1E293B',
+    marginRight: 8,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+    letterSpacing: -0.2,
   },
   cardTime: {
-    fontSize: 10,
-    color: colors.textLight,
+    fontSize: 12,
+    color: SLATE_GREY,
     fontWeight: '500',
   },
   cardMessage: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    lineHeight: 19,
+    fontSize: 14,
+    color: SLATE_GREY,
+    lineHeight: 20,
+    fontWeight: '400',
+  },
+  unreadContainer: {
+    marginLeft: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.primary,
-    marginLeft: spacing.sm,
-    marginTop: 6,
+    backgroundColor: BRAND_NAVY,
+    shadowColor: BRAND_NAVY,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
   },
 });

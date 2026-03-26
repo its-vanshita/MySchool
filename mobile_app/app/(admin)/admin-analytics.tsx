@@ -1,425 +1,553 @@
-import React, { useState, useMemo } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  Platform,
   Dimensions,
-  TextInput,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { PieChart } from 'react-native-chart-kit';
-import { useSharedMarks, DEMO_EXAMS } from '../../src/hooks/useSharedMarks';
-import { useTheme } from '../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { Stack, useRouter } from 'expo-router';
 
-const screenWidth = Dimensions.get('window').width;
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const DARK_TEXT = '#1E293B';
+const TREND_UP = '#10B981';
+const TREND_FLAT = '#F59E0B';
+const TREND_DOWN = '#EF4444';
 
-const CLASSES = ['Class 10A', 'Class 9C', 'Class 8B'];
-const PERIODS = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
+const { width } = Dimensions.get('window');
 
-const CLASS_SUBJECTS: Record<string, string[]> = {
-  'Class 10A': ['Mathematics', 'English'],
-  'Class 9C': ['Science'],
-  'Class 8B': ['Social Studies'],
-};
+type PeriodType = 'Today' | 'Week' | 'Month';
 
-export default function AdminAnalyticsScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-  const { store, adminUpdateMarks, adminUnlockPortal } = useSharedMarks();
-
-  const [activeTab, setActiveTab] = useState<'analytics' | 'marks'>('analytics');
-
-  const [selectedClass, setSelectedClass] = useState(CLASSES[0]);
-  const [selectedPeriod, setSelectedPeriod] = useState(PERIODS[0]);
-  const [selectedExam, setSelectedExam] = useState(DEMO_EXAMS[0].id);
-
-  // Edit Mark state
-  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
-  const [editingMark, setEditingMark] = useState('');
-
-  // 1. Mock Attendance Data based on Period
-  const attendanceData = useMemo(() => {
-    let present = 85;
-    let absent = 10;
-    let leave = 5;
-
-    if (selectedPeriod === 'Weekly') { present = 80; absent = 12; leave = 8; }
-    if (selectedPeriod === 'Monthly') { present = 88; absent = 7; leave = 5; }
-    if (selectedPeriod === 'Yearly') { present = 92; absent = 5; leave = 3; }
-
-    return [
-      { name: 'Present', population: present, color: colors.success, legendFontColor: colors.textPrimary, legendFontSize: 12 },
-      { name: 'Absent', population: absent, color: colors.danger, legendFontColor: colors.textPrimary, legendFontSize: 12 },
-      { name: 'On Leave', population: leave, color: colors.warning, legendFontColor: colors.textPrimary, legendFontSize: 12 },
-    ];
-  }, [selectedPeriod]);
-
-  // 2. Compute Marks for Selected Class and Exam
-  const subjects = CLASS_SUBJECTS[selectedClass] || [];
-  
-  // Aggregate students and find top performers
-  // A top student logic: we combine their marks across subjects for this exam
-  const studentStats = useMemo(() => {
-    const stats: Record<string, { name: string; avatar: string; totalMarks: number; maxMarks: number }> = {};
-    
-    subjects.forEach(subject => {
-      const classKey = `${subject}|${selectedClass}`;
-      const group = store.find(s => s.classKey === classKey && s.examId === selectedExam);
-      if (group) {
-        group.students.forEach(st => {
-          if (!stats[st.id]) {
-            stats[st.id] = { name: st.name, avatar: st.avatar, totalMarks: 0, maxMarks: 0 };
-          }
-          if (st.marks && st.status === 'entered') {
-            stats[st.id].totalMarks += parseInt(st.marks, 10);
-            stats[st.id].maxMarks += st.maxMarks;
-          }
-        });
-      }
-    });
-    
-    const list = Object.values(stats);
-    list.sort((a, b) => b.totalMarks - a.totalMarks);
-    return list;
-  }, [store, selectedClass, selectedExam, subjects]);
-
-  const schoolStats = useMemo(() => {
-    const stats: Record<string, { name: string; avatar: string; totalMarks: number; maxMarks: number }> = {};
-    
-    store.forEach(group => {
-      // Aggregate across all classes and subjects
-      group.students.forEach(st => {
-        if (!stats[st.id]) {
-          stats[st.id] = { name: st.name, avatar: st.avatar, totalMarks: 0, maxMarks: 0 };
-        }
-        if (st.marks && st.status === 'entered') {
-          stats[st.id].totalMarks += parseInt(st.marks, 10);
-          stats[st.id].maxMarks += st.maxMarks;
-        }
-      });
-    });
-
-    const list = Object.values(stats);
-    list.sort((a, b) => b.totalMarks - a.totalMarks);
-    return list;
-  }, [store]);
-
-  const topStudent = studentStats[0];
-  const wholeSchoolTopper = schoolStats[0];
-
-  const handleAdminMarkSave = (classKey: string, studentId: string) => {
-    if (!editingMark) return;
-    adminUpdateMarks(classKey, selectedExam, studentId, editingMark);
-    Alert.alert('Success', 'Mark updated successfully by admin override.');
-    setEditingStudentId(null);
-  };
+export default function AdminAnalytics() {
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const [activePeriod, setActivePeriod] = useState<PeriodType>('Today');
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        
-        {/* Global Filters */}
-        <View style={styles.filterRow}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-            {CLASSES.map(c => (
-              <TouchableOpacity
-                key={c}
-                style={[styles.chip, selectedClass === c && styles.chipSelected]}
-                onPress={() => setSelectedClass(c)}
-              >
-                <Text style={[styles.chipText, selectedClass === c && styles.chipTextSelected]}>{c}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+      <Stack.Screen options={{ headerShown: false }} />
+      <StatusBar style="light" backgroundColor="transparent" translucent />
+      
+      {/* ── Midnight Navy Header Area ── */}
+      <View style={[styles.headerArea, { paddingTop: insets.top + 16 }]}>
+        <View style={styles.headerTitleRow}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                 <Ionicons name="arrow-back" size={24} color={PURE_WHITE} />
+            </TouchableOpacity>
+            <View style={styles.headerIconBox}>
+               <Ionicons name="analytics" size={24} color={PURE_WHITE} />
+            </View>
+            <View style={styles.headerTextWrap}>
+                <Text style={styles.headerTitle}>School Performance</Text>
+                <Text style={styles.headerSubTitle}>Real-time Intelligence</Text>
+            </View>
         </View>
 
-        {/* Attendance Section */}
-        {activeTab === 'analytics' && (
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Attendance Overview</Text>
-              <View style={styles.periodRow}>
-                {PERIODS.map(p => (
-                  <TouchableOpacity key={p} onPress={() => setSelectedPeriod(p)}>
-                    <Text style={[styles.periodText, selectedPeriod === p && styles.periodTextSelected]}>{p}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-            
-            <PieChart
-              data={attendanceData}
-              width={screenWidth - spacing.xl * 2 - 32}
-              height={160}
-              chartConfig={{
-                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              }}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="15"
-              absolute
-            />
-          </View>
-        )}
-
-        {/* Top Performing Section */}
-        {activeTab === 'analytics' && (
-          <View style={{ marginBottom: spacing.xl }}>
-            <Text style={styles.sectionLabel}>Top Performance Highlights</Text>
-            <View style={styles.row}>
-              <View style={[styles.highlightCard, { backgroundColor: '#E3F2FD' }]}>
-                <Ionicons name="trophy" size={24} color={colors.primary} />
-                <Text style={styles.highlightTitle}>Class Top Student</Text>
-                <Text style={styles.highlightVal} numberOfLines={1}>{topStudent?.name || 'N/A'}</Text>
-                <Text style={styles.highlightSub}>
-                  {topStudent ? `${topStudent.totalMarks} / ${topStudent.maxMarks} Marks` : 'No data'}
+        {/* Floating Period Selector */}
+        <View style={styles.periodSelectorWrap}>
+           {(['Today', 'Week', 'Month'] as PeriodType[]).map((period) => (
+             <TouchableOpacity 
+                key={period} 
+                style={[styles.periodBtn, activePeriod === period && styles.periodBtnActive]}
+                onPress={() => setActivePeriod(period)}
+                activeOpacity={0.8}
+             >
+                <Text style={[styles.periodBtnText, activePeriod === period && styles.periodBtnTextActive]}>
+                   {period}
                 </Text>
-              </View>
-              
-              <View style={[styles.highlightCard, { backgroundColor: '#F3E5F5' }]}>
-                <Ionicons name="star" size={24} color={colors.purple} />
-                <Text style={styles.highlightTitle}>Overall School Topper</Text>
-                <Text style={styles.highlightVal} numberOfLines={1}>{wholeSchoolTopper?.name || 'N/A'}</Text>
-                <Text style={styles.highlightSub}>
-                  {wholeSchoolTopper ? `${wholeSchoolTopper.totalMarks} / ${wholeSchoolTopper.maxMarks} Marks` : 'No data'}
-                </Text>
-              </View>
-
-              <View style={[styles.highlightCard, { backgroundColor: '#E8F5E9', marginTop: spacing.md }]}>
-                <Ionicons name="shield-checkmark" size={24} color={colors.success} />
-                <Text style={styles.highlightTitle}>Best Attendance</Text>
-                <Text style={styles.highlightVal} numberOfLines={1}>N/A</Text>
-                <Text style={styles.highlightSub}>No data</Text>
-              </View>
-            </View>
-          </View>
-        )}
-          {/* Marks Tracking & Admin Override System */}
-        {activeTab === 'marks' && (
-          <View style={{ marginBottom: spacing.xl }}>
-            <Text style={styles.sectionLabel}>Marks Tracking & Overrides</Text>
-            
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-                {DEMO_EXAMS.map(e => (
-                  <TouchableOpacity
-                    key={e.id}
-                    style={[styles.smallChip, selectedExam === e.id && styles.smallChipSelected]}
-                    onPress={() => setSelectedExam(e.id)}
-                  >
-                    <Text style={[styles.smallChipText, selectedExam === e.id && styles.smallChipTextSelected]}>{e.label}</Text>
-                  </TouchableOpacity>
-                ))}
-            </ScrollView>
-
-            <View style={{ marginTop: spacing.md }}>
-              {subjects.map(subj => {
-                const classKey = `${subj}|${selectedClass}`;
-                const group = store.find(s => s.classKey === classKey && s.examId === selectedExam);
-                
-                const deadlinePassed = group?.uploadDeadline ? Date.now() > group.uploadDeadline : false;
-                const isLocked = group?.submitted || deadlinePassed;
-                
-                return (
-                  <View key={subj} style={styles.subjectCard}>
-                    <View style={styles.subjectHeader}>
-                      <Text style={styles.subjectTitle}>{subj}</Text>
-                      {isLocked ? (
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                          <View style={[styles.lockedBadge, { backgroundColor: deadlinePassed && !group?.submitted ? colors.danger : colors.success }]}>
-                            <Ionicons name="lock-closed" size={12} color={colors.white} />
-                            <Text style={styles.lockedText}>
-                              {deadlinePassed && !group?.submitted ? 'Time Locked' : 'Locked by Teacher'}
-                            </Text>
-                          </View>
-                          <TouchableOpacity
-                            style={styles.unlockBtn}
-                            onPress={() => {
-                              adminUnlockPortal(classKey, selectedExam, 24);
-                              Alert.alert('Portal Unlocked', 'Teacher now has 24 hours to modify and submit marks.');
-                            }}
-                          >
-                            <Ionicons name="time-outline" size={12} color={colors.primary} />
-                            <Text style={styles.unlockBtnText}>Unlock 24h</Text>
-                          </TouchableOpacity>
-                        </View>
-                      ) : (
-                        <Text style={{ fontSize: 10, color: colors.warning, fontWeight: '700' }}>PENDING SUBMISSION</Text>
-                      )}
-                    </View>
-
-                    {group && group.students.length > 0 ? (
-                      group.students.map(st => (
-                        <View key={st.id} style={styles.studentMarkRow}>
-                          <Text style={styles.studentNameList}>{st.name}</Text>
-                          
-                          {editingStudentId === `${classKey}|${st.id}` ? (
-                            <View style={styles.editMarkWrapper}>
-                              <TextInput 
-                                style={styles.overrideInput} 
-                                value={editingMark}
-                                onChangeText={setEditingMark}
-                                keyboardType="number-pad"
-                                autoFocus
-                                maxLength={3}
-                              />
-                              <TouchableOpacity onPress={() => handleAdminMarkSave(classKey, st.id)}>
-                                <Ionicons name="checkmark-circle" size={24} color={colors.success} />
-                              </TouchableOpacity>
-                              <TouchableOpacity onPress={() => setEditingStudentId(null)}>
-                                <Ionicons name="close-circle" size={24} color={colors.danger} />
-                              </TouchableOpacity>
-                            </View>
-                          ) : (
-                            <View style={styles.scoreActionRow}>
-                              <Text style={styles.scoreVal}>
-                                {st.marks ? `${st.marks} / ${st.maxMarks}` : '— / 100'}
-                              </Text>
-                              {isLocked && (
-                                <TouchableOpacity onPress={() => { setEditingStudentId(`${classKey}|${st.id}`); setEditingMark(st.marks); }}>
-                                  <Ionicons name="create-outline" size={18} color={colors.primary} style={{ marginLeft: 8 }} />
-                                </TouchableOpacity>
-                              )}
-                            </View>
-                          )}
-                        </View>
-                      ))
-                    ) : (
-                      <Text style={{ fontSize: 12, color: colors.textLight, paddingVertical: 8 }}>No marks recorded.</Text>
-                    )}
-                  </View>
-                );
-              })}
-              {subjects.length === 0 && (
-                 <Text style={{ color: colors.textLight, marginTop: spacing.md }}>No subjects found for this class.</Text>
-              )}
-            </View>
-          </View>
-        )}
-
-        {/* Padding for fake navbar */}
-        <View style={{ height: 100 }} />
-      </ScrollView>
-
-      {/* Internal Bottom Navbar */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity 
-          style={[styles.navItem, activeTab === 'analytics' && styles.navItemSelected]}
-          onPress={() => setActiveTab('analytics')}
-        >
-          <Ionicons name="pie-chart" size={24} color={activeTab === 'analytics' ? colors.primary : colors.textLight} />
-          <Text style={[styles.navItemText, activeTab === 'analytics' && styles.navItemTextSelected]}>Insights</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.navItem, activeTab === 'marks' && styles.navItemSelected]}
-          onPress={() => setActiveTab('marks')}
-        >
-          <Ionicons name="document-text" size={24} color={activeTab === 'marks' ? colors.primary : colors.textLight} />
-          <Text style={[styles.navItemText, activeTab === 'marks' && styles.navItemTextSelected]}>Update Marks</Text>
-        </TouchableOpacity>
+             </TouchableOpacity>
+           ))}
+        </View>
       </View>
+
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Top Performance Cards (Horizontal Scroll) ── */}
+        <ScrollView 
+           horizontal 
+           showsHorizontalScrollIndicator={false} 
+           contentContainerStyle={styles.horizontalScrollPad}
+        >
+            {/* Attendance Card */}
+            <View style={styles.perfCard}>
+               <View style={styles.perfTopRow}>
+                   <View style={styles.perfIconWrap}>
+                       <Ionicons name="people-outline" size={20} color={BRAND_NAVY} />
+                   </View>
+                   <View style={styles.trendWrap}>
+                       <Ionicons name="arrow-up" size={12} color={TREND_UP} />
+                       <Text style={[styles.trendText, { color: TREND_UP }]}>0.8%</Text>
+                   </View>
+               </View>
+               <Text style={styles.perfValue}>94.2%</Text>
+               <Text style={styles.perfLabel}>Total Attendance</Text>
+               
+               {/* Decorative Sparkline (CSS simulation) */}
+               <View style={styles.sparkLineWrap}>
+                   <View style={styles.sparkBaseBar}>
+                       <View style={[styles.sparkFill, { width: '85%', backgroundColor: '#3B82F6' }]} />
+                   </View>
+               </View>
+            </View>
+
+            {/* Academic Card */}
+            <View style={styles.perfCard}>
+               <View style={styles.perfTopRow}>
+                   <View style={styles.perfIconWrap}>
+                       <Ionicons name="school-outline" size={20} color={BRAND_NAVY} />
+                   </View>
+                   <View style={[styles.trendWrap, { backgroundColor: '#FEF3C7' }]}>
+                       <Text style={[styles.trendText, { color: TREND_FLAT, marginLeft: 0 }]}>— Flat</Text>
+                   </View>
+               </View>
+               <Text style={styles.perfValue}>78<Text style={styles.perfValueSuffix}>/100</Text></Text>
+               <Text style={styles.perfLabel}>Average Marks</Text>
+               
+               <View style={styles.sparkLineWrap}>
+                   <View style={styles.sparkBaseBar}>
+                       <View style={[styles.sparkFill, { width: '78%', backgroundColor: TREND_FLAT }]} />
+                   </View>
+               </View>
+            </View>
+
+            {/* Engagement Card */}
+            <View style={styles.perfCard}>
+               <View style={styles.perfTopRow}>
+                   <View style={styles.perfIconWrap}>
+                       <Ionicons name="chatbubbles-outline" size={20} color={BRAND_NAVY} />
+                   </View>
+                   <View style={[styles.trendWrap, { backgroundColor: '#DCFCE7' }]}>
+                       <Ionicons name="arrow-up" size={12} color="#16A34A" />
+                       <Text style={[styles.trendText, { color: "#16A34A" }]}>3.2%</Text>
+                   </View>
+               </View>
+               <Text style={styles.perfValue}>85%</Text>
+               <Text style={styles.perfLabel}>Teacher Activity</Text>
+               
+               <View style={styles.sparkLineWrap}>
+                   <View style={styles.sparkBaseBar}>
+                       <View style={[styles.sparkFill, { width: '85%', backgroundColor: '#16A34A' }]} />
+                   </View>
+               </View>
+            </View>
+        </ScrollView>
+
+        {/* ── Visual Analytics Section ── */}
+        <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+               <Text style={styles.sectionTitle}>Visual Analytics</Text>
+               <TouchableOpacity>
+                   <Ionicons name="ellipsis-horizontal" size={20} color={SLATE_GREY} />
+               </TouchableOpacity>
+            </View>
+
+            {/* Attendance Heatmap */}
+            <View style={styles.analyticsCard}>
+               <View style={styles.cardHeader}>
+                  <Text style={styles.cardHeaderTitle}>Wing Attendance Heatmap</Text>
+                  <Ionicons name="grid-outline" size={18} color={BRAND_NAVY} />
+               </View>
+               <View style={styles.heatmapGrid}>
+                   {['Primary', 'Secondary', 'Higher'].map((wing, i) => (
+                       <View key={wing} style={styles.heatmapRow}>
+                           <Text style={styles.heatmapLabel}>{wing}</Text>
+                           <View style={styles.heatmapBlocksWrap}>
+                               {[85, 92, 98, 95, 88].map((val, idx) => (
+                                   <View 
+                                     key={idx} 
+                                     style={[
+                                         styles.heatmapBlock, 
+                                         { backgroundColor: val > 94 ? '#10B981' : val > 89 ? '#34D399' : '#6EE7B7' }
+                                     ]} 
+                                   />
+                               ))}
+                           </View>
+                       </View>
+                   ))}
+               </View>
+            </View>
+
+            {/* Performance Bar Chart (Class 1-12) */}
+            <View style={styles.analyticsCard}>
+               <View style={styles.cardHeader}>
+                  <Text style={styles.cardHeaderTitle}>Avg. Scores by Class Level</Text>
+                  <Ionicons name="bar-chart-outline" size={18} color={BRAND_NAVY} />
+               </View>
+               
+               <View style={styles.chartContainer}>
+                  {[
+                      { lbl: 'Class 10', val: 88, w: '88%' },
+                      { lbl: 'Class 12', val: 84, w: '84%' },
+                      { lbl: 'Class 8',  val: 76, w: '76%' },
+                      { lbl: 'Class 5',  val: 72, w: '72%' },
+                      { lbl: 'Class 2',  val: 81, w: '81%' },
+                  ].map((item, idx) => (
+                      <View key={item.lbl} style={styles.barChartRow}>
+                          <Text style={styles.barChartLabel}>{item.lbl}</Text>
+                          <View style={styles.barChartBarWrap}>
+                              <View style={[styles.barChartFill, { width: item.w as any, backgroundColor: idx % 2 === 0 ? BRAND_NAVY : '#60A5FA' }]} />
+                          </View>
+                          <Text style={styles.barChartValue}>{item.val}</Text>
+                      </View>
+                  ))}
+               </View>
+            </View>
+
+        </View>
+
+        {/* ── Command Center: Key Alerts ── */}
+        <View style={styles.sectionContainerBottom}>
+            <View style={styles.sectionHeader}>
+               <Text style={styles.sectionTitle}>Key Alerts</Text>
+               <View style={styles.liveBadge}><Text style={styles.liveBadgeText}>LIVE</Text></View>
+            </View>
+
+            <View style={[styles.alertCard, styles.alertRed]}>
+                <View style={[styles.alertIconPill, { backgroundColor: '#FEE2E2' }]}>
+                    <Ionicons name="warning-outline" size={20} color={TREND_DOWN} />
+                </View>
+                <View style={styles.alertTextWrap}>
+                    <Text style={styles.alertTitle}>Low Attendance Alert</Text>
+                    <Text style={styles.alertDesc}>Class 9-B is currently operating at 74% attendance.</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#FCA5A5" />
+            </View>
+
+            <View style={[styles.alertCard, styles.alertGreen]}>
+                <View style={[styles.alertIconPill, { backgroundColor: '#D1FAE5' }]}>
+                    <Ionicons name="trophy-outline" size={20} color={TREND_UP} />
+                </View>
+                <View style={styles.alertTextWrap}>
+                    <Text style={styles.alertTitle}>Academic Milestone</Text>
+                    <Text style={styles.alertDesc}>100% Syllabus Completion verified in Grade 12.</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#6EE7B7" />
+            </View>
+
+        </View>
+
+      </ScrollView>
     </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F9FB' },
-  content: { padding: spacing.xl, paddingBottom: 100 },
-  headerTitle: { fontSize: fontSize.xl, fontWeight: '800', color: colors.textPrimary },
-  subTitle: { fontSize: fontSize.sm, color: colors.textSecondary, marginTop: 4, marginBottom: spacing.lg },
-  
-  filterRow: { marginBottom: spacing.lg },
-  chipScroll: { flexDirection: 'row' },
-  chip: {
-    paddingHorizontal: 16, paddingVertical: 8,
-    borderRadius: 20, backgroundColor: colors.white,
-    borderWidth: 1, borderColor: colors.border, marginRight: 8,
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: BG_LIGHT,
   },
-  chipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-  chipTextSelected: { color: colors.white },
-
-  smallChip: {
-    paddingHorizontal: 12, paddingVertical: 6,
-    borderRadius: 16, backgroundColor: colors.white,
-    borderWidth: 1, borderColor: colors.border, marginRight: 6,
+  headerArea: {
+    backgroundColor: BRAND_NAVY,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+    zIndex: 10,
   },
-  smallChipSelected: { backgroundColor: colors.textPrimary, borderColor: colors.textPrimary },
-  smallChipText: { fontSize: 11, fontWeight: '600', color: colors.textSecondary },
-  smallChipTextSelected: { color: colors.white },
-
-  card: {
-    backgroundColor: colors.white, borderRadius: borderRadius.lg, padding: spacing.lg,
-    elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5, shadowOffset: { width: 0, height: 2 },
-    marginBottom: spacing.xl,
+  backButton: {
+    marginRight: 16,
   },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  cardTitle: { fontSize: fontSize.md, fontWeight: '700', color: colors.textPrimary },
-  periodRow: { flexDirection: 'row', gap: 10 },
-  periodText: { fontSize: 11, color: colors.textLight, fontWeight: '600' },
-  periodTextSelected: { color: colors.primary, fontWeight: '700' },
-
-  sectionLabel: { fontSize: fontSize.sm, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', marginBottom: spacing.sm, letterSpacing: 0.5 },
-  
-  row: { flexDirection: 'row', gap: spacing.md, flexWrap: 'wrap' },
-  highlightCard: {
-    width: '45%', borderRadius: borderRadius.lg, padding: spacing.md,
-    elevation: 1, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 3, shadowOffset: { width: 0, height: 1 },
-    marginBottom: spacing.sm
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 24,
   },
-  highlightTitle: { fontSize: 11, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', marginTop: 8 },
-  highlightVal: { fontSize: fontSize.md, fontWeight: '800', color: colors.textPrimary, marginTop: 4 },
-  highlightSub: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
-
-  subjectCard: {
-    backgroundColor: colors.white, borderRadius: borderRadius.md, padding: spacing.md, marginTop: spacing.md,
-    borderWidth: 1, borderColor: colors.border,
+  headerIconBox: {
+      width: 48,
+      height: 48,
+      borderRadius: 16,
+      backgroundColor: 'rgba(255,255,255,0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 16,
   },
-  subjectHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.divider, paddingBottom: 8, marginBottom: 8 },
-  subjectTitle: { fontSize: fontSize.sm, fontWeight: '700', color: colors.textPrimary },
-  lockedBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.success, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, gap: 4 },
-  lockedText: { fontSize: 9, fontWeight: '700', color: colors.white, textTransform: 'uppercase' },
-  
-  studentMarkRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
-  studentNameList: { fontSize: 13, color: colors.textPrimary, flex: 1, fontWeight: '500' },
-  scoreActionRow: { flexDirection: 'row', alignItems: 'center' },
-  scoreVal: { fontSize: 13, fontWeight: '700', color: colors.textPrimary },
-  
-  editMarkWrapper: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  overrideInput: {
-    width: 40, height: 28, borderRadius: 4, borderWidth: 1.5, borderColor: colors.primary,
-    textAlign: 'center', fontSize: 12, fontWeight: '700', padding: 0, backgroundColor: colors.primaryLight
+  headerTextWrap: {
+      flex: 1,
   },
-  unlockBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: colors.primaryLight, paddingHorizontal: 6, paddingVertical: 3,
-    borderRadius: 4, borderWidth: 1, borderColor: colors.primary
+  headerTitle: {
+    color: PURE_WHITE,
+    fontSize: 22,
+    fontWeight: '800',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+    letterSpacing: 0.5,
   },
-  unlockBtnText: {
-    fontSize: 9, fontWeight: '700', color: colors.primary, textTransform: 'uppercase'
+  headerSubTitle: {
+      color: '#94A3B8',
+      fontSize: 13,
+      fontWeight: '500',
+      marginTop: 2,
   },
-  
-  bottomNav: {
-    position: 'absolute', bottom: 0, left: 0, right: 0,
-    flexDirection: 'row', backgroundColor: colors.white,
-    borderTopWidth: 1, borderTopColor: colors.border,
-    paddingBottom: 24, paddingTop: 12, elevation: 15,
+  periodSelectorWrap: {
+      flexDirection: 'row',
+      backgroundColor: 'rgba(255,255,255,0.1)',
+      marginHorizontal: 20,
+      padding: 4,
+      borderRadius: 12,
   },
-  navItem: {
-    flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4
+  periodBtn: {
+      flex: 1,
+      paddingVertical: 10,
+      alignItems: 'center',
+      borderRadius: 10,
   },
-  navItemSelected: {
-    opacity: 1,
+  periodBtnActive: {
+      backgroundColor: PURE_WHITE,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
   },
-  navItemText: {
-    fontSize: 11, fontWeight: '600', color: colors.textLight
+  periodBtnText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: '#CBD5E1',
   },
-  navItemTextSelected: {
-    color: colors.primary, fontWeight: '700'
+  periodBtnTextActive: {
+      color: BRAND_NAVY,
+      fontWeight: '700',
+  },
+  scrollContent: {
+      paddingBottom: 40,
+  },
+  horizontalScrollPad: {
+      paddingHorizontal: 12,
+      paddingTop: 24,
+      paddingBottom: 16,
+  },
+  perfCard: {
+      width: width * 0.44,
+      backgroundColor: PURE_WHITE,
+      borderRadius: 20,
+      padding: 16,
+      marginHorizontal: 8,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.04,
+      shadowRadius: 12,
+      elevation: 4,
+  },
+  perfTopRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+  },
+  perfIconWrap: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: '#F1F5F9',
+      justifyContent: 'center',
+      alignItems: 'center',
+  },
+  trendWrap: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#D1FAE5',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 12,
+  },
+  trendText: {
+      fontSize: 11,
+      fontWeight: '700',
+      marginLeft: 4,
+  },
+  perfValue: {
+      fontSize: 26,
+      fontWeight: '800',
+      color: DARK_TEXT,
+      marginBottom: 4,
+      fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  perfValueSuffix: {
+      fontSize: 14,
+      color: SLATE_GREY,
+      fontWeight: '600',
+  },
+  perfLabel: {
+      fontSize: 13,
+      color: SLATE_GREY,
+      fontWeight: '600',
+      marginBottom: 16,
+  },
+  sparkLineWrap: {
+      height: 4,
+      justifyContent: 'center',
+  },
+  sparkBaseBar: {
+      height: 4,
+      backgroundColor: '#F1F5F9',
+      borderRadius: 2,
+      overflow: 'hidden',
+  },
+  sparkFill: {
+      height: '100%',
+      borderRadius: 2,
+  },
+  sectionContainer: {
+      paddingHorizontal: 20,
+      marginTop: 8,
+  },
+  sectionContainerBottom: {
+      paddingHorizontal: 20,
+      marginTop: 24,
+  },
+  sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+  },
+  sectionTitle: {
+      fontSize: 18,
+      fontWeight: '800',
+      color: BRAND_NAVY,
+      fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  liveBadge: {
+      backgroundColor: '#FEE2E2',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
+  },
+  liveBadgeText: {
+      fontSize: 10,
+      fontWeight: '800',
+      color: TREND_DOWN,
+      letterSpacing: 1,
+  },
+  analyticsCard: {
+      backgroundColor: PURE_WHITE,
+      borderRadius: 20,
+      padding: 20,
+      marginBottom: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.03,
+      shadowRadius: 10,
+      elevation: 3,
+  },
+  cardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
+  },
+  cardHeaderTitle: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: DARK_TEXT,
+      letterSpacing: 0.2,
+  },
+  heatmapGrid: {
+      gap: 12,
+  },
+  heatmapRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+  },
+  heatmapLabel: {
+      width: 70,
+      fontSize: 12,
+      color: SLATE_GREY,
+      fontWeight: '600',
+  },
+  heatmapBlocksWrap: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+  },
+  heatmapBlock: {
+      width: 32,
+      height: 32,
+      borderRadius: 8,
+  },
+  chartContainer: {
+      gap: 14,
+  },
+  barChartRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+  },
+  barChartLabel: {
+      width: 60,
+      fontSize: 12,
+      fontWeight: '600',
+      color: SLATE_GREY,
+  },
+  barChartBarWrap: {
+      flex: 1,
+      height: 8,
+      backgroundColor: '#F1F5F9',
+      borderRadius: 4,
+      marginHorizontal: 12,
+      overflow: 'hidden',
+  },
+  barChartFill: {
+      height: '100%',
+      borderRadius: 4,
+  },
+  barChartValue: {
+      width: 25,
+      fontSize: 12,
+      fontWeight: '700',
+      color: DARK_TEXT,
+      textAlign: 'right',
+  },
+  alertCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 16,
+      borderRadius: 16,
+      marginBottom: 12,
+      borderWidth: 1,
+  },
+  alertRed: {
+      backgroundColor: '#FEF2F2',
+      borderColor: '#FEE2E2',
+  },
+  alertGreen: {
+      backgroundColor: '#F0FDF4',
+      borderColor: '#D1FAE5',
+  },
+  alertIconPill: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 16,
+  },
+  alertTextWrap: {
+      flex: 1,
+      paddingRight: 12,
+  },
+  alertTitle: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: BRAND_NAVY,
+      marginBottom: 4,
+  },
+  alertDesc: {
+      fontSize: 13,
+      color: SLATE_GREY,
+      lineHeight: 18,
   }
 });
-

@@ -1,4 +1,6 @@
-import { Drawer } from 'expo-router/drawer';
+const fs = require('fs');
+
+const content = `import { Drawer } from 'expo-router/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useUser } from '../../src/context/UserContext';
@@ -11,7 +13,7 @@ import { useRouter } from 'expo-router';
 // Matte Solid Dark Royal Blue (#153462)
 // Pure White Text and Icons (#FFFFFF)
 
-function ParentDrawerContent(props: any) {
+function CustomDrawerContent(props: any) {
   const { profile, role } = useUser();
   const { signOut } = useAuth();
   const router = useRouter();
@@ -139,11 +141,11 @@ function ParentDrawerContent(props: any) {
         <View style={drawerStyles.header}>
           <View style={drawerStyles.avatarContainer}>
             <View style={drawerStyles.avatarFallback}>
-              <Ionicons name="people-outline" size={32} color="#FFFFFF" />
+              <Ionicons name="person-outline" size={32} color="#FFFFFF" />
             </View>
           </View>
-          <Text style={drawerStyles.name}>{profile?.name ?? 'Parent'}</Text>
-          <Text style={drawerStyles.role}>Parent</Text>
+          <Text style={drawerStyles.name}>{profile?.name ?? 'Admin User'}</Text>
+          <Text style={drawerStyles.role}>{role.charAt(0).toUpperCase() + role.slice(1)}</Text>
         </View>
 
         <View style={drawerStyles.itemsContainer}>
@@ -185,70 +187,36 @@ function ParentDrawerContent(props: any) {
           })}
 
           <TouchableOpacity
-            key="attendance-static"
+            key="analytics-static"
             activeOpacity={0.7}
             onPress={() => {
               navigation.closeDrawer();
-              router.push('/(parent-drawer)/(tabs)/attendance');
+              router.push('/admin-analytics');
             }}
             style={drawerStyles.drawerItem}
           >
             <View style={drawerStyles.iconContainer}>
-              <Ionicons name="checkmark-circle-outline" size={22} color="#FFFFFF" />
+              <Ionicons name="pie-chart-outline" size={22} color="#FFFFFF" />
             </View>
             <Text style={[drawerStyles.drawerLabel, { color: '#FFFFFF', fontWeight: '500', opacity: 0.85 }]}>
-              Attendance Tracker
+              Analytics Dashboard
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            key="homework-static"
+            key="leave-approvals-static"
             activeOpacity={0.7}
             onPress={() => {
               navigation.closeDrawer();
-              router.push('/(parent-drawer)/(tabs)/homework');
+              router.push('/admin-leave-approvals');
             }}
             style={drawerStyles.drawerItem}
           >
             <View style={drawerStyles.iconContainer}>
-              <Ionicons name="book-outline" size={22} color="#FFFFFF" />
+              <Ionicons name="document-text-outline" size={22} color="#FFFFFF" />
             </View>
             <Text style={[drawerStyles.drawerLabel, { color: '#FFFFFF', fontWeight: '500', opacity: 0.85 }]}>
-              Homework & Tasks
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            key="notices-static"
-            activeOpacity={0.7}
-            onPress={() => {
-              navigation.closeDrawer();
-              router.push('/(parent-drawer)/(tabs)/notices');
-            }}
-            style={drawerStyles.drawerItem}
-          >
-            <View style={drawerStyles.iconContainer}>
-              <Ionicons name="megaphone-outline" size={22} color="#FFFFFF" />
-            </View>
-            <Text style={[drawerStyles.drawerLabel, { color: '#FFFFFF', fontWeight: '500', opacity: 0.85 }]}>
-              School Notices
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            key="datesheets-static"
-            activeOpacity={0.7}
-            onPress={() => {
-              navigation.closeDrawer();
-              router.push('/(parent-drawer)/(tabs)/datesheet');
-            }}
-            style={drawerStyles.drawerItem}
-          >
-            <View style={drawerStyles.iconContainer}>
-              <Ionicons name="calendar-outline" size={22} color="#FFFFFF" />
-            </View>
-            <Text style={[drawerStyles.drawerLabel, { color: '#FFFFFF', fontWeight: '500', opacity: 0.85 }]}>
-              Exam Datesheets
+              Leave Approvals
             </Text>
           </TouchableOpacity>
 
@@ -257,7 +225,7 @@ function ParentDrawerContent(props: any) {
             activeOpacity={0.7}
             onPress={() => {
               navigation.closeDrawer();
-              router.push('/faq');
+              router.push('/faq' as any);
             }}
             style={drawerStyles.drawerItem}
           >
@@ -289,11 +257,11 @@ function ParentDrawerContent(props: any) {
   );
 }
 
-export default function ParentDrawerLayout() {
+export default function AdminDrawerLayout() {
   const { colors } = useTheme();
   return (
     <Drawer
-      drawerContent={(props) => <ParentDrawerContent {...props} />}
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         headerStyle: { backgroundColor: colors.primary },
         headerTintColor: colors.white,
@@ -310,17 +278,10 @@ export default function ParentDrawerLayout() {
         }}
       />
       <Drawer.Screen
-        name="profile"
+        name="admin-datesheet"
         options={{
-          title: 'Profile',
-          drawerIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
-        }}
-      />
-      <Drawer.Screen
-        name="calendar"
-        options={{
-          title: 'Calendar',
-          drawerIcon: ({ color, size }) => <Ionicons name="today-outline" size={size} color={color} />,
+          title: 'Upload Datesheet',
+          drawerIcon: ({ color, size }) => <Ionicons name="cloud-upload-outline" size={size} color={color} />,
         }}
       />
       <Drawer.Screen
@@ -330,6 +291,15 @@ export default function ParentDrawerLayout() {
           drawerIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
         }}
       />
+      <Drawer.Screen
+        name="profile"
+        options={{
+          title: 'Admin Profile',
+          drawerIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
+        }}
+      />
     </Drawer>
   );
 }
+`
+fs.writeFileSync('app/(admin-drawer)/_layout.tsx', content);

@@ -1,259 +1,321 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useUser } from '../../src/context/UserContext';
-import { useDatesheet } from '../../src/hooks/useDatesheet';
-import { useSharedUploadedDatesheets } from '../../src/hooks/useSharedUploadedDatesheets';
-import { useTheme } from '../../src/context/ThemeContext';
-import { Image } from 'react-native';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
-import type { ExamGroup, ExamType } from '../../src/types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const EXAM_ICONS: Record<ExamType, keyof typeof Ionicons.glyphMap> = {
-  'half-yearly': 'document-text',
-  'annual': 'trophy',
-  'unit-test': 'create',
-  'pre-board': 'school',
-  'practical': 'flask',
-  'other': 'clipboard',
-};
+export default function DatesheetIndex() {
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  
+  // High Fidelity Theme Constants
+  const THEME = {
+    NAVY: '#153462',
+    LIGHT_BG: '#F8F9FB',
+    CARD_BG: '#FFFFFF',
+    SLATE: '#64748B',
+    DARK_TEXT: '#1E293B',
+    ACCENT_BLUE: '#3B82F6',
+    ACCENT_GREEN: '#10B981',
+    DIVIDER: '#F1F5F9'
+  };
 
-const EXAM_COLORS: Record<ExamType, { bg: string; accent: string }> = {
-  'half-yearly': { bg: '#E3F2FD', accent: '#1565C0' },
-  'annual': { bg: '#D1FAE5', accent: '#059669' },
-  'unit-test': { bg: '#EDE9FE', accent: '#7C3AED' },
-  'pre-board': { bg: '#FEF3C7', accent: '#D97706' },
-  'practical': { bg: '#FCE4EC', accent: '#E91E63' },
-  'other': { bg: '#F3F4F6', accent: '#6B7280' },
-};
-
-function formatDateRange(start: string, end: string): string {
-  const s = new Date(start);
-  const e = new Date(end);
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  if (start === end) {
-    return `${s.getDate()} ${months[s.getMonth()]} ${s.getFullYear()}`;
-  }
-  if (s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear()) {
-    return `${s.getDate()} - ${e.getDate()} ${months[s.getMonth()]} ${s.getFullYear()}`;
-  }
-  return `${s.getDate()} ${months[s.getMonth()]} - ${e.getDate()} ${months[e.getMonth()]} ${s.getFullYear()}`;
-}
-
-function ExamTypeCard({ group }: { group: ExamGroup }) {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-const router = useRouter();
-  const colorScheme = EXAM_COLORS[group.exam_type] ?? EXAM_COLORS.other;
-  const icon = EXAM_ICONS[group.exam_type] ?? 'clipboard';
+  const handlePressExamInfo = (type: string, name: string) => {
+    // In our simplified routing, we just head to the shared view
+    // The exact param passing can reflect current logic:
+    router.push({
+      pathname: '/(shared)/exam-datesheet',
+      params: { type, name }
+    });
+  };
 
   return (
-    <TouchableOpacity
-      style={styles.card}
-      activeOpacity={0.7}
-      onPress={() =>
-        router.push({
-          pathname: '/exam-datesheet',
-          params: { examType: group.exam_type },
-        })
-      }
-    >
-      <View style={[styles.iconBox, { backgroundColor: colorScheme.bg }]}>
-        <Ionicons name={icon} size={28} color={colorScheme.accent} />
-      </View>
-      <View style={styles.cardContent}>
-        <Text style={styles.examTitle}>{group.label}</Text>
-        <View style={styles.metaRow}>
-          <Ionicons name="calendar-outline" size={13} color={colors.textSecondary} />
-          <Text style={styles.metaText}>{formatDateRange(group.startDate, group.endDate)}</Text>
+    <View style={[styles.container, { backgroundColor: THEME.LIGHT_BG }]}>
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/* ── HEADER HERO ── */}
+      <View style={[styles.headerHero, { paddingTop: insets.top, backgroundColor: THEME.NAVY }]}>
+        <View style={styles.headerTop}>
+          <TouchableOpacity 
+            onPress={() => router.back()} 
+            style={styles.backBtn}
+          >
+            <Ionicons name="arrow-back" size={24} color="#FFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Examination Center</Text>
+          <TouchableOpacity style={styles.backBtn}>
+            <View style={styles.notificationDot} />
+            <Ionicons name="notifications-outline" size={24} color="#FFF" />
+          </TouchableOpacity>
         </View>
-        <View style={styles.metaRow}>
-          <Ionicons name="people-outline" size={13} color={colors.textSecondary} />
-          <Text style={styles.metaText}>{group.classes.join(', ')}</Text>
-        </View>
-        <View style={styles.statsRow}>
-          <View style={[styles.statBadge, { backgroundColor: colorScheme.bg }]}>
-            <Text style={[styles.statText, { color: colorScheme.accent }]}>
-              {group.totalSubjects} Subjects
-            </Text>
-          </View>
-          {group.duties.length > 0 && (
-            <View style={[styles.statBadge, { backgroundColor: '#FEF3C7' }]}>
-              <Ionicons name="shield-checkmark" size={11} color="#D97706" />
-              <Text style={[styles.statText, { color: '#D97706' }]}>
-                {group.duties.length} Duty{group.duties.length > 1 ? ' Days' : ''}
-              </Text>
+
+        <View style={styles.headerContent}>
+          <Text style={styles.headerSubtitle}>Term 2 - Academic Year 2024-25</Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>2</Text>
+              <Text style={styles.statLabel}>Active Exams</Text>
             </View>
-          )}
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>12</Text>
+              <Text style={styles.statLabel}>Total Subjects</Text>
+            </View>
+          </View>
         </View>
       </View>
-      <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
-    </TouchableOpacity>
-  );
-}
 
-export default function DatesheetScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-  const { profile, isDemo } = useUser();
-  const { examGroups, loading } = useDatesheet(profile?.school_id, isDemo);
-  const { datesheets } = useSharedUploadedDatesheets();
-  const teacherDatesheets = datesheets.filter(d => d.target === 'teacher' || d.target === 'both');
+      {/* ── MAIN CONTENT FEED ── */}
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.sectionHeader}>UPCOMING EXAMINATIONS</Text>
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.container}>
-      {/* Header info */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Exam Datesheet</Text>
-        <Text style={styles.headerSub}>
-          {examGroups.length} examination{examGroups.length !== 1 ? 's' : ''} scheduled
-        </Text>
-      </View>
-
-      {examGroups.length === 0 && teacherDatesheets.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="clipboard-outline" size={50} color={colors.textLight} />
-          <Text style={styles.emptyText}>No exams scheduled yet</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={examGroups}
-          keyExtractor={(item) => item.exam_type}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            teacherDatesheets.length > 0 ? (
-              <View style={styles.uploadedContainer}>
-                <Text style={styles.sectionHeader}>Official Announcements</Text>
-                {teacherDatesheets.map(d => (
-                  <View key={d.id} style={styles.uploadedCard}>
-                    <Image source={{ uri: d.imageUrl }} style={styles.uploadedImage} />
-                    <View style={styles.uploadedInfo}>
-                      <Text style={styles.uploadedTitle}>{d.title}</Text>
-                      <Text style={styles.uploadedDate}>Posted: {new Date(d.datePosted).toLocaleDateString()}</Text>
-                    </View>
-                  </View>
-                ))}
-                <Text style={[styles.sectionHeader, { marginTop: spacing.md }]}>Upcoming Tracked Exams</Text>
+        {/* Exam Card 1 */}
+        <TouchableOpacity 
+          style={styles.card}
+          activeOpacity={0.9}
+          onPress={() => handlePressExamInfo('half-yearly', 'Half Yearly Examination')}
+        >
+          <View style={[styles.cardAccent, { backgroundColor: THEME.ACCENT_BLUE }]} />
+          <View style={styles.cardContent}>
+            <View style={styles.cardHeader}>
+              <View style={styles.iconContainer}>
+                 <Ionicons name="document-text" size={20} color={THEME.ACCENT_BLUE} />
               </View>
-            ) : null
-          }
-          renderItem={({ item }) => <ExamTypeCard group={item} />}
-        />
-      )}
+              <View style={styles.statusBadge}>
+                 <Text style={styles.statusText}>Scheduled</Text>
+              </View>
+            </View>
+            
+            <View style={styles.cardBody}>
+              <Text style={styles.examTitle}>Half Yearly Examination</Text>
+              <Text style={styles.examDate}>Starts Oct 15, 2024</Text>
+            </View>
+
+            <View style={styles.cardFooter}>
+              <View style={styles.footerItem}>
+                <Ionicons name="list" size={16} color={THEME.SLATE} style={{marginRight: 6}} />
+                <Text style={styles.footerText}>12 Subjects</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={THEME.SLATE} />
+            </View>
+          </View>
+        </TouchableOpacity>
+
+        {/* Exam Card 2 */}
+        <TouchableOpacity 
+          style={styles.card}
+          activeOpacity={0.9}
+          onPress={() => handlePressExamInfo('final', 'Final Examination')}
+        >
+          <View style={[styles.cardAccent, { backgroundColor: THEME.ACCENT_GREEN }]} />
+          <View style={styles.cardContent}>
+            <View style={styles.cardHeader}>
+              <View style={[styles.iconContainer, { backgroundColor: '#ECFDF5' }]}>
+                 <Ionicons name="school" size={20} color={THEME.ACCENT_GREEN} />
+              </View>
+              <View style={[styles.statusBadge, { backgroundColor: '#F1F5F9' }]}>
+                 <Text style={[styles.statusText, { color: THEME.SLATE }]}>Upcoming</Text>
+              </View>
+            </View>
+            
+            <View style={styles.cardBody}>
+              <Text style={styles.examTitle}>Final Examination</Text>
+              <Text style={styles.examDate}>Starts Mar 01, 2025</Text>
+            </View>
+
+            <View style={styles.cardFooter}>
+              <View style={styles.footerItem}>
+                <Ionicons name="list" size={16} color={THEME.SLATE} style={{marginRight: 6}} />
+                <Text style={styles.footerText}>12 Subjects</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={THEME.SLATE} />
+            </View>
+          </View>
+        </TouchableOpacity>
+        
+        <View style={{ height: 40 }} />
+      </ScrollView>
     </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-
-  header: {
-    backgroundColor: colors.white,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  
+  // Header
+  headerHero: {
+    paddingBottom: 24,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    shadowColor: '#153462',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    zIndex: 10,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#EF4444',
+    borderWidth: 2,
+    borderColor: '#153462',
+    zIndex: 2,
   },
   headerTitle: {
-    fontSize: fontSize.xl,
-    fontWeight: '800',
-    color: colors.textPrimary,
-  },
-  headerSub: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-
-  list: { padding: spacing.lg, paddingBottom: 40 },
-
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  iconBox: {
-    width: 52,
-    height: 52,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-  cardContent: { flex: 1 },
-  examTitle: {
-    fontSize: fontSize.md,
+    color: '#FFF',
+    fontSize: 18,
     fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: 4,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    marginBottom: 3,
+  headerContent: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
   },
-  metaText: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
+  headerSubtitle: {
+    color: '#94A3B8',
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   statsRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
-    marginTop: spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    paddingVertical: 16,
   },
-  statBadge: {
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  statValue: {
+    color: '#FFF',
+    fontSize: 24,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  statLabel: {
+    color: '#CBD5E1',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+
+  // Main Content
+  scrollContent: {
+    padding: 24,
+  },
+  sectionHeader: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 1.2,
+    marginBottom: 16,
+    marginLeft: 4,
+  },
+
+  // Premium Cards
+  card: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF',
+    borderRadius: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+    overflow: 'hidden',
+  },
+  cardAccent: {
+    width: 5,
+    height: '100%',
+  },
+  cardContent: {
+    flex: 1,
+    padding: 20,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#EFF6FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusBadge: {
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  statusText: {
+    color: '#3B82F6',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  cardBody: {
+    marginBottom: 16,
+  },
+  examTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 6,
+  },
+  examDate: {
+    fontSize: 14,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  footerItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-    borderRadius: borderRadius.sm,
   },
-  statText: {
-    fontSize: 10,
-    fontWeight: '700',
+  footerText: {
+    fontSize: 13,
+    color: '#64748B',
+    fontWeight: '600',
   },
-
-  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  emptyText: { color: colors.textLight, fontSize: fontSize.md, marginTop: spacing.md },
-
-  uploadedContainer: { marginBottom: spacing.md },
-  sectionHeader: { fontSize: fontSize.md, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', marginBottom: spacing.sm },
-  uploadedCard: {
-    flexDirection: 'row', backgroundColor: colors.white, 
-    borderRadius: borderRadius.md, marginBottom: spacing.sm, padding: spacing.sm,
-    borderWidth: 1, borderColor: colors.border
-  },
-  uploadedImage: { width: 50, height: 50, borderRadius: 8, backgroundColor: '#E5E7EB', marginRight: spacing.md },
-  uploadedInfo: { flex: 1, justifyContent: 'center' },
-  uploadedTitle: { fontSize: 13, fontWeight: '700', color: colors.textPrimary, marginBottom: 2 },
-  uploadedDate: { fontSize: 11, color: colors.textLight }
 });

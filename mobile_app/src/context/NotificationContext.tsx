@@ -57,41 +57,66 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (!profile) return;
 
     let initialLoad = true;
+    const seenNotices = new Set<string>();
+    const seenAnns = new Set<string>();
 
     const unsubNotices = subscribeNotices((data: Notice[]) => {
-      if (initialLoad) return; // Skip initial bulk load to avoid spamming notifications
-      
-      const newNotice = data[0]; // Assuming ordered by created_at desc
-      if (!newNotice) return;
-      
-      // Check if it's relevant
-      const isForMe = 
-        newNotice.target_audience === 'all' || 
-        newNotice.target_audience === 'teachers' || 
-        (newNotice.target_audience === 'specific_teachers' && newNotice.target_teachers?.includes(profile.id));
+      const myNotices = data.filter(n => 
+        (n.target_audience === 'all' || 
+         n.target_audience === 'teachers' || 
+         (n.target_audience === 'specific_teachers' && n.target_teachers?.includes(profile.id))) 
+        && n.created_by !== profile.id
+      );
 
-      if (isForMe && newNotice.created_by !== profile.id) {
-        addNotification({
-          title: `New Notice: ${newNotice.title}`,
-          message: newNotice.message,
-          type: 'notice'
+      if (initialLoad) {
+        myNotices.slice(0, 5).reverse().forEach(n => {
+          seenNotices.add(n.id);
+          addNotification({
+            title: `New Notice: ${n.title}`,
+            message: n.message,
+            type: 'notice'
+          });
         });
+        return;
       }
+      
+      myNotices.forEach(n => {
+        if (!seenNotices.has(n.id)) {
+          seenNotices.add(n.id);
+          addNotification({
+            title: `New Notice: ${n.title}`,
+            message: n.message,
+            type: 'notice'
+          });
+        }
+      });
     });
 
     const unsubAnnouncements = subscribeAnnouncements((data: Announcement[]) => {
-      if (initialLoad) return;
-      
-      const newAnn = data[0];
-      if (!newAnn) return;
+      const myAnns = data.filter(a => a.created_by !== profile.id);
 
-      if (newAnn.created_by !== profile.id) {
-        addNotification({
-          title: `New Announcement: ${newAnn.title}`,
-          message: newAnn.message,
-          type: 'announcement'
+      if (initialLoad) {
+        myAnns.slice(0, 5).reverse().forEach(a => {
+          seenAnns.add(a.id);
+          addNotification({
+            title: `New Announcement: ${a.title}`,
+            message: a.message,
+            type: 'announcement'
+          });
         });
+        return;
       }
+      
+      myAnns.forEach(a => {
+        if (!seenAnns.has(a.id)) {
+          seenAnns.add(a.id);
+          addNotification({
+            title: `New Announcement: ${a.title}`,
+            message: a.message,
+            type: 'announcement'
+          });
+        }
+      });
     });
 
     // Mark end of initial load after a short delay

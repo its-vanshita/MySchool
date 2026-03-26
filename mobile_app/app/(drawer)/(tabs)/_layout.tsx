@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { View, TouchableOpacity, Image, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Image, Text, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../src/context/ThemeContext';
 import { useUser } from '../../../src/context/UserContext';
@@ -7,34 +7,25 @@ import { useNotificationBadge } from '../../../src/context/NotificationContext';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 
+// Premium Variables
+const BRAND_NAVY = '#153462';
+const PURE_WHITE = '#FFFFFF';
+
 function HeaderRight() {
-  const { colors, isDark } = useTheme();
-  const badgeStyles = getBadgeStyles(colors); const styles = getStyles(colors);
-    const router = useRouter();
+  const router = useRouter();
   const { unreadCount } = useNotificationBadge();
-  const { profile } = useUser();
+  
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 12 }}>
-      <TouchableOpacity style={{ padding: 6 }} onPress={() => router.push('/notifications')}>
-        <Ionicons name="notifications-outline" size={22} color={colors.white} />
-        {unreadCount > 0 && (
-          <View style={badgeStyles.badge}>
-            <Text style={badgeStyles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
-          </View>
-        )}
-      </TouchableOpacity>
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 16 }}>
       <TouchableOpacity 
-        style={{ marginLeft: 10 }}
-        onPress={() => router.push('/(drawer)/profile')}
+        style={styles.bellButton} 
+        onPress={() => router.push('/notifications')}
+        activeOpacity={0.7}
       >
-        {profile?.avatar_url ? (
-          <Image
-            source={{ uri: profile.avatar_url }}
-            style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1.5, borderColor: colors.white }}
-          />
-        ) : (
-          <View style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1.5, borderColor: colors.white, backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center' }}>
-            <Ionicons name="person" size={16} color={colors.primary} />
+        <Ionicons name="notifications-outline" size={24} color={PURE_WHITE} />
+        {unreadCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -42,83 +33,116 @@ function HeaderRight() {
   );
 }
 
+function HeaderLeft() {
+  return (
+    <View style={{ marginLeft: 4 }}>
+      <DrawerToggleButton tintColor={PURE_WHITE} />
+    </View>
+  );
+}
+
 export default function TabsLayout() {
-  const { colors, isDark } = useTheme();
   const { permissions } = useUser();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textLight,
-        tabBarStyle: {
-          backgroundColor: colors.white,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
-          height: 85,
-          paddingBottom: 25,
-          paddingTop: 15,
+        tabBarActiveTintColor: BRAND_NAVY,
+        tabBarInactiveTintColor: '#94A3B8',
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+          fontWeight: '600',
         },
-        headerStyle: { backgroundColor: colors.primary },
-        headerTintColor: colors.white,
-        headerTitleStyle: { fontWeight: '700' },
-        headerLeft: () => <DrawerToggleButton tintColor={colors.white} />,
+        tabBarStyle: {
+          backgroundColor: PURE_WHITE,
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(0,0,0,0.05)',
+          height: Platform.OS === 'ios' ? 92 : 88, 
+          paddingBottom: Platform.OS === 'ios' ? 30 : 16,
+          paddingTop: 8,
+          elevation: 10,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.05,
+          shadowRadius: 12,
+        },
+        tabBarItemStyle: {
+          paddingVertical: Platform.OS === 'ios' ? 0 : 5,
+        },
+        headerStyle: { 
+          backgroundColor: BRAND_NAVY,
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 0,
+        },
+        headerTintColor: PURE_WHITE,
+        headerTitleStyle: { 
+          fontWeight: '800',
+          fontSize: 20,
+          fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+          letterSpacing: -0.5,
+        },
+        headerLeft: () => <HeaderLeft />,
         headerRight: () => <HeaderRight />,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'VidDarpan',
-          tabBarIcon: ({ color, size }) => <Ionicons name="grid" size={size} color={color} />,
+          title: 'Dashboard',
+          headerTitle: 'VidDarpan',
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused ? styles.activeTabPill : styles.inactiveTabPill}>
+              <Ionicons name={focused ? "grid" : "grid-outline"} size={22} color={color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="attendance"
         options={{
-          title: 'Attendance',
           href: null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="checkmark-circle" size={size} color={color} />
-          ),
         }}
       />
       <Tabs.Screen
         name="myclass"
         options={{
           title: 'My Class',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="school" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+             <View style={focused ? styles.activeTabPill : styles.inactiveTabPill}>
+               <Ionicons name={focused ? "school" : "school-outline"} size={24} color={color} />
+             </View>
           ),
         }}
       />
       <Tabs.Screen
         name="notices"
         options={{
-          title: 'Notices',
-          href: null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="megaphone" size={size} color={color} />
+          title: 'Notice',
+          tabBarIcon: ({ color, size, focused }) => (
+             <View style={focused ? styles.activeTabPill : styles.inactiveTabPill}>
+               <Ionicons name={focused ? "megaphone" : "megaphone-outline"} size={22} color={color} />
+             </View>
           ),
         }}
       />
       <Tabs.Screen
         name="marks"
         options={{
-          title: 'Marks',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="create" size={size} color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen
         name="leave"
         options={{
           title: 'Leave',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+             <View style={focused ? styles.activeTabPill : styles.inactiveTabPill}>
+                <Ionicons name={focused ? "calendar" : "calendar-outline"} size={22} color={color} />
+             </View>
           ),
-          // Hide for admin who can't request leave
           href: permissions.canRequestLeave || permissions.canApproveLeave ? undefined : null,
         }}
       />
@@ -126,27 +150,44 @@ export default function TabsLayout() {
   );
 }
 
-const getBadgeStyles = (colors: any) => StyleSheet.create({
+const styles = StyleSheet.create({
+  bellButton: {
+    padding: 8,
+    position: 'relative',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 20,
+  },
   badge: {
     position: 'absolute',
     right: 2,
     top: 2,
-    backgroundColor: colors.danger,
+    backgroundColor: '#EF4444', // Premium Red
     borderRadius: 10,
     minWidth: 18,
     height: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: colors.white,
+    borderWidth: 2,
+    borderColor: BRAND_NAVY, // Match header to cut out
     paddingHorizontal: 4,
   },
   badgeText: {
-    color: colors.white,
-    fontSize: 10,
-    fontWeight: 'bold',
+    color: PURE_WHITE,
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  activeTabPill: {
+    width: 48,
+    height: 32,
+    backgroundColor: '#F1F5F9', // light blue soft pill
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inactiveTabPill: {
+    width: 48,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 });
-
-
-function getStyles(colors: any) { return {}; }

@@ -1,16 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSharedDuties } from '../../../src/hooks/useSharedDuties';
+import { useSharedUsers } from '../../../src/hooks/useSharedUsers';
 import { useNotificationBadge } from '../../../src/context/NotificationContext';
 import { useTheme } from '../../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
-
-const TEACHERS = [
-  { id: 't1', name: 'Sarah Jenkins' },
-  { id: 'demo-teacher', name: 'Demo Teacher' },
-  { id: 't3', name: 'Aman Patel' },
-];
 
 const ACTIVITIES = [
   'Exam Invigilation',
@@ -23,21 +18,30 @@ export default function AdminDutiesTab() {
   const { colors, isDark } = useTheme();
   const styles = getStyles(colors);
   const { duties, addDuty, removeDuty } = useSharedDuties();
+  const { teachers, loading: usersLoading } = useSharedUsers();
   const { addNotification } = useNotificationBadge();
 
-  const [selectedTeacherId, setSelectedTeacherId] = useState(TEACHERS[1].id);
+  const [selectedTeacherId, setSelectedTeacherId] = useState('');
   const [selectedActivity, setSelectedActivity] = useState(ACTIVITIES[0]);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [room, setRoom] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Set default teacher once they are loaded
+  useEffect(() => {
+    if (teachers.length > 0 && !selectedTeacherId) {
+      setSelectedTeacherId(teachers[0].id);
+    }
+  }, [teachers, selectedTeacherId]);
 
   const handleAssign = () => {
-    if (!date.trim() || !time.trim() || !room.trim()) {
-      Alert.alert('Error', 'Please fill in all details (Date, Time, Room, Activity).');
+    if (!date.trim() || !time.trim() || !room.trim() || !selectedTeacherId) {
+      Alert.alert('Error', 'Please fill in all details (Teacher, Date, Time, Room, Activity).');
       return;
     }
 
-    const teacher = TEACHERS.find((t) => t.id === selectedTeacherId);
+    const teacher = teachers.find((t) => t.id === selectedTeacherId);
 
     addDuty({
       teacher_id: selectedTeacherId,
@@ -68,8 +72,16 @@ export default function AdminDutiesTab() {
 
         <View style={styles.card}>
           <Text style={styles.label}>Select Teacher</Text>
+          <TextInput
+            style={[styles.input, { marginBottom: spacing.md }]}
+            placeholder="Search Teacher..."
+            placeholderTextColor={colors.textLight}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-            {TEACHERS.map((t) => (
+            {usersLoading && <Text style={{ color: colors.textLight }}>Loading teachers...</Text>}
+            {teachers.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase())).map((t) => (
               <TouchableOpacity
                 key={t.id}
                 style={[styles.chip, selectedTeacherId === t.id && styles.chipSelected]}

@@ -60,6 +60,9 @@ export default function LessonPlansScreen() {
           });
         }
       }
+      
+      opts.sort((a, b) => a.label.localeCompare(b.label));
+
       setSubjectClasses(opts);
       if (opts.length > 0) {
         setSelected(opts[0]);

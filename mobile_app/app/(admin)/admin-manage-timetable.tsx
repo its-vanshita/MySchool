@@ -14,6 +14,8 @@ import {
   useAdminTeacherTimetable,
   useAdminStudentTimetable,
 } from '../../src/hooks/useAdminTimetable';
+import { useClasses } from '../../src/hooks/useClasses';
+import { useSharedUsers } from '../../src/hooks/useSharedUsers';
 import { useTheme } from '../../src/context/ThemeContext';
 import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { DayOfWeek } from '../../src/types';
@@ -27,22 +29,14 @@ const DAY_OPTIONS: { key: DayOfWeek; label: string }[] = [
   { key: 'saturday', label: 'Sat' },
 ];
 
-const MOCK_TEACHERS = [
-  { id: 'demo-teacher', name: 'John Doe' },
-  { id: 'T-002', name: 'Jane Smith' },
-  { id: 'T-003', name: 'Michael Brown' },
-  { id: 'all-teachers', name: 'All Teachers' },
-];
-
-const MOCK_CLASSES = [
-  'Class 8-B', 'Class 9A', 'Class 9C', 'Class 10A', 'Class 10B', 'All Classes',
-];
-
 export default function AdminManageTimetableScreen() {
   const { colors, isDark } = useTheme();
   const styles = getStyles(colors);
   // Tab: teacher or student
   const [targetType, setTargetType] = useState<'teacher' | 'student'>('teacher');
+
+  const { classes, loading: classesLoading } = useClasses();
+  const { teachers, loading: teachersLoading } = useSharedUsers();
 
   // Hooks
   const {
@@ -59,8 +53,23 @@ export default function AdminManageTimetableScreen() {
 
   // Form state
   const [showForm, setShowForm] = useState(false);
-  const [selectedTeacherId, setSelectedTeacherId] = useState('demo-teacher');
-  const [selectedClass, setSelectedClass] = useState('Class 10A');
+  const [selectedTeacherId, setSelectedTeacherId] = useState('');
+  const [selectedClass, setSelectedClass] = useState('');
+
+  // Set default class when classes are loaded
+  React.useEffect(() => {
+    if (classes.length > 0 && !selectedClass) {
+      setSelectedClass(classes[0].name);
+    }
+  }, [classes, selectedClass]);
+
+  // Set default teacher when teachers are loaded
+  React.useEffect(() => {
+    if (teachers.length > 0 && !selectedTeacherId) {
+      setSelectedTeacherId(teachers[0].id);
+    }
+  }, [teachers, selectedTeacherId]);
+
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('monday');
   const [subject, setSubject] = useState('');
   const [room, setRoom] = useState('');
@@ -149,7 +158,7 @@ export default function AdminManageTimetableScreen() {
     return `${hr}:${m.toString().padStart(2, '0')} ${suffix}`;
   };
 
-  const selectedTeacherName = MOCK_TEACHERS.find((t) => t.id === selectedTeacherId)?.name || '';
+  const selectedTeacherName = teachers.find((t) => t.id === selectedTeacherId)?.name || '';
 
   return (
     <View style={styles.container}>
@@ -249,7 +258,7 @@ export default function AdminManageTimetableScreen() {
                   {isTeacher ? (
                     <>
                       <Text style={styles.entryMetaLabel}>
-                        Teacher: {MOCK_TEACHERS.find((t) => t.id === entryData.teacher_id)?.name || entryData.teacher_id}
+                        Teacher: {teachers.find((t) => t.id === entryData.teacher_id)?.name || entryData.teacher_id}
                       </Text>
                       <Text style={styles.entryMetaLabel}>Class: {entryData.class_name}</Text>
                     </>
@@ -284,7 +293,10 @@ export default function AdminManageTimetableScreen() {
               <>
                 <Text style={styles.label}>Select Teacher</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-                  {MOCK_TEACHERS.map((t) => (
+                  {teachersLoading && (
+                    <Text style={{ marginVertical: 8, color: colors.textLight }}>Loading teachers...</Text>
+                  )}
+                  {teachers.map((t) => (
                     <TouchableOpacity
                       key={t.id}
                       style={[styles.chip, selectedTeacherId === t.id && styles.chipActive]}
@@ -302,17 +314,28 @@ export default function AdminManageTimetableScreen() {
             {/* Class selection */}
             <Text style={styles.label}>Select Class</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-              {MOCK_CLASSES.map((c) => (
+              {classesLoading && (
+                <Text style={{ marginVertical: 8, color: colors.textLight }}>Loading classes...</Text>
+              )}
+              {classes.map((c) => (
                 <TouchableOpacity
-                  key={c}
-                  style={[styles.chip, selectedClass === c && styles.chipActive]}
-                  onPress={() => setSelectedClass(c)}
+                  key={c.id}
+                  style={[styles.chip, selectedClass === c.name && styles.chipActive]}
+                  onPress={() => setSelectedClass(c.name)}
                 >
-                  <Text style={[styles.chipText, selectedClass === c && styles.chipTextActive]}>
-                    {c}
+                  <Text style={[styles.chipText, selectedClass === c.name && styles.chipTextActive]}>
+                    {c.name}
                   </Text>
                 </TouchableOpacity>
               ))}
+              <TouchableOpacity
+                style={[styles.chip, selectedClass === 'All Classes' && styles.chipActive]}
+                onPress={() => setSelectedClass('All Classes')}
+              >
+                <Text style={[styles.chipText, selectedClass === 'All Classes' && styles.chipTextActive]}>
+                  All Classes
+                </Text>
+              </TouchableOpacity>
             </ScrollView>
 
             {/* Day selection */}

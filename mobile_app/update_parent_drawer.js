@@ -1,4 +1,6 @@
-import { Drawer } from 'expo-router/drawer';
+const fs = require('fs');
+
+const content = `import { Drawer } from 'expo-router/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/context/ThemeContext';
 import { useUser } from '../../src/context/UserContext';
@@ -333,3 +335,5 @@ export default function ParentDrawerLayout() {
     </Drawer>
   );
 }
+`
+fs.writeFileSync('app/(parent-drawer)/_layout.tsx', content);
