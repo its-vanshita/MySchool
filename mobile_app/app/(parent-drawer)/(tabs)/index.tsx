@@ -36,7 +36,7 @@ export default function ParentDashboardScreen() {
   }, []);
 
   const quickActions = [
-    { icon: 'document-text-outline' as const, label: 'Documents', route: '/documents' },
+    { icon: 'megaphone-outline' as const, label: 'Notices', route: '/notices' },
     { icon: 'book-outline' as const, label: 'Homework', route: '/homework', badge: '2 New', badgeColor: '#3B82F6' },
     { icon: 'ribbon-outline' as const, label: 'Marks', route: '/marks' },
     { icon: 'wallet-outline' as const, label: 'Fee', route: '/fee', badge: 'Due', badgeColor: '#F87171' },

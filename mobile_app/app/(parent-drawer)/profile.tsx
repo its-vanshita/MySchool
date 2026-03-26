@@ -8,34 +8,42 @@ import {
   Image,
   Switch,
   Alert,
-  Linking,
+  Platform,
+  StatusBar
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
 import { useUser } from '../../src/context/UserContext';
-import { useTheme } from '../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function ParentProfileScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
+// Premium Theme Variables
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const SUCCESS_GREEN = '#10B981';
+const DANGER_RED = '#EF4444';
+const DANGER_BG = '#FEF2F2';
+
+export default function PremiumParentProfileScreen() {
+  const router = useRouter();
   const { profile } = useUser();
   const { signOut } = useAuth();
-  const router = useRouter();
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [emailAlerts, setEmailAlerts] = useState(false);
+  const insets = useSafeAreaInsets();
+  
+  const [pushEnabled, setPushEnabled] = useState(true);
 
-  const joiningDate = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      })
-    : '—';
+  const parentName = profile?.name || 'Mr. Rajesh Sharma';
+  const parentEmail = profile?.email || 'rajesh.sharma@example.com';
+  const parentPhone = profile?.phone || '+91 98765 43210';
+  
+  const studentName = (profile as any)?.metadata?.studentName || 'Arjun Sharma';
+  const studentClass = (profile as any)?.metadata?.studentClass || 'Class 10-A';
+  const studentRoll = '12';
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
+    Alert.alert('Logout', 'Are you sure you want to securely log out?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Logout',
@@ -49,309 +57,278 @@ export default function ParentProfileScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Profile Header */}
-      <View style={styles.headerSection}>
-        <View style={styles.avatarRing}>
-          <View style={styles.avatarInner}>
-            {profile?.avatar_url ? (
-              <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
-            ) : (
-              <View style={[styles.avatarImage, { backgroundColor: colors.primaryLight, justifyContent: 'center', alignItems: 'center' }]}>
-                <Ionicons name="person" size={54} color={colors.primary} />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: BRAND_NAVY, elevation: 0, shadowOpacity: 0 },
+          headerTintColor: PURE_WHITE,
+          headerTitle: 'Profile',
+          headerTitleStyle: {
+             fontWeight: '700',
+             fontSize: 20,
+             fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+          },
+        }}
+      />
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+
+        {/* Hero Profile Card */}
+        <View style={styles.heroCard}>
+          <Image 
+            source={{ uri: 'https://i.pravatar.cc/300?u=parent123' }} 
+            style={styles.heroAvatar} 
+          />
+          <Text style={styles.heroName}>{parentName}</Text>
+          <Text style={styles.heroRole}>Parent</Text>
+        </View>
+
+        {/* Section: Child Details */}
+        <View style={styles.detailCard}>
+           <Text style={styles.cardHeader}>STUDENT DETAIL</Text>
+           <View style={styles.childBriefRow}>
+              <Image 
+                 source={{ uri: 'https://i.pravatar.cc/150?u=student123' }} 
+                 style={styles.childAvatar} 
+              />
+              <View style={styles.childTextCol}>
+                 <Text style={styles.childName}>{studentName}</Text>
+                 <Text style={styles.childMeta}>{studentClass}  •  Roll {studentRoll}</Text>
               </View>
-            )}
-          </View>
+              <TouchableOpacity style={styles.switchBtn}>
+                 <Ionicons name="swap-horizontal" size={16} color={BRAND_NAVY} />
+              </TouchableOpacity>
+           </View>
         </View>
-        <Text style={styles.profileName}>{profile?.name || 'Parent'}</Text>
-        <Text style={styles.profileRole}>PARENT</Text>
-        <Text style={styles.profileId}>ID: {profile?.unique_id || '—'}</Text>
-      </View>
 
-      {/* Personal Details */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>PERSONAL DETAILS</Text>
-        <DetailField label="Full Name" value={profile?.name || '—'} />
-        <DetailField label="Email Address" value={profile?.email || '—'} />
-        <DetailField label="Phone Number" value={profile?.phone || '—'} />
-        <DetailField label="Registered Since" value={joiningDate} isLast />
-      </View>
-
-      {/* Child Details */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>CHILD DETAILS</Text>
-        <DetailField label="Child Name" value="Arjun Sharma" />
-        <DetailField label="Class" value="Class 10-A" />
-        <DetailField label="Roll Number" value="12" />
-        <DetailField label="Attendance" value="92%" isLast />
-      </View>
-
-      {/* Password & Security */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>PASSWORD & SECURITY</Text>
-        <NavRow
-          icon="lock-closed-outline"
-          label="Change Password"
-          onPress={() => Alert.alert('Change Password', 'Password change coming soon.')}
-          isLast
-        />
-      </View>
-
-      {/* Notifications */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>NOTIFICATIONS</Text>
-        <View style={styles.toggleRow}>
-          <View style={styles.toggleLeft}>
-            <View style={[styles.toggleIcon, { backgroundColor: colors.primaryLight }]}>
-              <Ionicons name="notifications-outline" size={18} color={colors.primary} />
-            </View>
-            <Text style={styles.toggleLabel}>Push Notifications</Text>
-          </View>
-          <Switch
-            value={pushNotifications}
-            onValueChange={setPushNotifications}
-            trackColor={{ false: '#E5E7EB', true: colors.primary }}
-            thumbColor={colors.white}
-          />
+        {/* Section: Personal Details */}
+        <View style={styles.detailCard}>
+           <Text style={styles.cardHeader}>PERSONAL DETAILS</Text>
+           
+           <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>FULL NAME</Text>
+              <Text style={styles.fieldValue}>{parentName}</Text>
+           </View>
+           
+           <View style={styles.fieldDivider} />
+           
+           <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>EMAIL</Text>
+              <Text style={styles.fieldValue}>{parentEmail}</Text>
+           </View>
+           
+           <View style={styles.fieldDivider} />
+           
+           <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>PHONE NUMBER</Text>
+              <Text style={styles.fieldValue}>{parentPhone}</Text>
+           </View>
         </View>
-        <View style={[styles.toggleRow, { borderBottomWidth: 0 }]}>
-          <View style={styles.toggleLeft}>
-            <View style={[styles.toggleIcon, { backgroundColor: colors.primaryLight }]}>
-              <Ionicons name="mail-outline" size={18} color={colors.primary} />
-            </View>
-            <Text style={styles.toggleLabel}>Email Alerts</Text>
-          </View>
-          <Switch
-            value={emailAlerts}
-            onValueChange={setEmailAlerts}
-            trackColor={{ false: '#E5E7EB', true: colors.primary }}
-            thumbColor={colors.white}
-          />
-        </View>
-      </View>
 
-      {/* Logout */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
-        <View style={styles.logoutIconWrap}>
-          <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+        {/* Section: Preferences */}
+        <View style={styles.detailCard}>
+           <Text style={styles.cardHeader}>PREFERENCES</Text>
+           
+           <View style={styles.toggleRow}>
+              <View style={styles.toggleLeft}>
+                 <Ionicons name="notifications" size={20} color={SLATE_GREY} />
+                 <Text style={styles.toggleText}>Push Notifications</Text>
+              </View>
+              <Switch
+                 value={pushEnabled}
+                 onValueChange={setPushEnabled}
+                 trackColor={{ false: '#E2E8F0', true: SUCCESS_GREEN }}
+                 thumbColor={PURE_WHITE}
+              />
+           </View>
+           
+           <View style={styles.fieldDivider} />
+           
+           <TouchableOpacity style={styles.actionRow} activeOpacity={0.7}>
+              <View style={styles.actionLeft}>
+                 <Ionicons name="lock-closed" size={20} color={SLATE_GREY} />
+                 <Text style={styles.actionText}>Change Password</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#CBD5E1" />
+           </TouchableOpacity>
         </View>
-        <Text style={styles.logoutText}>Log Out</Text>
-      </TouchableOpacity>
-    </ScrollView>
-  );
-}
 
-function DetailField({ label, value, isLast }: { label: string; value: string; isLast?: boolean }) {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-return (
-    <View style={[styles.detailField, !isLast && styles.detailFieldBorder]}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>{value}</Text>
+        {/* Logout Button */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
+           <Ionicons name="log-out" size={20} color={DANGER_RED} />
+           <Text style={styles.logoutButtonText}>Log Out</Text>
+        </TouchableOpacity>
+
+        <View style={{ height: 40 }} />
+      </ScrollView>
     </View>
   );
 }
 
-function NavRow({
-  icon,
-  label,
-  rightText,
-  onPress,
-  isLast,
-}: {
-  icon: string;
-  label: string;
-  rightText?: string;
-  onPress: () => void;
-  isLast?: boolean;
-}) {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-return (
-    <TouchableOpacity
-      style={[styles.navRow, !isLast && styles.navRowBorder]}
-      onPress={onPress}
-      activeOpacity={0.6}
-    >
-      <View style={styles.navRowLeft}>
-        <Ionicons name={icon as any} size={20} color={colors.textSecondary} />
-        <Text style={styles.navRowLabel}>{label}</Text>
-      </View>
-      <View style={styles.navRowRight}>
-        {rightText ? <Text style={styles.navRightText}>{rightText}</Text> : null}
-        <Ionicons name="chevron-forward" size={16} color={colors.textLight} />
-      </View>
-    </TouchableOpacity>
-  );
-}
-
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: 100 },
-
-  headerSection: {
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: BG_LIGHT,
+  },
+  content: {
+    padding: 16,
+    paddingTop: 24,
+  },
+  
+  heroCard: {
+    backgroundColor: PURE_WHITE,
+    borderRadius: 24,
     alignItems: 'center',
-    paddingVertical: spacing.xxl,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    paddingVertical: 32,
+    marginBottom: 20,
+    shadowColor: BRAND_NAVY,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.05,
+    shadowRadius: 24,
+    elevation: 5,
   },
-  avatarRing: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    borderWidth: 3,
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
+  heroAvatar: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    marginBottom: 16,
   },
-  avatarInner: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
-    overflow: 'hidden',
-    backgroundColor: colors.primaryLight,
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-  },
-  profileName: {
-    fontSize: fontSize.xl,
+  heroName: {
+    fontSize: 22,
     fontWeight: '800',
-    color: colors.textPrimary,
-  },
-  profileRole: {
-    fontSize: fontSize.sm,
-    fontWeight: '700',
-    color: colors.primary,
-    marginTop: 4,
-    letterSpacing: 1,
-  },
-  profileId: {
-    fontSize: fontSize.xs,
-    color: colors.textLight,
-    marginTop: 4,
-  },
-
-  card: {
-    backgroundColor: colors.white,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cardTitle: {
-    fontSize: fontSize.xs,
-    fontWeight: '700',
-    color: colors.textLight,
-    letterSpacing: 0.5,
-    marginBottom: spacing.md,
-  },
-
-  detailField: {
-    paddingVertical: spacing.md,
-  },
-  detailFieldBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
-  detailLabel: {
-    fontSize: fontSize.xs,
-    color: colors.textLight,
-    fontWeight: '600',
+    color: BRAND_NAVY,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
     marginBottom: 4,
   },
-  detailValue: {
-    fontSize: fontSize.md,
-    color: colors.textPrimary,
+  heroRole: {
+    fontSize: 15,
     fontWeight: '500',
+    color: SLATE_GREY,
   },
 
-  navRow: {
+  detailCard: {
+    backgroundColor: PURE_WHITE,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.03,
+    shadowRadius: 16,
+    elevation: 2,
+  },
+  cardHeader: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: SLATE_GREY,
+    letterSpacing: 1.2,
+    marginBottom: 20,
+  },
+  
+  childBriefRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: spacing.md,
   },
-  navRowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
+  childAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginRight: 14,
   },
-  navRowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
+  childTextCol: {
+    flex: 1,
+    justifyContent: 'center',
   },
-  navRowLabel: {
-    fontSize: fontSize.md,
+  childName: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 2,
+  },
+  childMeta: {
+    fontSize: 13,
+    color: SLATE_GREY,
     fontWeight: '500',
-    color: colors.textPrimary,
   },
-  navRowRight: {
-    flexDirection: 'row',
+  switchBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F1F5F9',
     alignItems: 'center',
-    gap: spacing.xs,
+    justifyContent: 'center',
   },
-  navRightText: {
-    fontSize: fontSize.sm,
-    color: colors.textLight,
+  
+  fieldGroup: {
+    marginVertical: 4,
   },
-
+  fieldLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#94A3B8',
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
+  fieldValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: BRAND_NAVY,
+  },
+  fieldDivider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginVertical: 16,
+  },
+  
   toggleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
+    justifyContent: 'space-between',
+    paddingVertical: 4,
   },
   toggleLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
   },
-  toggleIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  toggleText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginLeft: 12,
+  },
+  
+  actionRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
   },
-  toggleLabel: {
-    fontSize: fontSize.md,
-    fontWeight: '500',
-    color: colors.textPrimary,
+  actionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginLeft: 12,
   },
 
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing.lg,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.dangerLight,
-  },
-  logoutIconWrap: {
-    width: 32,
-    height: 32,
+    backgroundColor: DANGER_BG,
     borderRadius: 16,
-    backgroundColor: colors.dangerLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 16,
+    marginTop: 8,
   },
-  logoutText: {
-    fontSize: fontSize.md,
+  logoutButtonText: {
+    fontSize: 16,
     fontWeight: '700',
-    color: colors.danger,
-  },
+    color: DANGER_RED,
+    marginLeft: 10,
+  }
 });
-

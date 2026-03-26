@@ -1,332 +1,290 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
-  Image,
+  Platform,
+  StatusBar
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useDatesheet } from '../../../src/hooks/useDatesheet';
-import { useSharedUploadedDatesheets } from '../../../src/hooks/useSharedUploadedDatesheets';
-import { useTheme } from '../../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
-import type { ExamEntry, ExamGroup } from '../../../src/types';
+import { Tabs } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Demo exam data for parent view
-const DEMO_EXAMS: ExamEntry[] = [
-  { id: '1', class_name: 'Class 10-A', subject: 'Mathematics', exam_date: '2026-03-20', start_time: '09:00', end_time: '11:00', room: 'Hall A', school_id: 'demo', exam_type: 'annual' },
-  { id: '2', class_name: 'Class 10-A', subject: 'Science', exam_date: '2026-03-22', start_time: '09:00', end_time: '11:00', room: 'Hall B', school_id: 'demo', exam_type: 'annual' },
-  { id: '3', class_name: 'Class 10-A', subject: 'English', exam_date: '2026-03-24', start_time: '09:00', end_time: '11:00', room: 'Hall A', school_id: 'demo', exam_type: 'annual' },
-  { id: '4', class_name: 'Class 10-A', subject: 'Hindi', exam_date: '2026-03-26', start_time: '09:00', end_time: '11:00', room: 'Hall C', school_id: 'demo', exam_type: 'annual' },
-  { id: '5', class_name: 'Class 10-A', subject: 'Social Studies', exam_date: '2026-03-28', start_time: '09:00', end_time: '11:00', room: 'Hall A', school_id: 'demo', exam_type: 'annual' },
-  { id: '6', class_name: 'Class 10-A', subject: 'Computer Science', exam_date: '2026-03-30', start_time: '09:00', end_time: '10:00', room: 'Lab 1', school_id: 'demo', exam_type: 'annual' },
+// Premium Theme Variables
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const DARK_TEXT = '#1E293B';
+const SUCCESS_GREEN = '#10B981';
+const SUCCESS_BG = '#ECFDF5';
+const AMBER_GOLD = '#F59E0B';
+const AMBER_BG = '#FFFBEB';
+const BLUE_ACCENT = '#3B82F6';
+
+const DEMO_EXAMS = [
+  { id: '1', class_name: 'Class 10-A', subject: 'Mathematics', exam_date: '2026-03-20', start_time: '09:00 AM', end_time: '12:00 PM', room: 'Hall A', color: '#3B82F6' },
+  { id: '2', class_name: 'Class 10-A', subject: 'Science', exam_date: '2026-03-22', start_time: '09:00 AM', end_time: '12:00 PM', room: 'Hall B', color: '#10B981' },
+  { id: '3', class_name: 'Class 10-A', subject: 'English', exam_date: '2026-03-28', start_time: '09:00 AM', end_time: '12:00 PM', room: 'Hall A', color: '#8B5CF6' },
+  { id: '4', class_name: 'Class 10-A', subject: 'Hindi', exam_date: '2026-03-30', start_time: '09:00 AM', end_time: '12:00 PM', room: 'Hall C', color: '#EC4899' },
+  { id: '5', class_name: 'Class 10-A', subject: 'Social Studies', exam_date: '2026-04-02', start_time: '09:00 AM', end_time: '12:00 PM', room: 'Hall A', color: '#F97316' },
+  { id: '6', class_name: 'Class 10-A', subject: 'Computer Science', exam_date: '2026-04-05', start_time: '09:00 AM', end_time: '11:00 AM', room: 'Lab 1', color: '#14B8A6' },
 ];
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-const getSubjectColors = (colors: any): Record<string, string> => ({
-
-});
-
-export default function ParentDatesheetScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-  const { examGroups, loading } = useDatesheet('demo-school', true);
-  const { datesheets } = useSharedUploadedDatesheets();
-  const [showDemo, setShowDemo] = useState(true);
-
-  const studentDatesheets = datesheets.filter(d => d.target === 'student' || d.target === 'both');
-  const exams = showDemo ? DEMO_EXAMS : [];
-
+export default function AdminDatesheetScreen() {
+  const insets = useSafeAreaInsets();
+  
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
-      <View style={styles.headerCard}>
-        <View style={styles.headerIcon}>
-          <Ionicons name="clipboard" size={24} color={colors.primary} />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <Tabs.Screen
+        options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: BRAND_NAVY, elevation: 0, shadowOpacity: 0 },
+          headerTintColor: PURE_WHITE,
+          headerTitle: 'Exams',
+          headerTitleStyle: {
+             fontWeight: '700',
+             fontSize: 20,
+             fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+          },
+        }}
+      />
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        
+        {/* Top Announcement Card */}
+        <View style={styles.announcementCard}>
+          <View style={styles.announcementIconWrap}>
+             <Ionicons name="pin" size={20} color={BRAND_NAVY} />
+          </View>
+          <View style={styles.announcementTextWrap}>
+            <Text style={styles.announcementTitle}>Final Examination Datesheet (Class 10)</Text>
+            <Text style={styles.announcementSub}>Published on March 15, 2026</Text>
+          </View>
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.headerTitle}>Exam Datesheet</Text>
-          <Text style={styles.headerSub}>Arjun Sharma • Class 10-A</Text>
+
+        {/* Exam Type Banner */}
+        <View style={styles.feedHeader}>
+          <Ionicons name="school" size={22} color={PURE_WHITE} />
+          <Text style={styles.feedHeaderText}>Upcoming Tracked Exams</Text>
         </View>
-      </View>
 
-      {studentDatesheets.length > 0 && (
-        <View style={styles.uploadedContainer}>
-          <Text style={styles.sectionHeader}>Official Announcements</Text>
-          {studentDatesheets.map(d => (
-            <View key={d.id} style={styles.uploadedCard}>
-              <Image source={{ uri: d.imageUrl }} style={styles.uploadedImage} />
-              <View style={styles.uploadedInfo}>
-                <Text style={styles.uploadedTitle}>{d.title}</Text>
-                <Text style={styles.uploadedDate}>Posted: {new Date(d.datePosted).toLocaleDateString()}</Text>
-              </View>
-            </View>
-          ))}
+        {/* Exams List */}
+        <View style={styles.listContainer}>
+          {DEMO_EXAMS.map((exam, idx) => {
+             const examDate = new Date(exam.exam_date + 'T00:00:00');
+             const today = new Date();
+             today.setHours(0, 0, 0, 0);
+             const daysUntil = Math.ceil((examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+             const isPast = daysUntil < 0;
+             const isNext = !isPast && daysUntil >= 0 && daysUntil <= 3; // Highlight as next if within 3 days
+             
+             return (
+               <View key={exam.id} style={[styles.examCard, isPast && styles.examCardPast]}>
+                 <View style={[styles.cardAccent, { backgroundColor: exam.color }]} />
+                 
+                 {/* Left Date Column */}
+                 <View style={styles.dateCol}>
+                    <Text style={styles.dateNum}>{examDate.getDate()}</Text>
+                    <Text style={styles.dateMonthDay}>{DAYS[examDate.getDay()]} • {MONTHS[examDate.getMonth()]}</Text>
+                 </View>
+
+                 {/* Divider */}
+                 <View style={styles.dateDivider} />
+
+                 {/* Central Content */}
+                 <View style={styles.contentCol}>
+                    <Text style={styles.subjectText}>{exam.subject}</Text>
+                    
+                    <View style={styles.detailRow}>
+                       <Ionicons name="time-outline" size={14} color={BRAND_NAVY} />
+                       <Text style={styles.detailText}>{exam.start_time} - {exam.end_time}</Text>
+                    </View>
+                    
+                    <View style={styles.detailRow}>
+                       <Ionicons name="location-outline" size={14} color={BRAND_NAVY} />
+                       <Text style={styles.detailText}>{exam.room}</Text>
+                    </View>
+                 </View>
+
+                 {/* Status Pill */}
+                 <View style={styles.statusCol}>
+                    {isPast ? (
+                       <View style={[styles.statusPill, { backgroundColor: SUCCESS_BG }]}>
+                          <Text style={[styles.statusPillText, { color: SUCCESS_GREEN }]}>Done</Text>
+                       </View>
+                    ) : isNext ? (
+                       <View style={[styles.statusPill, { backgroundColor: AMBER_BG }]}>
+                          <Text style={[styles.statusPillText, { color: AMBER_GOLD }]}>In {daysUntil} {daysUntil === 1 ? 'Day' : 'Days'}</Text>
+                       </View>
+                    ) : null}
+                 </View>
+               </View>
+             );
+          })}
         </View>
-      )}
-
-      {/* Exam Type Banner */}
-      <View style={styles.examTypeBanner}>
-        <Ionicons name="school" size={18} color={colors.white} />
-        <Text style={styles.examTypeText}>Upcoming Tracked Exams</Text>
-      </View>
-
-      {exams.length === 0 ? (
-        <View style={styles.emptyCard}>
-          <Ionicons name="clipboard-outline" size={48} color={colors.textLight} />
-          <Text style={styles.emptyTitle}>No Exams Scheduled</Text>
-          <Text style={styles.emptySubText}>Exam datesheet will appear here when published</Text>
-        </View>
-      ) : (
-        exams.map((exam, idx) => {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-const examDate = new Date(exam.exam_date + 'T00:00:00');
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const daysUntil = Math.ceil((examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-          const isPast = daysUntil < 0;
-          const isToday = daysUntil === 0;
-          const subjectColor = getSubjectColors(colors)[exam.subject] || colors.textPrimary;
-
-          return (
-            <View key={exam.id} style={[styles.examCard, isPast && styles.examCardPast]}>
-              {/* Date Column */}
-              <View style={[styles.dateColumn, isToday && styles.dateColumnToday]}>
-                <Text style={[styles.dateDay, isToday && { color: colors.white }]}>
-                  {examDate.getDate()}
-                </Text>
-                <Text style={[styles.dateMonth, isToday && { color: colors.white }]}>
-                  {MONTHS[examDate.getMonth()]}
-                </Text>
-                <Text style={[styles.dateDayName, isToday && { color: 'rgba(255,255,255,0.8)' }]}>
-                  {DAYS[examDate.getDay()]}
-                </Text>
-              </View>
-
-              {/* Content */}
-              <View style={styles.examContent}>
-                <View style={styles.examSubjectRow}>
-                  <View style={[styles.subjectDot, { backgroundColor: subjectColor }]} />
-                  <Text style={[styles.examSubject, isPast && { color: colors.textLight }]}>
-                    {exam.subject}
-                  </Text>
-                </View>
-                <View style={styles.examDetails}>
-                  <Ionicons name="time-outline" size={13} color={colors.textLight} />
-                  <Text style={styles.examDetailText}>
-                    {exam.start_time} – {exam.end_time}
-                  </Text>
-                </View>
-                <View style={styles.examDetails}>
-                  <Ionicons name="location-outline" size={13} color={colors.textLight} />
-                  <Text style={styles.examDetailText}>{exam.room}</Text>
-                </View>
-              </View>
-
-              {/* Status */}
-              <View style={styles.examStatus}>
-                {isPast ? (
-                  <View style={[styles.statusPill, { backgroundColor: colors.successLight }]}>
-                    <Text style={[styles.statusPillText, { color: colors.success }]}>Done</Text>
-                  </View>
-                ) : isToday ? (
-                  <View style={[styles.statusPill, { backgroundColor: colors.dangerLight }]}>
-                    <Text style={[styles.statusPillText, { color: colors.danger }]}>Today</Text>
-                  </View>
-                ) : (
-                  <View style={[styles.statusPill, { backgroundColor: colors.primaryLight }]}>
-                    <Text style={[styles.statusPillText, { color: colors.primary }]}>
-                      {daysUntil}d
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
-          );
-        })
-      )}
-
-      <View style={{ height: 30 }} />
-    </ScrollView>
+        
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: 100 },
-
-  headerCard: {
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: BG_LIGHT,
+  },
+  content: {
+    paddingTop: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 40,
+  },
+  announcementCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
-    padding: spacing.lg,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: PURE_WHITE,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
+    elevation: 3,
   },
-  headerIcon: {
+  announcementIconWrap: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.primaryLight,
+    backgroundColor: '#F1F5F9',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing.md,
+    marginRight: 16,
   },
-  headerTitle: {
-    fontSize: fontSize.md,
-    fontWeight: '700',
-    color: colors.textPrimary,
+  announcementTextWrap: {
+    flex: 1,
   },
-  headerSub: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginTop: 2,
+  announcementTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: BRAND_NAVY,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+    marginBottom: 4,
   },
-
-  examTypeBanner: {
+  announcementSub: {
+    fontSize: 13,
+    color: SLATE_GREY,
+    fontWeight: '500',
+  },
+  feedHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.md,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    gap: spacing.sm,
+    backgroundColor: BLUE_ACCENT,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: BLUE_ACCENT,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 4,
   },
-  examTypeText: {
-    fontSize: fontSize.md,
+  feedHeaderText: {
+    fontSize: 16,
     fontWeight: '700',
-    color: colors.white,
+    color: PURE_WHITE,
+    marginLeft: 12,
+    letterSpacing: 0.3,
   },
-
+  listContainer: {
+    gap: 16,
+  },
   examCard: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.white,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.sm,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    elevation: 1,
+    backgroundColor: PURE_WHITE,
+    borderRadius: 16,
+    overflow: 'hidden',
     shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.04,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 10,
+    elevation: 2,
+    paddingRight: 12,
   },
   examCardPast: {
     opacity: 0.6,
   },
-
-  dateColumn: {
-    width: 56,
-    height: 68,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.primaryLight,
+  cardAccent: {
+    width: 4,
+    height: '100%',
+  },
+  dateCol: {
+    width: 76,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing.md,
+    paddingVertical: 20,
   },
-  dateColumnToday: {
-    backgroundColor: colors.primary,
-  },
-  dateDay: {
-    fontSize: fontSize.xl,
+  dateNum: {
+    fontSize: 26,
     fontWeight: '800',
-    color: colors.primary,
-  },
-  dateMonth: {
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-    color: colors.primary,
-  },
-  dateDayName: {
-    fontSize: fontSize.xs,
-    color: colors.textLight,
-    marginTop: 1,
-  },
-
-  examContent: { flex: 1 },
-  examSubjectRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    color: BLUE_ACCENT,
     marginBottom: 4,
   },
-  subjectDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  examSubject: {
-    fontSize: fontSize.md,
+  dateMonthDay: {
+    fontSize: 10,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: SLATE_GREY,
+    letterSpacing: 0.5,
   },
-  examDetails: {
+  dateDivider: {
+    width: 1,
+    height: '70%',
+    backgroundColor: '#F1F5F9',
+    alignSelf: 'center',
+  },
+  contentCol: {
+    flex: 1,
+    paddingVertical: 16,
+    paddingLeft: 16,
+    justifyContent: 'center',
+  },
+  subjectText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: BRAND_NAVY,
+    marginBottom: 10,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginTop: 2,
+    marginBottom: 6,
   },
-  examDetailText: {
-    fontSize: fontSize.xs,
-    color: colors.textLight,
+  detailText: {
+    fontSize: 13,
+    color: SLATE_GREY,
+    fontWeight: '600',
+    marginLeft: 6,
   },
-
-  examStatus: { marginLeft: spacing.sm },
+  statusCol: {
+    justifyContent: 'flex-start',
+    paddingTop: 16,
+  },
   statusPill: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
   statusPillText: {
-    fontSize: fontSize.xs,
-    fontWeight: '700',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
-
-  emptyCard: {
-    backgroundColor: colors.white,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.xxl,
-    borderRadius: borderRadius.lg,
-    padding: spacing.xxxl,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  emptyTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginTop: spacing.md,
-  },
-  emptySubText: {
-    fontSize: fontSize.sm,
-    color: colors.textLight,
-    marginTop: spacing.xs,
-  },
-
-  uploadedContainer: { marginHorizontal: spacing.lg, marginTop: spacing.xl },
-  sectionHeader: { fontSize: fontSize.md, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', marginBottom: spacing.sm },
-  uploadedCard: {
-    flexDirection: 'row', backgroundColor: colors.white, 
-    borderRadius: borderRadius.md, marginBottom: spacing.sm, padding: spacing.sm,
-    borderWidth: 1, borderColor: colors.border
-  },
-  uploadedImage: { width: 50, height: 50, borderRadius: 8, backgroundColor: '#E5E7EB', marginRight: spacing.md },
-  uploadedInfo: { flex: 1, justifyContent: 'center' },
-  uploadedTitle: { fontSize: 13, fontWeight: '700', color: colors.textPrimary, marginBottom: 2 },
-  uploadedDate: { fontSize: 11, color: colors.textLight }
 });
-
