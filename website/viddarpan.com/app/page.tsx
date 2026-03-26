@@ -39,7 +39,7 @@ const Logo = () => (
   </a>
 );
 
-const Navbar = ({ onLoginClick }: { onLoginClick: () => void }) => {
+const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -62,7 +62,14 @@ const Navbar = ({ onLoginClick }: { onLoginClick: () => void }) => {
         <a href="#contact" className="hover:text-[#1a2b4c] transition-colors">Contact</a>
       </div>
       <div className="hidden md:flex items-center gap-4">
-        <button onClick={onLoginClick} className="text-sm font-medium text-gray-600 hover:text-[#1a2b4c] transition-colors">Portal Login</button>
+        <a 
+          href="https://erp.viddarpan.com" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-sm font-medium text-gray-600 hover:text-[#1a2b4c] transition-colors"
+        >
+          Portal Login
+        </a>
         <a href="#contact" className="bg-[#1a2b4c] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#111d33] transition-colors">
           Get Started
         </a>
@@ -76,7 +83,14 @@ const Navbar = ({ onLoginClick }: { onLoginClick: () => void }) => {
           <a href="#platforms" onClick={() => setIsOpen(false)} className="text-gray-600 font-medium px-2 hover:text-[#1a2b4c]">Platforms</a>
           <a href="#contact" onClick={() => setIsOpen(false)} className="text-gray-600 font-medium px-2 hover:text-[#1a2b4c]">Contact</a>
           <div className="h-px bg-gray-100 my-2"></div>
-          <button onClick={() => { setIsOpen(false); onLoginClick(); }} className="text-left text-gray-600 font-medium px-2 hover:text-[#1a2b4c]">Portal Login</button>
+          <a 
+            href="https://erp.viddarpan.com" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-left text-gray-600 font-medium px-2 hover:text-[#1a2b4c]"
+          >
+            Portal Login
+          </a>
           <a href="#contact" onClick={() => setIsOpen(false)} className="bg-[#1a2b4c] text-white px-5 py-3 rounded-lg text-sm font-medium hover:bg-[#111d33] transition-colors w-full mt-2 text-center">
             Get Started
           </a>
@@ -418,128 +432,15 @@ const Footer = () => (
   </footer>
 );
 
-const LoginPage = ({ onBack }: { onBack: () => void }) => {
-  return (
-    <div className="h-screen w-full flex flex-col md:flex-row bg-white animate-in fade-in duration-300 overflow-hidden">
-      {/* Back Button */}
-      <button 
-        onClick={onBack}
-        className="absolute top-4 right-4 md:top-6 md:right-6 z-50 flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-[#1a2b4c] transition-colors bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-100"
-      >
-        <X size={16} /> Close
-      </button>
 
-      {/* Left Side - Image/Branding */}
-      <div className="hidden md:flex md:w-1/2 relative bg-[#111d33] flex-col justify-end p-8 lg:p-16 text-white h-full">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000" 
-            alt="Office" 
-            className="w-full h-full object-cover opacity-40 mix-blend-luminosity"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a1128] via-[#111d33]/80 to-transparent"></div>
-        </div>
-        
-        <div className="relative z-10">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4">The Digital Registrar</h2>
-          <p className="text-blue-200 text-base lg:text-lg leading-relaxed mb-8 max-w-lg">
-            Empowering modern educational institutions with institutional authority and digital efficiency.
-          </p>
-          <div className="flex items-center gap-4">
-            <div className="w-8 h-1 bg-emerald-400"></div>
-            <span className="tracking-[0.2em] text-xs font-semibold text-gray-300">PORTAL V2.4</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Right Side - Login Form */}
-      <div className="w-full md:w-1/2 h-full flex flex-col justify-center p-6 md:p-8 lg:p-12 relative overflow-y-auto">
-        <div className="max-w-md w-full mx-auto">
-          <h2 className="text-2xl lg:text-3xl font-bold text-[#1a2b4c] mb-2">VidDarpan</h2>
-          <p className="text-gray-500 mb-6 text-base">Sign in to your institutional dashboard</p>
-
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-            <div>
-              <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                <Building2 size={14} /> School ID
-              </label>
-              <input 
-                type="text" 
-                placeholder="e.g. DPS-DEL-001" 
-                className="w-full bg-gray-50 border border-gray-200 focus:border-[#1a2b4c] focus:bg-white focus:ring-2 focus:ring-[#1a2b4c]/20 rounded-xl px-4 py-2.5 outline-none transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                <User size={14} /> Username / Email
-              </label>
-              <input 
-                type="text" 
-                placeholder="admin@school.edu" 
-                className="w-full bg-gray-50 border border-gray-200 focus:border-[#1a2b4c] focus:bg-white focus:ring-2 focus:ring-[#1a2b4c]/20 rounded-xl px-4 py-2.5 outline-none transition-all"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="flex items-center gap-2 text-xs font-bold text-gray-700 uppercase tracking-wider">
-                  <Lock size={14} /> Password
-                </label>
-                <a href="#" className="text-xs font-bold text-[#1a2b4c] hover:underline">Forgot Password?</a>
-              </div>
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                className="w-full bg-gray-50 border border-gray-200 focus:border-[#1a2b4c] focus:bg-white focus:ring-2 focus:ring-[#1a2b4c]/20 rounded-xl px-4 py-2.5 outline-none transition-all"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 pt-1">
-              <input type="checkbox" id="remember" className="w-4 h-4 rounded border-gray-300 text-[#1a2b4c] focus:ring-[#1a2b4c]" />
-              <label htmlFor="remember" className="text-sm text-gray-600">Remember this device</label>
-            </div>
-
-            <button className="w-full bg-[#0f1f3d] text-white font-medium py-3 rounded-xl hover:bg-[#1a2b4c] transition-colors mt-2 shadow-lg shadow-[#0f1f3d]/20">
-              Login
-            </button>
-          </form>
-
-          <div className="mt-6 pt-6 border-t border-gray-100">
-            <div className="flex gap-3 items-start bg-blue-50/50 p-3.5 rounded-xl">
-              <div className="text-orange-500 mt-0.5 shrink-0">
-                <Info size={18} className="fill-orange-500 text-white" />
-              </div>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                Don't have an account? <span className="font-semibold text-gray-900">Contact your School Administrator</span> to receive your login credentials.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8 text-[10px] font-bold tracking-[0.2em] text-gray-300 uppercase text-center md:text-left">
-            ERP.VIDDARPAN.COM
-          </div>
-        </div>
-      </div>
-      
-      <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 text-[10px] font-bold tracking-wider text-gray-300 uppercase hidden md:block">
-        © 2024 VIDDARPAN. ALL RIGHTS RESERVED.
-      </div>
-    </div>
-  );
-};
 
 export default function App() {
   const [activeRoleTab, setActiveRoleTab] = useState('principals');
-  const [currentRoute, setCurrentRoute] = useState<'home' | 'login'>('home');
-
-  if (currentRoute === 'login') {
-    return <LoginPage onBack={() => setCurrentRoute('home')} />;
-  }
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">
-      <Navbar onLoginClick={() => setCurrentRoute('login')} />
+      <Navbar />
       <main>
         <Hero />
         <Features />

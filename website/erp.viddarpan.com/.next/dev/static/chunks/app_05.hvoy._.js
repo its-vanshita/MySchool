@@ -530,17 +530,44 @@ function Sidebar() {
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "p-5 flex items-center",
-                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
-                            src: "/logo.png",
-                            alt: "VidDarpan Logo",
-                            className: "h-10 object-contain"
-                        }, void 0, false, {
-                            fileName: "[project]/app/components/Sidebar.tsx",
-                            lineNumber: 9,
-                            columnNumber: 11
-                        }, this)
-                    }, void 0, false, {
+                        className: "p-5 flex items-center gap-3",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                                src: "/logo.svg",
+                                alt: "VidDarpan Logo",
+                                className: "h-8 object-contain"
+                            }, void 0, false, {
+                                fileName: "[project]/app/components/Sidebar.tsx",
+                                lineNumber: 9,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex flex-col",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "font-bold text-base text-[#1a2b4c] leading-tight tracking-tight",
+                                        children: "VidDarpan"
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/components/Sidebar.tsx",
+                                        lineNumber: 15,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "text-[9px] text-emerald-600 font-bold uppercase tracking-widest leading-none",
+                                        children: "Academic ERP"
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/components/Sidebar.tsx",
+                                        lineNumber: 16,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/app/components/Sidebar.tsx",
+                                lineNumber: 14,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
                         fileName: "[project]/app/components/Sidebar.tsx",
                         lineNumber: 8,
                         columnNumber: 9
@@ -553,14 +580,14 @@ function Sidebar() {
                                     size: 20
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/Sidebar.tsx",
-                                    lineNumber: 17,
+                                    lineNumber: 21,
                                     columnNumber: 26
                                 }, this),
                                 label: "Dashboard",
                                 active: true
                             }, void 0, false, {
                                 fileName: "[project]/app/components/Sidebar.tsx",
-                                lineNumber: 17,
+                                lineNumber: 21,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(NavItem, {
@@ -568,13 +595,13 @@ function Sidebar() {
                                     size: 20
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/Sidebar.tsx",
-                                    lineNumber: 18,
+                                    lineNumber: 22,
                                     columnNumber: 26
                                 }, this),
                                 label: "Attendance"
                             }, void 0, false, {
                                 fileName: "[project]/app/components/Sidebar.tsx",
-                                lineNumber: 18,
+                                lineNumber: 22,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(NavItem, {
@@ -582,13 +609,13 @@ function Sidebar() {
                                     size: 20
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/Sidebar.tsx",
-                                    lineNumber: 19,
+                                    lineNumber: 23,
                                     columnNumber: 26
                                 }, this),
                                 label: "Notices"
                             }, void 0, false, {
                                 fileName: "[project]/app/components/Sidebar.tsx",
-                                lineNumber: 19,
+                                lineNumber: 23,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(NavItem, {
@@ -596,13 +623,13 @@ function Sidebar() {
                                     size: 20
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/Sidebar.tsx",
-                                    lineNumber: 20,
+                                    lineNumber: 24,
                                     columnNumber: 26
                                 }, this),
                                 label: "Staff Management"
                             }, void 0, false, {
                                 fileName: "[project]/app/components/Sidebar.tsx",
-                                lineNumber: 20,
+                                lineNumber: 24,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(NavItem, {
@@ -610,19 +637,19 @@ function Sidebar() {
                                     size: 20
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/Sidebar.tsx",
-                                    lineNumber: 21,
+                                    lineNumber: 25,
                                     columnNumber: 26
                                 }, this),
                                 label: "Settings"
                             }, void 0, false, {
                                 fileName: "[project]/app/components/Sidebar.tsx",
-                                lineNumber: 21,
+                                lineNumber: 25,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/components/Sidebar.tsx",
-                        lineNumber: 16,
+                        lineNumber: 20,
                         columnNumber: 9
                     }, this)
                 ]
@@ -641,7 +668,7 @@ function Sidebar() {
                             children: "Support"
                         }, void 0, false, {
                             fileName: "[project]/app/components/Sidebar.tsx",
-                            lineNumber: 27,
+                            lineNumber: 31,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -649,7 +676,7 @@ function Sidebar() {
                             children: "Need help with Grade 10-A reports?"
                         }, void 0, false, {
                             fileName: "[project]/app/components/Sidebar.tsx",
-                            lineNumber: 28,
+                            lineNumber: 32,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -657,18 +684,18 @@ function Sidebar() {
                             children: "Contact IT"
                         }, void 0, false, {
                             fileName: "[project]/app/components/Sidebar.tsx",
-                            lineNumber: 29,
+                            lineNumber: 33,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/components/Sidebar.tsx",
-                    lineNumber: 26,
+                    lineNumber: 30,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/components/Sidebar.tsx",
-                lineNumber: 25,
+                lineNumber: 29,
                 columnNumber: 7
             }, this)
         ]
@@ -688,7 +715,7 @@ function NavItem({ icon, label, active = false }) {
                 className: "absolute left-0 top-1.5 bottom-1.5 w-1 bg-blue-700 rounded-r-full"
             }, void 0, false, {
                 fileName: "[project]/app/components/Sidebar.tsx",
-                lineNumber: 41,
+                lineNumber: 45,
                 columnNumber: 18
             }, this),
             icon,
@@ -696,13 +723,13 @@ function NavItem({ icon, label, active = false }) {
                 children: label
             }, void 0, false, {
                 fileName: "[project]/app/components/Sidebar.tsx",
-                lineNumber: 43,
+                lineNumber: 47,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/components/Sidebar.tsx",
-        lineNumber: 40,
+        lineNumber: 44,
         columnNumber: 5
     }, this);
 }
@@ -2502,17 +2529,44 @@ function AdminSidebar() {
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "p-5 flex items-center",
-                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
-                            src: "/logo.png",
-                            alt: "VidDarpan Logo",
-                            className: "h-10 object-contain"
-                        }, void 0, false, {
-                            fileName: "[project]/app/components/AdminSidebar.tsx",
-                            lineNumber: 9,
-                            columnNumber: 11
-                        }, this)
-                    }, void 0, false, {
+                        className: "p-5 flex items-center gap-3",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                                src: "/logo.svg",
+                                alt: "VidDarpan Logo",
+                                className: "h-8 object-contain"
+                            }, void 0, false, {
+                                fileName: "[project]/app/components/AdminSidebar.tsx",
+                                lineNumber: 9,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex flex-col",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "font-bold text-base text-[#1a2b4c] leading-tight tracking-tight",
+                                        children: "VidDarpan"
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/components/AdminSidebar.tsx",
+                                        lineNumber: 15,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "text-[9px] text-emerald-600 font-bold uppercase tracking-widest leading-none",
+                                        children: "Institutional Admin"
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/components/AdminSidebar.tsx",
+                                        lineNumber: 16,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/app/components/AdminSidebar.tsx",
+                                lineNumber: 14,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
                         fileName: "[project]/app/components/AdminSidebar.tsx",
                         lineNumber: 8,
                         columnNumber: 9
@@ -2525,14 +2579,14 @@ function AdminSidebar() {
                                     className: "w-4 h-4"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/AdminSidebar.tsx",
-                                    lineNumber: 17,
+                                    lineNumber: 21,
                                     columnNumber: 26
                                 }, this),
                                 label: "Dashboard",
                                 active: true
                             }, void 0, false, {
                                 fileName: "[project]/app/components/AdminSidebar.tsx",
-                                lineNumber: 17,
+                                lineNumber: 21,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(NavItem, {
@@ -2540,13 +2594,13 @@ function AdminSidebar() {
                                     className: "w-4 h-4"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/AdminSidebar.tsx",
-                                    lineNumber: 18,
+                                    lineNumber: 22,
                                     columnNumber: 26
                                 }, this),
                                 label: "Attendance"
                             }, void 0, false, {
                                 fileName: "[project]/app/components/AdminSidebar.tsx",
-                                lineNumber: 18,
+                                lineNumber: 22,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(NavItem, {
@@ -2554,13 +2608,13 @@ function AdminSidebar() {
                                     className: "w-4 h-4"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/AdminSidebar.tsx",
-                                    lineNumber: 19,
+                                    lineNumber: 23,
                                     columnNumber: 26
                                 }, this),
                                 label: "Notices"
                             }, void 0, false, {
                                 fileName: "[project]/app/components/AdminSidebar.tsx",
-                                lineNumber: 19,
+                                lineNumber: 23,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(NavItem, {
@@ -2568,13 +2622,13 @@ function AdminSidebar() {
                                     className: "w-4 h-4"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/AdminSidebar.tsx",
-                                    lineNumber: 20,
+                                    lineNumber: 24,
                                     columnNumber: 26
                                 }, this),
                                 label: "Staff Management"
                             }, void 0, false, {
                                 fileName: "[project]/app/components/AdminSidebar.tsx",
-                                lineNumber: 20,
+                                lineNumber: 24,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(NavItem, {
@@ -2582,19 +2636,19 @@ function AdminSidebar() {
                                     className: "w-4 h-4"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/AdminSidebar.tsx",
-                                    lineNumber: 21,
+                                    lineNumber: 25,
                                     columnNumber: 26
                                 }, this),
                                 label: "Settings"
                             }, void 0, false, {
                                 fileName: "[project]/app/components/AdminSidebar.tsx",
-                                lineNumber: 21,
+                                lineNumber: 25,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/components/AdminSidebar.tsx",
-                        lineNumber: 16,
+                        lineNumber: 20,
                         columnNumber: 9
                     }, this)
                 ]
@@ -2613,7 +2667,7 @@ function AdminSidebar() {
                             children: "School Status"
                         }, void 0, false, {
                             fileName: "[project]/app/components/AdminSidebar.tsx",
-                            lineNumber: 27,
+                            lineNumber: 31,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2624,31 +2678,31 @@ function AdminSidebar() {
                                     children: "Live Monitoring"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/AdminSidebar.tsx",
-                                    lineNumber: 29,
+                                    lineNumber: 33,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"
                                 }, void 0, false, {
                                     fileName: "[project]/app/components/AdminSidebar.tsx",
-                                    lineNumber: 30,
+                                    lineNumber: 34,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/components/AdminSidebar.tsx",
-                            lineNumber: 28,
+                            lineNumber: 32,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/components/AdminSidebar.tsx",
-                    lineNumber: 26,
+                    lineNumber: 30,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/components/AdminSidebar.tsx",
-                lineNumber: 25,
+                lineNumber: 29,
                 columnNumber: 7
             }, this)
         ]
@@ -2668,7 +2722,7 @@ function NavItem({ icon, label, active = false }) {
                 className: "absolute left-0 top-1.5 bottom-1.5 w-1 bg-blue-700 rounded-r-full"
             }, void 0, false, {
                 fileName: "[project]/app/components/AdminSidebar.tsx",
-                lineNumber: 41,
+                lineNumber: 45,
                 columnNumber: 18
             }, this),
             icon,
@@ -2676,13 +2730,13 @@ function NavItem({ icon, label, active = false }) {
                 children: label
             }, void 0, false, {
                 fileName: "[project]/app/components/AdminSidebar.tsx",
-                lineNumber: 43,
+                lineNumber: 47,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/components/AdminSidebar.tsx",
-        lineNumber: 40,
+        lineNumber: 44,
         columnNumber: 5
     }, this);
 }

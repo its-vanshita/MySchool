@@ -196,7 +196,9 @@
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
     --font-weight-black: 900;
+    --tracking-tight: -.025em;
     --tracking-wider: .05em;
+    --tracking-widest: .1em;
     --leading-tight: 1.25;
     --leading-relaxed: 1.625;
     --radius-md: .375rem;
@@ -1585,13 +1587,27 @@
     letter-spacing: .15em;
   }
 
+  .tracking-tight {
+    --tw-tracking: var(--tracking-tight);
+    letter-spacing: var(--tracking-tight);
+  }
+
   .tracking-wider {
     --tw-tracking: var(--tracking-wider);
     letter-spacing: var(--tracking-wider);
   }
 
+  .tracking-widest {
+    --tw-tracking: var(--tracking-widest);
+    letter-spacing: var(--tracking-widest);
+  }
+
   .text-\[\#0f172a\] {
     color: #0f172a;
+  }
+
+  .text-\[\#1a2b4c\] {
+    color: #1a2b4c;
   }
 
   .text-amber-600 {
