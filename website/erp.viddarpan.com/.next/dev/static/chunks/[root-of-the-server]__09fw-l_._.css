@@ -1333,6 +1333,10 @@
     background-position: center;
   }
 
+  .object-contain {
+    object-fit: contain;
+  }
+
   .p-0\.5 {
     padding: calc(var(--spacing) * .5);
   }

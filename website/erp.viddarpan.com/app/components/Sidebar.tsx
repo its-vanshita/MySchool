@@ -6,12 +6,14 @@ export default function Sidebar() {
     <aside className="w-60 bg-white border-r border-slate-200 flex flex-col justify-between h-full shrink-0">
       <div>
         <div className="p-5 flex items-center gap-3">
-          <div className="bg-slate-800 p-1.5 rounded-lg">
-            <GraduationCap className="text-white w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="font-bold text-lg text-slate-800 leading-tight">VidDarpan</h1>
-            <p className="text-[10px] text-slate-500 font-semibold tracking-wider uppercase">Academic ERP</p>
+          <img 
+            src="/logo.svg" 
+            alt="VidDarpan Logo" 
+            className="h-8 object-contain" 
+          />
+          <div className="flex flex-col">
+            <span className="font-bold text-base text-[#1a2b4c] leading-tight tracking-tight">VidDarpan</span>
+            <span className="text-[9px] text-emerald-600 font-bold uppercase tracking-widest leading-none">Academic ERP</span>
           </div>
         </div>
         

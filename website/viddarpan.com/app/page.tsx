@@ -26,26 +26,15 @@ import {
 // --- Components ---
 
 const Logo = () => (
-  <a href="#" className="flex items-center">
+  <a href="#" className="flex items-center gap-2">
     <img 
-      src="/logo.png" 
+      src="/logo.svg" 
       alt="VidDarpan Logo" 
-      className="h-12 md:h-16 object-contain mix-blend-multiply" 
-      referrerPolicy="no-referrer"
-      onError={(e) => {
-        // Fallback text if the image isn't uploaded yet
-        e.currentTarget.style.display = 'none';
-        const fallback = document.getElementById('logo-fallback');
-        if (fallback) fallback.style.display = 'flex';
-      }}
+      className="h-10 md:h-12 object-contain" 
     />
-    <div id="logo-fallback" className="hidden items-center gap-2">
-      <div className="bg-[#1a2b4c] text-white p-2 rounded-xl flex items-center justify-center">
-        <BookOpen size={24} strokeWidth={2.5} />
-      </div>
-      <div className="flex flex-col">
-        <span className="font-bold text-2xl text-[#1a2b4c] leading-none tracking-tight">VidDarpan</span>
-      </div>
+    <div className="flex flex-col">
+      <span className="font-bold text-xl md:text-2xl text-[#1a2b4c] leading-none tracking-tight">VidDarpan</span>
+      <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest mt-0.5">Academic ERP</span>
     </div>
   </a>
 );
@@ -339,11 +328,16 @@ const Footer = () => (
     <div className="max-w-7xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-12 mb-16">
         <div className="lg:col-span-2">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="bg-white text-[#1a2b4c] p-1.5 rounded-lg flex items-center justify-center">
-              <BookOpen size={20} strokeWidth={2.5} />
+          <div className="flex items-center mb-6">
+            <img 
+              src="/logo-white.svg" 
+              alt="VidDarpan Logo" 
+              className="h-10 object-contain" 
+            />
+            <div className="ml-3">
+              <span className="font-bold text-xl text-white tracking-tight">VidDarpan</span>
+              <p className="text-[9px] text-blue-300 font-bold uppercase tracking-[0.2em] leading-none">Academic ERP</p>
             </div>
-            <span className="font-bold text-xl tracking-tight">VidDarpan</span>
           </div>
           <p className="text-blue-200 text-sm leading-relaxed mb-6 pr-4 lg:pr-12">
             The digital ledger for modern institutions, bringing authority and efficiency to academic management across the nation.

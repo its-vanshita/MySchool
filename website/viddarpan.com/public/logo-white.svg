@@ -1,0 +1,11 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rounded Rect Background -->
+  <rect width="128" height="128" rx="32" fill="white" fill-opacity="0.1"/>
+  
+  <!-- Stylized Book Pages -->
+  <path d="M32 40C32 37.7909 33.7909 36 36 36H64V92H36C33.7909 92 32 90.2091 32 88V40Z" fill="white" fill-opacity="0.9"/>
+  <path d="M64 36H92C94.2091 36 96 37.7909 96 40V88C96 90.2091 94.2091 92 92 92H64V36Z" fill="white" fill-opacity="0.5"/>
+  
+  <!-- Mirror Shine Effect -->
+  <path d="M75 40L64 36V92L85 80L75 40Z" fill="white" fill-opacity="0.2"/>
+</svg>
