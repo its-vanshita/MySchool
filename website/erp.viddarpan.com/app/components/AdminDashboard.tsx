@@ -6,6 +6,9 @@ import AdminTopbar from './AdminTopbar';
 import AdminContent from './AdminContent';
 import AssignNotice from './AssignNotice';
 import AdminNoticesList from './AdminNoticesList';
+import AdminLeaveApprovals from './AdminLeaveApprovals';
+import AdminTimetable from './AdminTimetable';
+import AdminManageCalendar from './AdminManageCalendar';
 
 export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -24,6 +27,9 @@ export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
           {activeTab === 'dashboard' && <AdminContent />}
           {activeTab === 'notices' && <AdminNoticesList notices={notices} onCreateNew={() => setActiveTab('assign-notice')} />}
+          {activeTab === 'leave-approvals' && <AdminLeaveApprovals />}
+          {activeTab === 'manage-timetable' && <AdminTimetable />}
+          {activeTab === 'manage-calendar' && <AdminManageCalendar />}
           {activeTab === 'assign-notice' && (
             <AssignNotice 
               onBroadcastSuccess={handleNoticeBroadcasted} 

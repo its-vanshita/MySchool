@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { LayoutDashboard, Users, Bell, Settings, CalendarCheck, Megaphone, LogOut, Plus } from 'lucide-react';
+import { LayoutDashboard, Users, Bell, Settings, CalendarCheck, Megaphone, LogOut, Plus, ClipboardCheck, CalendarRange } from 'lucide-react';
 
 interface AdminSidebarProps {
   activeTab?: string;
@@ -28,7 +28,10 @@ export default function AdminSidebar({ activeTab = 'dashboard', onTabChange = ()
         <nav className="px-3 mt-4 space-y-1">
           <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label="Dashboard" active={activeTab === 'dashboard'} onClick={() => onTabChange('dashboard')} />
           <NavItem icon={<Megaphone className="w-4 h-4" />} label="Notices" active={activeTab === 'notices'} onClick={() => onTabChange('notices')} />
-          <NavItem icon={<CalendarCheck className="w-4 h-4" />} label="Attendance" active={activeTab === 'attendance'} onClick={() => onTabChange('attendance')} />
+          <NavItem icon={<ClipboardCheck className="w-4 h-4" />} label="Leave Approvals" active={activeTab === 'leave-approvals'} onClick={() => onTabChange('leave-approvals')} />
+          <NavItem icon={<CalendarRange className="w-4 h-4" />} label="Manage Timetable" active={activeTab === 'manage-timetable'} onClick={() => onTabChange('manage-timetable')} />
+          <NavItem icon={<CalendarCheck className="w-4 h-4" />} label="Manage Calendar" active={activeTab === 'manage-calendar'} onClick={() => onTabChange('manage-calendar')} />
+          <NavItem icon={<LayoutDashboard className="w-4 h-4" />} label="Attendance" active={activeTab === 'attendance'} onClick={() => onTabChange('attendance')} />
           <NavItem icon={<Users className="w-4 h-4" />} label="Staff Management" active={activeTab === 'staff'} onClick={() => onTabChange('staff')} />
           <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" active={activeTab === 'settings'} onClick={() => onTabChange('settings')} />
         </nav>
