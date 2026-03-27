@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,221 +7,408 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  Platform,
+  Switch,
+  StatusBar
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 import { useSharedMarks, DEMO_EXAMS } from '../../../src/hooks/useSharedMarks';
 import { useClasses } from '../../../src/hooks/useClasses';
 import { useClassSubjects } from '../../../src/hooks/useClassSubjects';
-import { useTheme } from '../../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
+
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const AMBER_GLOW = '#F59E0B';
 
 export default function AdminUpdateMarksTab() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
   const { store, adminUpdateMarks, adminUnlockPortal } = useSharedMarks();
   const { classes, loading: classesLoading } = useClasses();
 
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedExam, setSelectedExam] = useState(DEMO_EXAMS[0].id);
+  const [isPortalUnlocked, setIsPortalUnlocked] = useState(false);
 
-  // Set default selected class when classes load
   React.useEffect(() => {
     if (classes.length > 0 && !selectedClass) {
       setSelectedClass(classes[0].name);
     }
   }, [classes, selectedClass]);
 
-  const { subjects, loading: subjectsLoading } = useClassSubjects(selectedClass);
+  const { subjects } = useClassSubjects(selectedClass);
 
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
   const [editingMark, setEditingMark] = useState('');
+  const [unsavedChanges, setUnsavedChanges] = useState<{classKey: string, studentId: string, mark: string} | null>(null);
 
-  const handleAdminMarkSave = (classKey: string, studentId: string) => {
-    if (!editingMark) return;
-    adminUpdateMarks(classKey, selectedExam, studentId, editingMark);
-    Alert.alert('Success', 'Mark updated successfully by admin override.');
+  const handleAdminMarkSave = () => {
+    if (!unsavedChanges) return;
+    adminUpdateMarks(unsavedChanges.classKey, selectedExam, unsavedChanges.studentId, unsavedChanges.mark);
+    Alert.alert('Changes Saved', 'Student marks have been successfully updated.');
     setEditingStudentId(null);
+    setUnsavedChanges(null);
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <Tabs.Screen
+        options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: BRAND_NAVY, elevation: 0, shadowOpacity: 0 },
+          headerTintColor: PURE_WHITE,
+          headerTitle: 'Update Marks',
+          headerTitleStyle: {
+             fontWeight: '700',
+             fontSize: 20,
+             fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+          },
+        }}
+      />
 
-        <Text style={styles.headerTitle}>Update Marks</Text>
-        <Text style={styles.subTitle}>View and edit student marks after teacher submission.</Text>
-
-        {/* Global Filters */}
-        <View style={styles.filterRow}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-            {classesLoading && (
-               <Text style={{ marginVertical: 8, color: colors.textLight }}>Loading classes...</Text>
-            )}
-            {classes.map(c => (
-              <TouchableOpacity
-                key={c.id}
-                style={[styles.chip, selectedClass === c.name && styles.chipSelected]}
-                onPress={() => setSelectedClass(c.name)}
-              >
-                <Text style={[styles.chipText, selectedClass === c.name && styles.chipTextSelected]}>{c.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        
+        {/* Portal Control Hero */}
+        <View style={[styles.heroCard, isPortalUnlocked && styles.heroCardActive]}>
+           <View style={styles.heroRow}>
+              <View style={styles.heroTextWrap}>
+                 <Text style={styles.heroTitle}>Teacher Portal Access</Text>
+                 <Text style={styles.heroSubTitle}>
+                    {isPortalUnlocked ? 'Modification mode is LIVE' : 'Portal locked for modifications'}
+                 </Text>
+              </View>
+              <Switch
+                 value={isPortalUnlocked}
+                 onValueChange={(val) => {
+                    setIsPortalUnlocked(val);
+                    if (val && subjects.length > 0) {
+                      const classKey = `${subjects[0]}|${selectedClass}`;
+                      adminUnlockPortal(classKey, selectedExam, 24);
+                    }
+                 }}
+                 trackColor={{ false: '#E2E8F0', true: '#FDE68A' }}
+                 thumbColor={isPortalUnlocked ? AMBER_GLOW : '#94A3B8'}
+                 ios_backgroundColor="#E2E8F0"
+              />
+           </View>
         </View>
 
-        {/* Exam filter */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-            {DEMO_EXAMS.map(e => (
-              <TouchableOpacity
-                key={e.id}
-                style={[styles.smallChip, selectedExam === e.id && styles.smallChipSelected]}
-                onPress={() => setSelectedExam(e.id)}
-              >
-                <Text style={[styles.smallChipText, selectedExam === e.id && styles.smallChipTextSelected]}>{e.label}</Text>
-              </TouchableOpacity>
-            ))}
-        </ScrollView>
+        {/* Selection Layer */}
+        <View style={styles.selectionLayer}>
+           {/* Exams Row */}
+           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
+              {DEMO_EXAMS.map(e => (
+                 <TouchableOpacity
+                   key={e.id}
+                   style={[styles.examChip, selectedExam === e.id && styles.examChipSelected]}
+                   onPress={() => setSelectedExam(e.id)}
+                   activeOpacity={0.8}
+                 >
+                   <Text style={[styles.examChipText, selectedExam === e.id && styles.examChipTextSelected]}>{e.label}</Text>
+                 </TouchableOpacity>
+              ))}
+           </ScrollView>
 
-        <View style={{ marginTop: spacing.md }}>
+           {/* Classes Row */}
+           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
+              {classes.map(c => (
+                 <TouchableOpacity
+                   key={c.id}
+                   style={[styles.classChip, selectedClass === c.name && styles.classChipSelected]}
+                   onPress={() => setSelectedClass(c.name)}
+                   activeOpacity={0.8}
+                 >
+                   <Text style={[styles.classChipText, selectedClass === c.name && styles.classChipTextSelected]}>{c.name}</Text>
+                 </TouchableOpacity>
+              ))}
+           </ScrollView>
+        </View>
+
+        {/* Data Records */}
+        <Text style={styles.sectionTitle}>Student Records</Text>
+        <View style={styles.listContainer}>
           {subjects.map(subj => {
             const classKey = `${subj}|${selectedClass}`;
             const group = store.find(s => s.classKey === classKey && s.examId === selectedExam);
             
-            const deadlinePassed = group?.uploadDeadline ? Date.now() > group.uploadDeadline : false;
-            const isLocked = group?.submitted || deadlinePassed;
-            
-            return (
-              <View key={subj} style={styles.subjectCard}>
-                <View style={styles.subjectHeader}>
-                  <Text style={styles.subjectTitle}>{subj}</Text>
-                  {isLocked ? (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      <View style={[styles.lockedBadge, { backgroundColor: deadlinePassed && !group?.submitted ? colors.danger : colors.success }]}>
-                        <Ionicons name="lock-closed" size={12} color={colors.white} />
-                        <Text style={styles.lockedText}>
-                          {deadlinePassed && !group?.submitted ? 'Time Locked' : 'Locked by Teacher'}
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        style={styles.unlockBtn}
-                        onPress={() => {
-                          adminUnlockPortal(classKey, selectedExam, 24);
-                          Alert.alert('Portal Unlocked', 'Teacher now has 24 hours to modify and submit marks.');
-                        }}
-                      >
-                        <Ionicons name="time-outline" size={12} color={colors.primary} />
-                        <Text style={styles.unlockBtnText}>Unlock 24h</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ) : (
-                    <Text style={{ fontSize: 10, color: colors.warning, fontWeight: '700' }}>PENDING SUBMISSION</Text>
-                  )}
-                </View>
+            if (group && group.students.length > 0) {
+               return group.students.map(st => {
+                 const isEditing = editingStudentId === `${classKey}|${st.id}`;
+                 
+                 return (
+                   <View key={`${subj}-${st.id}`} style={styles.recordCard}>
+                     <View style={styles.recordInfo}>
+                        <Text style={styles.recordName}>{st.name}</Text>
+                        <Text style={styles.recordSubject}>{subj}</Text>
+                     </View>
 
-                {group && group.students.length > 0 ? (
-                  group.students.map(st => (
-                    <View key={st.id} style={styles.studentMarkRow}>
-                      <Text style={styles.studentNameList}>{st.name}</Text>
-                      
-                      {editingStudentId === `${classKey}|${st.id}` ? (
-                        <View style={styles.editMarkWrapper}>
-                          <TextInput 
-                            style={styles.overrideInput} 
-                            value={editingMark}
-                            onChangeText={setEditingMark}
-                            keyboardType="number-pad"
-                            maxLength={3}
-                            autoFocus
-                          />
-                          <TouchableOpacity onPress={() => handleAdminMarkSave(classKey, st.id)}>
-                            <Ionicons name="checkmark-circle" size={24} color={colors.success} />
-                          </TouchableOpacity>
-                          <TouchableOpacity onPress={() => setEditingStudentId(null)}>
-                            <Ionicons name="close-circle" size={24} color={colors.danger} />
-                          </TouchableOpacity>
-                        </View>
-                      ) : (
-                        <View style={styles.scoreActionRow}>
-                          <Text style={styles.scoreVal}>
-                            {st.marks ? `${st.marks} / ${st.maxMarks}` : '— / 100'}
-                          </Text>
-                          {isLocked && (
-                            <TouchableOpacity onPress={() => { setEditingStudentId(`${classKey}|${st.id}`); setEditingMark(st.marks || ''); }}>
-                              <Ionicons name="create-outline" size={18} color={colors.primary} style={{ marginLeft: 8 }} />
-                            </TouchableOpacity>
-                          )}
-                        </View>
-                      )}
-                    </View>
-                  ))
-                ) : (
-                  <Text style={{ fontSize: 12, color: colors.textLight, paddingVertical: 8 }}>No marks recorded by the teacher yet.</Text>
-                )}
-              </View>
-            );
+                     <View style={styles.recordAction}>
+                        {isEditing ? (
+                           <View style={styles.editWrap}>
+                              <TextInput 
+                                style={styles.scoreInput}
+                                value={editingMark}
+                                onChangeText={(text) => {
+                                   setEditingMark(text);
+                                   setUnsavedChanges({classKey, studentId: st.id, mark: text});
+                                }}
+                                keyboardType="numeric"
+                                maxLength={3}
+                                autoFocus
+                              />
+                              <Text style={styles.maxMarkText}>/ 100</Text>
+                           </View>
+                        ) : (
+                           <Text style={styles.scoreText}>{st.marks ? `${st.marks}/100` : '—/100'}</Text>
+                        )}
+                        <TouchableOpacity 
+                           style={styles.editBtn} 
+                           onPress={() => {
+                              if (isEditing) {
+                                 setEditingStudentId(null);
+                                 setUnsavedChanges(null);
+                              } else {
+                                 setEditingStudentId(`${classKey}|${st.id}`);
+                                 setEditingMark(st.marks || '');
+                              }
+                           }}
+                        >
+                           <Ionicons name={isEditing ? "close-outline" : "pencil-outline"} size={20} color={BRAND_NAVY} />
+                        </TouchableOpacity>
+                     </View>
+                   </View>
+                 );
+               });
+            }
+            return null;
           })}
-          {subjects.length === 0 && (
-             <Text style={{ color: colors.textLight, marginTop: spacing.md }}>No subjects found for this class.</Text>
-          )}
         </View>
 
-        <View style={{ height: 60 }} />
+        <View style={{ height: 80 }} />
       </ScrollView>
+
+      {/* The Elite Footer */}
+      {unsavedChanges && (
+         <View style={styles.footerWrap}>
+            <TouchableOpacity style={styles.saveBtn} activeOpacity={0.8} onPress={handleAdminMarkSave}>
+               <Text style={styles.saveBtnText}>Save All Changes</Text>
+               <Ionicons name="checkmark" size={20} color={PURE_WHITE} />
+            </TouchableOpacity>
+         </View>
+      )}
     </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.xl, paddingBottom: 100 },
-  headerTitle: { fontSize: fontSize.xl, fontWeight: '800', color: colors.textPrimary },
-  subTitle: { fontSize: fontSize.sm, color: colors.textSecondary, marginTop: 4, marginBottom: spacing.lg },
-  
-  filterRow: { marginBottom: spacing.lg },
-  chipScroll: { flexDirection: 'row' },
-  chip: {
-    paddingHorizontal: 16, paddingVertical: 8,
-    borderRadius: 20, backgroundColor: colors.white,
-    borderWidth: 1, borderColor: colors.border, marginRight: 8,
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: BG_LIGHT,
   },
-  chipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-  chipTextSelected: { color: colors.white },
+  content: {
+    padding: 20,
+    paddingTop: 16,
+  },
+  
+  // Hero
+  heroCard: {
+     backgroundColor: PURE_WHITE,
+     borderRadius: 24,
+     padding: 24,
+     marginBottom: 24,
+     shadowColor: '#000',
+     shadowOffset: { width: 0, height: 10 },
+     shadowOpacity: 0.05,
+     shadowRadius: 20,
+     elevation: 4,
+     borderWidth: 2,
+     borderColor: 'transparent',
+  },
+  heroCardActive: {
+     borderColor: AMBER_GLOW,
+     shadowColor: AMBER_GLOW,
+     shadowOpacity: 0.15,
+  },
+  heroRow: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     justifyContent: 'space-between',
+  },
+  heroTextWrap: {
+     flex: 1,
+     paddingRight: 16,
+  },
+  heroTitle: {
+     fontSize: 18,
+     fontWeight: '800',
+     color: BRAND_NAVY,
+     marginBottom: 4,
+     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  heroSubTitle: {
+     fontSize: 13,
+     color: SLATE_GREY,
+     fontWeight: '500',
+  },
 
-  smallChip: {
-    paddingHorizontal: 12, paddingVertical: 6,
-    borderRadius: 16, backgroundColor: colors.white,
-    borderWidth: 1, borderColor: colors.border, marginRight: 6,
+  // Selection Layer
+  selectionLayer: {
+     marginBottom: 24,
   },
-  smallChipSelected: { backgroundColor: colors.textPrimary, borderColor: colors.textPrimary },
-  smallChipText: { fontSize: 11, fontWeight: '600', color: colors.textSecondary },
-  smallChipTextSelected: { color: colors.white },
+  chipRow: {
+     flexDirection: 'row',
+     marginBottom: 16,
+  },
+  examChip: {
+     backgroundColor: PURE_WHITE,
+     paddingHorizontal: 20,
+     paddingVertical: 10,
+     borderRadius: 20,
+     marginRight: 10,
+     borderWidth: 1,
+     borderColor: '#E2E8F0',
+  },
+  examChipSelected: {
+     backgroundColor: BRAND_NAVY,
+     borderColor: BRAND_NAVY,
+  },
+  examChipText: {
+     fontSize: 14,
+     fontWeight: '700',
+     color: SLATE_GREY,
+  },
+  examChipTextSelected: {
+     color: PURE_WHITE,
+  },
+  
+  classChip: {
+     backgroundColor: 'transparent',
+     paddingHorizontal: 16,
+     paddingVertical: 8,
+     borderRadius: 16,
+     marginRight: 8,
+     borderWidth: 1,
+     borderColor: '#CBD5E1', // soft-grey outline
+  },
+  classChipSelected: {
+     borderColor: BRAND_NAVY,
+     backgroundColor: '#F1F5F9',
+  },
+  classChipText: {
+     fontSize: 13,
+     fontWeight: '600',
+     color: '#64748B',
+  },
+  classChipTextSelected: {
+     color: BRAND_NAVY,
+  },
 
-  subjectCard: {
-    backgroundColor: colors.white, borderRadius: borderRadius.md, padding: spacing.md, marginTop: spacing.md,
-    borderWidth: 1, borderColor: colors.border, elevation: 1,
+  // Data Records
+  sectionTitle: {
+     fontSize: 16,
+     fontWeight: '800',
+     color: BRAND_NAVY,
+     marginBottom: 16,
+     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
-  subjectHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.divider, paddingBottom: 8, marginBottom: 8 },
-  subjectTitle: { fontSize: fontSize.sm, fontWeight: '700', color: colors.textPrimary },
-  lockedBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.success, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, gap: 4 },
-  lockedText: { fontSize: 9, fontWeight: '700', color: colors.white, textTransform: 'uppercase' },
-  
-  studentMarkRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
-  studentNameList: { fontSize: 13, color: colors.textPrimary, flex: 1, fontWeight: '500' },
-  scoreActionRow: { flexDirection: 'row', alignItems: 'center' },
-  scoreVal: { fontSize: 13, fontWeight: '700', color: colors.textPrimary },
-  
-  editMarkWrapper: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  overrideInput: {
-    width: 44, height: 32, borderRadius: 4, borderWidth: 1.5, borderColor: colors.primary,
-    textAlign: 'center', fontSize: 14, fontWeight: '700', padding: 0, backgroundColor: colors.primaryLight
+  listContainer: {
+     gap: 12,
   },
-  unlockBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: colors.primaryLight, paddingHorizontal: 6, paddingVertical: 3,
-    borderRadius: 4, borderWidth: 1, borderColor: colors.primary
+  recordCard: {
+     flexDirection: 'row',
+     backgroundColor: PURE_WHITE,
+     borderRadius: 16,
+     paddingVertical: 16,
+     paddingHorizontal: 20,
+     alignItems: 'center',
+     justifyContent: 'space-between',
+     shadowColor: '#000',
+     shadowOffset: { width: 0, height: 4 },
+     shadowOpacity: 0.03,
+     shadowRadius: 10,
+     elevation: 2,
   },
-  unlockBtnText: {
-    fontSize: 9, fontWeight: '700', color: colors.primary, textTransform: 'uppercase'
+  recordInfo: {
+     flex: 1,
+  },
+  recordName: {
+     fontSize: 16,
+     fontWeight: '800',
+     color: BRAND_NAVY,
+     marginBottom: 4,
+     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  recordSubject: {
+     fontSize: 13,
+     color: SLATE_GREY,
+     fontWeight: '500',
+  },
+  recordAction: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     gap: 16,
+  },
+  scoreText: {
+     fontSize: 18,
+     fontWeight: '800',
+     color: '#0F172A',
+  },
+  editWrap: {
+     flexDirection: 'row',
+     alignItems: 'center',
+     backgroundColor: '#F1F5F9',
+     borderRadius: 8,
+     paddingHorizontal: 8,
+     paddingVertical: 4,
+  },
+  scoreInput: {
+     fontSize: 18,
+     fontWeight: '800',
+     color: BRAND_NAVY,
+     padding: 0,
+     textAlign: 'right',
+     minWidth: 32,
+  },
+  maxMarkText: {
+     fontSize: 14,
+     fontWeight: '700',
+     color: SLATE_GREY,
+     marginLeft: 2,
+  },
+  editBtn: {
+     padding: 4,
+     borderWidth: 1,
+     borderColor: '#E2E8F0',
+     borderRadius: 8,
+  },
+
+  // Footer
+  footerWrap: {
+     position: 'absolute',
+     bottom: 30,
+     left: 20,
+     right: 20,
+  },
+  saveBtn: {
+     flexDirection: 'row',
+     backgroundColor: BRAND_NAVY,
+     borderRadius: 16,
+     paddingVertical: 18,
+     alignItems: 'center',
+     justifyContent: 'center',
+     shadowColor: BRAND_NAVY,
+     shadowOffset: { width: 0, height: 8 },
+     shadowOpacity: 0.3,
+     shadowRadius: 16,
+     elevation: 8,
+     gap: 8,
+  },
+  saveBtnText: {
+     fontSize: 16,
+     fontWeight: '700',
+     color: PURE_WHITE,
+     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   }
 });
-
