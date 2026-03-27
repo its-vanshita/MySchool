@@ -103,7 +103,7 @@ export default function TeacherAcademicCalendar() {
   return (
     <div className="flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-500">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-md shadow-sm border border-slate-200">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
             <CalendarIcon className="w-7 h-7 text-blue-600" />
@@ -114,7 +114,7 @@ export default function TeacherAcademicCalendar() {
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setShowFilter(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-100 transition-all shadow-sm active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded-md text-sm font-semibold hover:bg-slate-100 transition-all shadow-sm active:scale-95"
           >
             <Filter className="w-4 h-4" />
             {filterType === 'All' ? 'Filter Events' : filterType}
@@ -124,8 +124,8 @@ export default function TeacherAcademicCalendar() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Main Calendar View */}
-        <div className="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col">
-          <div className="flex items-center justify-between p-6 border-b border-slate-50 bg-slate-50/30">
+        <div className="lg:col-span-8 bg-white rounded-md shadow-sm border border-slate-200 flex flex-col">
+          <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/30">
             <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
               {monthNames[month]} {year}
             </h3>
@@ -213,7 +213,7 @@ export default function TeacherAcademicCalendar() {
         {/* Upcoming events Sidebar */}
         <div className="lg:col-span-4 flex flex-col gap-6">
           {/* Legend Card */}
-          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+          <div className="bg-white p-4 rounded-md shadow-sm border border-slate-200">
              <h4 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-4">Event Types</h4>
              <div className="grid grid-cols-2 gap-3">
                <span className="flex items-center gap-2 text-xs font-bold text-slate-600">
@@ -232,8 +232,8 @@ export default function TeacherAcademicCalendar() {
           </div>
 
           {/* Upcoming Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col">
-             <div className="p-5 border-b border-slate-50 flex items-center justify-between">
+          <div className="bg-white rounded-md shadow-sm border border-slate-200 flex flex-col">
+             <div className="p-4 border-b border-slate-100 flex items-center justify-between">
                <h4 className="text-sm font-bold text-slate-800">Upcoming for Teachers</h4>
                <span className="text-[10px] font-extrabold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full border border-blue-100">next 7 days</span>
              </div>
@@ -286,9 +286,9 @@ export default function TeacherAcademicCalendar() {
 
       {/* Filter Modal */}
       {showFilter && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between p-6 border-b border-slate-50">
+        <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-md shadow-lg w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
               <h3 className="font-bold text-slate-800 text-lg">Filter Events</h3>
               <button onClick={() => setShowFilter(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"><X className="w-5 h-5"/></button>
             </div>
@@ -298,7 +298,7 @@ export default function TeacherAcademicCalendar() {
                   <button 
                     key={type}
                     onClick={() => { setFilterType(type); setShowFilter(false); }}
-                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border-2 transition-all font-bold text-sm ${
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-md border transition-all font-medium text-sm ${
                       filterType === type 
                         ? 'bg-blue-50 border-blue-600 text-blue-700 shadow-lg shadow-blue-100' 
                         : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200 hover:bg-slate-50'
@@ -321,17 +321,17 @@ export default function TeacherAcademicCalendar() {
 
       {/* Day Details Modal */}
       {selectedDayEvents && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh] animate-in slide-in-from-bottom-5 duration-300">
-            <div className="relative h-40 bg-gradient-to-br from-blue-600 to-indigo-700 p-8 flex flex-col justify-end">
-               <button onClick={() => setSelectedDayEvents(null)} className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors text-white backdrop-blur-md"><X className="w-5 h-5"/></button>
-               <h3 className="text-white text-3xl font-black">{new Date(selectedDayEvents.date).getDate()}</h3>
-               <p className="text-white/80 font-bold uppercase tracking-[0.2em] text-xs">{new Date(selectedDayEvents.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', year: 'numeric' })}</p>
+        <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-md shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
+            <div className="relative p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col justify-end">
+               <button onClick={() => setSelectedDayEvents(null)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors"><X className="w-5 h-5"/></button>
+               <h3 className="text-slate-800 text-xl font-bold">{new Date(selectedDayEvents.date).getDate()}</h3>
+               <p className="text-slate-500 font-medium uppercase tracking-wider text-xs">{new Date(selectedDayEvents.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', year: 'numeric' })}</p>
             </div>
             
-            <div className="p-8 flex-1 overflow-y-auto space-y-4">
+            <div className="p-5 flex-1 overflow-y-auto space-y-4">
               {selectedDayEvents.events.map(event => (
-                <div key={event.id} className={`p-6 rounded-3xl border-2 transition-all hover:bg-white bg-white/50 ${
+                <div key={event.id} className={`p-5 rounded-md border transition-all hover:bg-slate-50 bg-white ${
                    event.type === 'Holiday' ? 'border-emerald-100 hover:border-emerald-300 shadow-md shadow-emerald-50' :
                    event.type === 'Exam' ? 'border-rose-100 hover:border-rose-300 shadow-md shadow-rose-50' :
                    event.type === 'Meeting' ? 'border-blue-100 hover:border-blue-300 shadow-md shadow-blue-50' :
@@ -379,11 +379,11 @@ export default function TeacherAcademicCalendar() {
 
                   <div className="mt-5 flex items-center gap-2">
                      {event.type === 'Meeting' && (
-                        <button className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
+                        <button className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-2">
                            <Video className="w-3.5 h-3.5" /> Join Meeting
                         </button>
                      )}
-                     <button className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all">
+                     <button className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors">
                         Sync to Calendar
                      </button>
                   </div>

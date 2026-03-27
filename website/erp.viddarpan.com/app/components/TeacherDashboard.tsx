@@ -11,6 +11,7 @@ import TeacherLessonPlan from './teacher/TeacherLessonPlan';
 import TeacherMarksEntry from './teacher/TeacherMarksEntry';
 import TeacherMyClass from './teacher/TeacherMyClass';
 import TeacherNotices from './teacher/TeacherNotices';
+import TeacherDatesheet from './teacher/TeacherDatesheet';
 
 export default function TeacherDashboard({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState('Dashboard');
@@ -35,9 +36,11 @@ export default function TeacherDashboard({ onLogout }: { onLogout: () => void })
         return <TeacherMyClass />;
       case 'Notices':
         return <TeacherNotices />;
+      case 'Datesheet':
+        return <TeacherDatesheet />;
       case 'Dashboard':
       default:
-        return <DashboardContent />;
+        return <DashboardContent setActiveTab={setActiveTab} />;
     }
   };
 

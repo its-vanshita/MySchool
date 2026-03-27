@@ -109,7 +109,7 @@ export default function TeacherLeaveRequest() {
       {/* Leave Balances */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {leaveBalances.map((item) => (
-          <div key={item.type} className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div key={item.type} className="bg-white p-5 rounded-md shadow-sm border border-slate-200 flex flex-col justify-between">
             <div className="flex justify-between items-center mb-4">
                <span className="text-sm font-semibold text-slate-600">{item.type}</span>
                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600`}>
@@ -137,7 +137,7 @@ export default function TeacherLeaveRequest() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Recent Requests Section */}
         <div className="lg:col-span-8 flex flex-col gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden">
              <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 className="text-base font-bold text-slate-800">Application History</h3>
              </div>
@@ -201,7 +201,7 @@ export default function TeacherLeaveRequest() {
         {/* Info Column */}
         <div className="lg:col-span-4 flex flex-col gap-6">
            {/* Guidelines Card */}
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+           <div className="bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden">
               <div className="p-5 border-b border-slate-100 bg-slate-50/50">
                 <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
                    <FileText className="w-4 h-4 text-blue-600" />
@@ -227,7 +227,7 @@ export default function TeacherLeaveRequest() {
            </div>
 
            {/* Emergency Contact */}
-           <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
+           <div className="bg-slate-50 rounded-md p-5 border border-slate-200">
               <h4 className="text-sm font-bold text-slate-800 mb-1 flex items-center gap-2">
                  <AlertCircle className="w-4 h-4 text-amber-500" /> Need Urgent Leave?
               </h4>
@@ -251,7 +251,7 @@ export default function TeacherLeaveRequest() {
       {/* Apply Leave Modal */}
       {showApplyForm && (
         <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-md shadow-xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
                <div>
                  <h3 className="text-lg font-bold text-slate-800">Request Leave</h3>

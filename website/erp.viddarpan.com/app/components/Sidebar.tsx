@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, CalendarCheck, Calendar as CalendarIcon, Megaphone, Users, Settings, GraduationCap, BookOpen, FileText, X, BookOpenCheck, Clock } from 'lucide-react';
+import { LayoutDashboard, CalendarCheck, Calendar as CalendarIcon, Megaphone, Users, Settings, GraduationCap, BookOpen, FileText, X, BookOpenCheck, Clock, FileSpreadsheet } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab }: { activeTab?: string, setActiveTab?: (tab: string) => void }) {
   const [showSupport, setShowSupport] = React.useState(true);
@@ -37,7 +37,7 @@ export default function Sidebar({ activeTab, setActiveTab }: { activeTab?: strin
           <NavItem icon={<GraduationCap size={20} />} label="Add Marks" active={activeTab === 'Add Marks'} onClick={(e) => handleNavClick(e, 'Add Marks')} />
           <NavItem icon={<Users size={20} />} label="My Class" active={activeTab === 'My Class'} onClick={(e) => handleNavClick(e, 'My Class')} />
           <NavItem icon={<Megaphone size={20} />} label="Notices" active={activeTab === 'Notices'} onClick={(e) => handleNavClick(e, 'Notices')} />
-          <NavItem icon={<Users size={20} />} label="Staff Management" active={activeTab === 'Staff Management'} onClick={(e) => handleNavClick(e, 'Staff Management')} />
+          <NavItem icon={<FileSpreadsheet size={20} />} label="Datesheet" active={activeTab === 'Datesheet'} onClick={(e) => handleNavClick(e, 'Datesheet')} />
           <NavItem icon={<Settings size={20} />} label="Settings" active={activeTab === 'Settings'} onClick={(e) => handleNavClick(e, 'Settings')} />
         </nav>
       </div>

@@ -58,7 +58,7 @@ export default function TeacherAttendance() {
   return (
     <div className="flex flex-col h-full space-y-6">
       {/* Top Header & Actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-lg shadow-sm border border-slate-200">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Daily Attendance</h1>
           <div className="flex items-center gap-2 mt-1.5 text-slate-500 text-sm font-medium">
@@ -69,7 +69,7 @@ export default function TeacherAttendance() {
         
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <select 
-            className="flex-1 sm:w-40 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer"
+            className="flex-1 sm:w-40 px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm font-semibold text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer"
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
           >
@@ -80,7 +80,7 @@ export default function TeacherAttendance() {
           <button 
             onClick={handleSubmit}
             disabled={isSubmitting || unmarkedCount > 0}
-            className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm ${
+            className={`flex items-center justify-center gap-2 px-5 py-2 rounded-md text-sm font-bold transition-all shadow-sm ${
               isSubmitting || unmarkedCount > 0 
                 ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
                 : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200 hover:shadow-md'
@@ -94,34 +94,34 @@ export default function TeacherAttendance() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-            <Users className="w-6 h-6" />
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4 hover:border-slate-300 transition-colors">
+          <div className="w-10 h-10 rounded bg-blue-50 flex items-center justify-center text-blue-600">
+            <Users className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Students</p>
-            <p className="text-2xl font-bold text-slate-800 leading-none mt-1">{totalStudents}</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Students</p>
+            <p className="text-xl font-bold text-slate-800 leading-none mt-1">{totalStudents}</p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-            <UserCheck className="w-6 h-6" />
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4 hover:border-emerald-300 transition-colors">
+          <div className="w-10 h-10 rounded bg-emerald-50 flex items-center justify-center text-emerald-600">
+            <UserCheck className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Present</p>
-            <p className="text-2xl font-bold text-slate-800 leading-none mt-1">{presentCount}</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Present</p>
+            <p className="text-xl font-bold text-slate-800 leading-none mt-1">{presentCount}</p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600">
-            <UserX className="w-6 h-6" />
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex items-center gap-4 hover:border-red-300 transition-colors">
+          <div className="w-10 h-10 rounded bg-red-50 flex items-center justify-center text-red-600">
+            <UserX className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Absent</p>
-            <p className="text-2xl font-bold text-slate-800 leading-none mt-1">{absentCount}</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Absent</p>
+            <p className="text-xl font-bold text-slate-800 leading-none mt-1">{absentCount}</p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 flex flex-col justify-center hover:border-slate-300 transition-colors">
           <div className="flex justify-between items-end mb-2">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Completion</p>
             <span className="text-sm font-bold text-blue-600">{progressPercentage}%</span>
@@ -139,7 +139,7 @@ export default function TeacherAttendance() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col overflow-hidden min-h-[400px]">
+      <div className="flex-1 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col overflow-hidden min-h-[400px]">
         {/* Toolbar */}
         <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/50">
           <div className="relative w-full sm:max-w-md">
@@ -149,25 +149,25 @@ export default function TeacherAttendance() {
               placeholder="Search by roll number or name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all placeholder:font-normal"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-md text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:font-normal"
             />
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button 
               onClick={() => markAll('none')}
-              className="px-4 py-2 bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold transition-all shadow-sm whitespace-nowrap"
+              className="px-3 py-1.5 bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-md text-sm font-semibold transition-all shadow-sm whitespace-nowrap"
             >
               Reset
             </button>
             <button 
               onClick={() => markAll('present')}
-              className="px-4 py-2 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 rounded-xl text-sm font-semibold transition-all shadow-sm whitespace-nowrap"
+              className="px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-md text-sm font-semibold transition-all shadow-sm whitespace-nowrap"
             >
               Mark All Present
             </button>
             <button 
               onClick={() => markAll('absent')}
-              className="px-4 py-2 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-xl text-sm font-semibold transition-all shadow-sm whitespace-nowrap"
+              className="px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-md text-sm font-semibold transition-all shadow-sm whitespace-nowrap"
             >
               Mark All Absent
             </button>
@@ -187,14 +187,14 @@ export default function TeacherAttendance() {
             {filteredStudents.map(student => (
               <div 
                 key={student.id} 
-                className={`group grid grid-cols-12 gap-4 items-center px-4 py-3 rounded-xl transition-all ${
-                  student.status === 'present' ? 'bg-green-50/30' :
-                  student.status === 'absent' ? 'bg-red-50/30' :
+                className={`group grid grid-cols-12 gap-4 items-center px-4 py-3 rounded-md transition-all ${
+                  student.status === 'present' ? 'bg-emerald-50/50' :
+                  student.status === 'absent' ? 'bg-red-50/50' :
                   'bg-white hover:bg-slate-50'
                 } border ${
-                  student.status === 'present' ? 'border-green-100' :
-                  student.status === 'absent' ? 'border-red-100' :
-                  'border-transparent hover:border-slate-200'
+                  student.status === 'present' ? 'border-emerald-200' :
+                  student.status === 'absent' ? 'border-red-200' :
+                  'border border-slate-100 hover:border-slate-200'
                 }`}
               >
                 {/* Roll No */}
@@ -206,8 +206,8 @@ export default function TeacherAttendance() {
 
                 {/* Info */}
                 <div className="col-span-5 flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shadow-sm border
-                    ${student.status === 'present' ? 'bg-green-100 text-green-700 border-green-200' : 
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shadow-sm border
+                    ${student.status === 'present' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 
                       student.status === 'absent' ? 'bg-red-100 text-red-700 border-red-200' : 
                       'bg-white text-slate-600 border-slate-200'}`}
                   >
@@ -235,24 +235,24 @@ export default function TeacherAttendance() {
                   
                   <button 
                     onClick={() => handleStatusChange(student.id, 'present')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
                       student.status === 'present' 
-                        ? 'bg-green-500 text-white shadow-md shadow-green-200 ring-2 ring-green-200 ring-offset-1' 
-                        : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 hover:border-green-300 hover:text-green-600 shadow-sm'
+                        ? 'bg-emerald-600 text-white shadow-sm' 
+                        : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 hover:border-emerald-300 hover:text-emerald-600 shadow-sm'
                     }`}
                   >
-                    <CheckCircle2 className={`w-4 h-4 ${student.status === 'present' ? 'text-white' : 'text-slate-400'}`} />
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${student.status === 'present' ? 'text-white' : 'text-slate-400'}`} />
                     Present
                   </button>
                   <button 
                     onClick={() => handleStatusChange(student.id, 'absent')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
                       student.status === 'absent' 
-                        ? 'bg-red-500 text-white shadow-md shadow-red-200 ring-2 ring-red-200 ring-offset-1' 
+                        ? 'bg-red-600 text-white shadow-sm' 
                         : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 hover:border-red-300 hover:text-red-600 shadow-sm'
                     }`}
                   >
-                    <XCircle className={`w-4 h-4 ${student.status === 'absent' ? 'text-white' : 'text-slate-400'}`} />
+                    <XCircle className={`w-3.5 h-3.5 ${student.status === 'absent' ? 'text-white' : 'text-slate-400'}`} />
                     Absent
                   </button>
                 </div>

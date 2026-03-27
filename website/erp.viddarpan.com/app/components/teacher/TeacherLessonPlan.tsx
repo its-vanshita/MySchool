@@ -223,7 +223,7 @@ export default function TeacherLessonPlan() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Planning List */}
         <div className="lg:col-span-12 flex flex-col gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50/50">
               <div className="relative w-full sm:w-72">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -362,7 +362,7 @@ export default function TeacherLessonPlan() {
       {/* Add Topic Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-md shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
                <div>
                   <h3 className="text-lg font-bold text-slate-800">Add Lesson Plan Topic</h3>
@@ -438,9 +438,9 @@ export default function TeacherLessonPlan() {
                      <label className="block text-sm font-medium text-slate-700 mb-3 text-slate-800">Syllabus Documents (PDF, DOCX, etc.)</label>
                      <div 
                        onClick={() => fileInputRef.current?.click()}
-                       className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 hover:border-blue-300 transition-all cursor-pointer group"
+                       className="border-2 border-dashed border-slate-200 rounded-md p-6 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 hover:border-blue-300 transition-all cursor-pointer group"
                      >
-                        <div className="w-12 h-12 rounded-full bg-white border border-slate-200 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <div className="w-10 h-10 rounded bg-white border border-slate-200 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                            <Upload className="w-5 h-5 text-slate-400 group-hover:text-blue-500" />
                         </div>
                         <p className="text-sm font-bold text-slate-700">Click to upload or drag & drop</p>
