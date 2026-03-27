@@ -93,7 +93,7 @@ export default function AdminTimetable() {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+      <div className="bg-white rounded-md shadow-sm border border-slate-200 p-6 mb-6">
         {/* Selectors */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
           <div className="flex items-center gap-3 w-full md:w-auto">
@@ -228,7 +228,7 @@ export default function AdminTimetable() {
       {/* Add Period Modal */}
       {showAddPeriod && (
         <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+          <div className="bg-white rounded-md shadow-md w-full max-w-md overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-slate-200">
               <h3 className="font-bold text-slate-800">Add New Period</h3>
               <button onClick={() => setShowAddPeriod(false)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5"/></button>
@@ -260,7 +260,7 @@ export default function AdminTimetable() {
       {/* Advanced Filter Modal */}
       {showFilter && (
         <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+          <div className="bg-white rounded-md shadow-md w-full max-w-md overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-slate-200">
               <h3 className="font-bold text-slate-800">Advanced Filters</h3>
               <button onClick={() => setShowFilter(false)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5"/></button>
@@ -293,7 +293,7 @@ export default function AdminTimetable() {
       {/* Edit Slot Modal */}
       {editSlot && (
         <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+          <div className="bg-white rounded-md shadow-md w-full max-w-sm overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-slate-200">
               <div>
                 <h3 className="font-bold text-slate-800">Edit Slot</h3>
@@ -348,7 +348,7 @@ export default function AdminTimetable() {
       {/* Delete Slot Modal */}
       {deleteSlot && (
         <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden p-6 text-center">
+          <div className="bg-white rounded-md shadow-md w-full max-w-sm overflow-hidden p-6 text-center">
             <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-6 h-6" />
             </div>

@@ -148,7 +148,7 @@ export default function AdminAssignDuties() {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-180px)] min-h-[500px]">
+      <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-180px)] min-h-[500px]">
         {/* Toolbar */}
         <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50">
           <div className="relative w-full sm:w-80">
@@ -167,7 +167,7 @@ export default function AdminAssignDuties() {
         <div className="flex-1 overflow-auto p-6 bg-slate-50/50">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDuties.map(duty => (
-              <div key={duty.id} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow relative group">
+              <div key={duty.id} className="bg-white border border-slate-200 rounded-md p-5 shadow-sm hover:shadow-md transition-shadow relative group">
                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button className="text-slate-400 hover:text-blue-600 transition-colors">
                     <Edit2 className="w-4 h-4" />
@@ -247,7 +247,7 @@ export default function AdminAssignDuties() {
       {/* Create Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-lg shadow-md w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
               <h2 className="text-lg font-bold text-slate-900">Create New Duty Assignment</h2>
               <button 

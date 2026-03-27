@@ -8,15 +8,14 @@ import AssignNotice from './AssignNotice';
 import AdminNoticesList from './AdminNoticesList';
 import AdminLeaveApprovals from './AdminLeaveApprovals';
 import AdminTimetable from './AdminTimetable';
-import AdminEventCalendar from './AdminEventCalendar';
-import StaffProxyManager from './StaffProxyManager';
-import AdminMaintenanceTickets from './AdminMaintenanceTickets';
+import AdminManageCalendar from './AdminManageCalendar';
 import AdminSyllabusTracking from './AdminSyllabusTracking';
 import AdminAnalytics from './AdminAnalytics';
 import AdminUpdateMarks from './AdminUpdateMarks';
 import AdminAssignDuties from './AdminAssignDuties';
 import AdminManageRecords from './AdminManageRecords';
 import AdminUploadDatesheet from './AdminUploadDatesheet';
+import AdminSettings from './AdminSettings';
 
 export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -37,15 +36,14 @@ export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {activeTab === 'notices' && <AdminNoticesList notices={notices} onCreateNew={() => setActiveTab('assign-notice')} />}
           {activeTab === 'leave-approvals' && <AdminLeaveApprovals />}
           {activeTab === 'manage-timetable' && <AdminTimetable />}
-          {activeTab === 'manage-calendar' && <AdminEventCalendar />}
-          {activeTab === 'proxy-manager' && <StaffProxyManager />}
-          {activeTab === 'maintenance' && <AdminMaintenanceTickets />}
+          {activeTab === 'manage-calendar' && <AdminManageCalendar />}
           {activeTab === 'syllabus' && <AdminSyllabusTracking />}
           {activeTab === 'analytics' && <AdminAnalytics />}
           {activeTab === 'update-marks' && <AdminUpdateMarks />}
           {activeTab === 'assign-duties' && <AdminAssignDuties />}
           {activeTab === 'manage-records' && <AdminManageRecords />}
           {activeTab === 'upload-datesheet' && <AdminUploadDatesheet />}
+          {activeTab === 'settings' && <AdminSettings />}
           {activeTab === 'assign-notice' && (
             <AssignNotice 
               onBroadcastSuccess={handleNoticeBroadcasted} 

@@ -141,7 +141,7 @@ export default function AssignNotice({ onBroadcastSuccess, onCancel }: { onBroad
           </button>
         </div>
         
-        <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-lg p-8 shadow-sm">
           <div className="mb-6 pb-6 border-b border-slate-100">
             <div className="flex items-center gap-2 mb-4">
               <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold uppercase tracking-wider">
@@ -164,14 +164,14 @@ export default function AssignNotice({ onBroadcastSuccess, onCancel }: { onBroad
         <div className="flex justify-end pt-6 mt-6 gap-4">
           <button 
             onClick={() => setShowPreview(false)}
-            className="px-8 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[14px] font-bold transition-colors"
+            className="px-8 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-[14px] font-bold transition-colors"
           >
             Edit further
           </button>
           <button 
             onClick={handleBroadcast}
             disabled={isBroadcasting}
-            className="flex items-center justify-center gap-2 px-8 py-3.5 bg-[#172554] hover:bg-slate-900 text-white rounded-xl text-[14px] font-bold transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-8 py-3.5 bg-[#172554] hover:bg-slate-900 text-white rounded-md text-[14px] font-bold transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isBroadcasting ? 'Broadcasting...' : 'Broadcast Notice'}
             {!isBroadcasting && <Send className="w-4 h-4" />}
@@ -191,7 +191,7 @@ export default function AssignNotice({ onBroadcastSuccess, onCancel }: { onBroad
         {onCancel && (
           <button 
             onClick={onCancel}
-            className="flex items-center gap-2 text-[14px] font-bold text-slate-500 hover:text-slate-800 transition-colors bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm"
+            className="flex items-center gap-2 text-[14px] font-bold text-slate-500 hover:text-slate-800 transition-colors bg-white px-4 py-2 rounded-md border border-slate-200 shadow-sm"
           >
             Cancel
           </button>
@@ -209,7 +209,7 @@ export default function AssignNotice({ onBroadcastSuccess, onCancel }: { onBroad
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Annual Sports Meet 2024 Sch..." 
-              className="w-full px-4 py-3.5 bg-slate-100 border-none rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm text-slate-700 font-medium placeholder:font-normal placeholder:opacity-60"
+              className="w-full px-4 py-3.5 bg-slate-100 border-none rounded-md focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm text-slate-700 font-medium placeholder:font-normal placeholder:opacity-60"
             />
           </div>
 
@@ -221,7 +221,7 @@ export default function AssignNotice({ onBroadcastSuccess, onCancel }: { onBroad
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`flex flex-col items-center justify-center py-3 rounded-xl flex-1 border-2 transition-all ${
+                  className={`flex flex-col items-center justify-center py-3 rounded-md flex-1 border-2 transition-all ${
                     activeCategory === cat.id 
                       ? 'border-slate-800 bg-white shadow-sm' 
                       : 'border-transparent bg-slate-50 hover:bg-slate-100'
@@ -238,7 +238,7 @@ export default function AssignNotice({ onBroadcastSuccess, onCancel }: { onBroad
         </div>
 
         {/* Target Audience */}
-        <div className="bg-slate-50 rounded-2xl p-6">
+        <div className="bg-slate-50 rounded-lg p-6">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h3 className="text-[14px] font-bold text-slate-800 mb-1">Target Audience</h3>
@@ -266,7 +266,7 @@ export default function AssignNotice({ onBroadcastSuccess, onCancel }: { onBroad
                 <button
                   key={aud.id}
                   onClick={() => toggleAudience(aud.id)}
-                  className={`flex items-center justify-center gap-2 w-32 py-2.5 rounded-xl font-bold text-[13px] transition-all border ${
+                  className={`flex items-center justify-center gap-2 w-32 py-2.5 rounded-md font-bold text-[13px] transition-all border ${
                     isSelected 
                       ? 'bg-[#d1fae5] border-[#a7f3d0] text-emerald-700' 
                       : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -300,14 +300,14 @@ export default function AssignNotice({ onBroadcastSuccess, onCancel }: { onBroad
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Type the detailed content of the notice here..."
-            className="w-full h-56 px-5 py-4 bg-white border border-slate-200 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-[14px] text-slate-700 resize-none font-sans"
+            className="w-full h-56 px-5 py-4 bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all text-[14px] text-slate-700 resize-none font-sans"
           ></textarea>
         </div>
 
         {/* Attachments */}
         <div>
           <h3 className="text-[14px] font-bold text-slate-800 mb-3">Attachments</h3>
-          <div className="border-2 border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer group">
+          <div className="border-2 border-dashed border-slate-200 rounded-lg p-10 flex flex-col items-center justify-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer group">
             <div className="w-12 h-12 bg-[#0f172a] rounded-full shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <UploadCloud className="w-5 h-5 text-white" />
             </div>
@@ -325,14 +325,14 @@ export default function AssignNotice({ onBroadcastSuccess, onCancel }: { onBroad
           <div className="flex gap-4 w-full sm:w-auto">
             <button 
               onClick={() => setShowPreview(true)}
-              className="flex-1 sm:flex-none px-8 py-3.5 bg-[#6feeb7] hover:bg-[#5ae6a8] text-[#0f172a] rounded-xl text-[14px] font-bold transition-colors"
+              className="flex-1 sm:flex-none px-8 py-3.5 bg-[#6feeb7] hover:bg-[#5ae6a8] text-[#0f172a] rounded-md text-[14px] font-bold transition-colors"
             >
               Preview
             </button>
             <button 
               onClick={handleBroadcast}
               disabled={isBroadcasting}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3.5 bg-[#172554] hover:bg-slate-900 text-white rounded-xl text-[14px] font-bold transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3.5 bg-[#172554] hover:bg-slate-900 text-white rounded-md text-[14px] font-bold transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isBroadcasting ? 'Broadcasting...' : 'Broadcast Notice'}
               {!isBroadcasting && <Send className="w-4 h-4" />}

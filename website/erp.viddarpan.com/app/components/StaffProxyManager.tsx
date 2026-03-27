@@ -1,142 +1,108 @@
-"use client";
-
 import React, { useState } from 'react';
-import { Users, UserMinus, UserCheck, Calendar, Clock, AlertTriangle, CheckCircle2, Search } from 'lucide-react';
-
-const ABSENT_STAFF = [
-  { id: 1, name: "Mrs. Anjali Sharma", subject: "Mathematics", grade: "10th B", period: "1st Period", reason: "Medical Leave" },
-  { id: 2, name: "Mr. David Miller", subject: "English", grade: "8th C", period: "2nd Period", reason: "Family Emergency" },
-  { id: 3, name: "Ms. Priyanka Chopra", subject: "Chemistry", grade: "12th A", period: "3rd Period", reason: "Official Duty" },
-];
-
-const AVAILABLE_PROXIES = [
-  { id: 101, name: "Mr. Suresh Raina", freePeriods: ["1st", "4th", "6th"], specialized: "Mathematics" },
-  { id: 102, name: "Ms. Neha Kakkar", freePeriods: ["2nd", "3rd", "5th"], specialized: "Music/Arts" },
-  { id: 103, name: "Mr. Rohit Sharma", freePeriods: ["1st", "2nd", "3rd"], specialized: "Physical Education" },
-];
+import { Users, ChevronDown, Check } from 'lucide-react';
 
 export default function StaffProxyManager() {
-  const [selectedAbsent, setSelectedAbsent] = useState<number | null>(null);
-  const [assignments, setAssignments] = useState<Record<number, number>>({});
+  const [assignments, setAssignments] = useState<Record<string, string>>({});
 
-  const handleAssign = (absentId: number, proxyId: number) => {
-    setAssignments({ ...assignments, [absentId]: proxyId });
+  const absentStaff = [
+    { id: '1', name: 'Saritha Madhavan', role: 'Primary Teacher', classes: '3 Classes today' },
+    { id: '2', name: 'Rahul Verma', role: 'Mathematics PGT', classes: '4 Classes today' },
+  ];
+
+  const availableProxies = ['Priya Sharma', 'Amit Kumar', 'Neha Gupta', 'Vikram Singh'];
+
+  const handleAssign = (staffId: string, proxy: string) => {
+    setAssignments(prev => {
+      const newAssignments = { ...prev };
+      if (!proxy) {
+        delete newAssignments[staffId];
+      } else {
+        newAssignments[staffId] = proxy;
+      }
+      return newAssignments;
+    });
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <div>
-            <h2 className="text-xl font-bold text-slate-800">Staff Proxy Management</h2>
-            <p className="text-[13px] text-slate-500 font-medium mt-1">Efficiently manage substitution for absent staff members</p>
-          </div>
-          <div className="flex items-center gap-3 bg-white p-2 border border-slate-200 rounded-lg shadow-sm">
-            <Calendar className="w-4 h-4 text-blue-600" />
-            <span className="text-[13px] font-bold text-slate-700">{new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
-          </div>
-        </div>
+  const unassignedCount = absentStaff.filter(s => !assignments[s.id]).length;
 
-        <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column: Absent Staff List */}
-          <div className="space-y-4">
-            <h3 className="text-[14px] font-bold text-slate-700 flex items-center gap-2 mb-2">
-              <UserMinus className="w-4 h-4 text-red-500" />
-              Absent Staff List Today
-            </h3>
-            <div className="space-y-3">
-              {ABSENT_STAFF.map(staff => (
-                <div 
-                  key={staff.id}
-                  onClick={() => setSelectedAbsent(staff.id)}
-                  className={`p-4 border rounded-xl transition-all cursor-pointer relative group ${selectedAbsent === staff.id ? 'border-blue-500 bg-blue-50/30' : 'border-slate-100 bg-white hover:border-slate-300'}`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600">
-                        {staff.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <p className="text-[14px] font-bold text-slate-800">{staff.name}</p>
-                        <p className="text-[12px] text-slate-500 font-medium">{staff.subject} • {staff.grade}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[11px] font-bold text-orange-600 uppercase tracking-widest">{staff.period}</p>
-                      <p className="text-[11px] text-slate-400 mt-1">{staff.reason}</p>
-                    </div>
-                  </div>
-                  
-                  {assignments[staff.id] ? (
-                    <div className="mt-3 flex items-center gap-2 py-1.5 px-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-[11px] font-bold text-emerald-700">
-                        Proxy: {AVAILABLE_PROXIES.find(p => p.id === assignments[staff.id])?.name}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="mt-3 flex items-center gap-2 py-1.5 px-3 bg-red-50 rounded-lg border border-red-100">
-                      <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
-                      <span className="text-[11px] font-bold text-red-700">Needs Proxy Assignment</span>
-                    </div>
-                  )}
+  return (
+    <div className="bg-white rounded-md p-6 shadow-sm border border-slate-200">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <Users className="w-5 h-5 text-blue-600" />
+            Staff Proxy Management
+          </h3>
+          <p className="text-[13px] text-slate-500 mt-1">Assign substitutes for staff on leave today.</p>
+        </div>
+        
+        {unassignedCount > 0 ? (
+          <div className="bg-amber-50 text-amber-700 font-bold px-3 py-1.5 rounded-md text-[12px] flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            {unassignedCount} Unassigned
+          </div>
+        ) : (
+          <div className="bg-emerald-50 text-emerald-700 font-bold px-3 py-1.5 rounded-md text-[12px] flex items-center gap-2">
+            <Check className="w-4 h-4" />
+            All Covered
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        {absentStaff.map(staff => (
+          <div key={staff.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors gap-4 sm:gap-0">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-[13px] font-bold text-red-600 shrink-0 border border-red-100">
+                {staff.name.split(' ').map(n => n[0]).join('')}
+              </div>
+              <div>
+                <p className="text-[14px] text-slate-800">
+                  <span className="font-bold">{staff.name}</span> <span className="text-slate-400 font-medium">(Absent)</span>
+                </p>
+                <p className="text-[12px] text-slate-500 mt-0.5">
+                  {staff.role} • <span className="text-slate-700 font-semibold">{staff.classes}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="shrink-0">
+              {assignments[staff.id] ? (
+                <div className="flex items-center justify-between min-w-[200px] px-4 py-2 bg-emerald-50 border border-emerald-100 rounded-md">
+                  <span className="text-[13px] font-semibold text-emerald-700">Covered by {assignments[staff.id]}</span>
+                  <button 
+                    onClick={() => handleAssign(staff.id, '')}
+                    className="text-emerald-600 hover:text-emerald-800 focus:outline-none ml-3"
+                    title="Remove assignment"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
                 </div>
-              ))}
+              ) : (
+                <div className="relative group/dropdown">
+                  <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors text-[13px] font-semibold text-slate-700 focus:ring-2 focus:ring-blue-200 outline-none w-full sm:w-[200px] justify-between z-0">
+                    Assign Proxy <ChevronDown className="w-4 h-4 text-slate-400" />
+                  </button>
+                  {/* Dropdown Menu (hover based for simplicity in widget) */}
+                  <div className="absolute right-0 top-full mt-1 w-full sm:w-48 bg-white border border-slate-200 shadow-xl rounded-md opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all z-10 py-1">
+                    <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                      Available Staff
+                    </div>
+                    {availableProxies.map(proxy => (
+                      <button 
+                        key={proxy}
+                        onClick={() => handleAssign(staff.id, proxy)}
+                        className="w-full text-left px-4 py-2 text-[13px] font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                      >
+                        {proxy}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Right Column: Proxy Assignment Panel */}
-          <div className="space-y-4">
-            <h3 className="text-[14px] font-bold text-slate-700 flex items-center gap-2 mb-2">
-              <UserCheck className="w-4 h-4 text-emerald-600" />
-              Available Substitute Staff
-            </h3>
-            
-            {!selectedAbsent ? (
-              <div className="h-[300px] border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-400 p-8 text-center">
-                <Users className="w-12 h-12 mb-4 opacity-20" />
-                <p className="text-sm font-medium">Select an absent staff member from the left to assign a proxy teacher</p>
-              </div>
-            ) : (
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4 animate-in slide-in-from-right-4 duration-300">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-[12px] font-bold text-slate-500 uppercase">Proposals for {ABSENT_STAFF.find(a => a.id === selectedAbsent)?.name}</p>
-                  <Search className="w-4 h-4 text-slate-400" />
-                </div>
-                
-                <div className="space-y-3">
-                  {AVAILABLE_PROXIES.map(proxy => (
-                    <div key={proxy.id} className="bg-white p-4 border border-slate-200 rounded-xl shadow-sm flex justify-between items-center group">
-                      <div className="flex gap-4">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center font-bold text-blue-600">
-                          {proxy.name.split(' ').map(n => n[0]).join('')}
-                        </div>
-                        <div>
-                          <p className="text-[14px] font-bold text-slate-800">{proxy.name}</p>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
-                              <Clock className="w-3 h-3" />
-                              Free: {proxy.freePeriods.join(', ')}
-                            </span>
-                          </div>
-                          {proxy.specialized === ABSENT_STAFF.find(a => a.id === selectedAbsent)?.subject && (
-                            <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-black rounded uppercase">Subject Specialist Match</span>
-                          )}
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => handleAssign(selectedAbsent, proxy.id)}
-                        className={`px-4 py-2 rounded-lg text-[12px] font-bold transition-all shadow-sm ${assignments[selectedAbsent] === proxy.id ? 'bg-emerald-600 text-white shadow-emerald-200' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200'}`}
-                      >
-                        {assignments[selectedAbsent] === proxy.id ? 'Assigned' : 'Assign Proxy'}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );

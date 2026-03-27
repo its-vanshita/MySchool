@@ -89,7 +89,7 @@ export default function AdminUpdateMarks() {
 
       {/* Tab Content: Portals */}
       {activeTab === 'portals' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-210px)] min-h-[500px]">
+        <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-210px)] min-h-[500px]">
           <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50">
             <div className="relative w-full sm:w-80">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -170,7 +170,7 @@ export default function AdminUpdateMarks() {
 
       {/* Tab Content: Update Marks */}
       {activeTab === 'update' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-210px)] min-h-[500px]">
+        <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-210px)] min-h-[500px]">
           <div className="p-4 border-b border-slate-200 flex flex-wrap gap-4 items-center bg-slate-50">
             <div className="flex flex-col gap-1 w-full sm:w-auto">
               <label className="text-xs font-semibold text-slate-500 uppercase">Class</label>
@@ -212,7 +212,7 @@ export default function AdminUpdateMarks() {
                 </span>
               </div>
               
-              <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+              <div className="border border-slate-200 rounded-md overflow-hidden shadow-sm">
                 <table className="w-full text-left bg-white">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>

@@ -1,6 +1,7 @@
 import React from 'react';
 import AdminStatCards from './AdminStatCards';
 import PendingApprovals from './PendingApprovals';
+import StaffProxyManager from './StaffProxyManager';
 import AdminAlerts from './AdminAlerts';
 import AdminRightSidebar from './AdminRightSidebar';
 
@@ -15,6 +16,7 @@ export default function AdminContent() {
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 flex flex-col min-w-0 gap-6">
           <AdminStatCards />
+          <StaffProxyManager />
           <PendingApprovals />
           <AdminAlerts />
         </div>

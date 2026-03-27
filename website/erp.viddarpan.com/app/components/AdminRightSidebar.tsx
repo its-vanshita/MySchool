@@ -1,11 +1,13 @@
 import React from 'react';
 import { CheckCircle2, XCircle, Hourglass, CalendarDays } from 'lucide-react';
+import AdminMaintenanceTickets from './AdminMaintenanceTickets';
+import AdminEventCalendar from './AdminEventCalendar';
 
 export default function AdminRightSidebar() {
   return (
     <>
       {/* Staff Quick Look & Departmental Health */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
+      <div className="bg-white rounded-md p-6 shadow-sm border border-slate-200">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-base font-bold text-slate-800">Staff Quick Look</h3>
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TODAY</span>
@@ -68,52 +70,9 @@ export default function AdminRightSidebar() {
         </div>
       </div>
 
-      {/* Event Calendar */}
-      <div className="bg-[#0f172a] rounded-xl p-6 text-white shadow-sm flex flex-col h-full">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-base font-bold">Event Calendar</h3>
-          <CalendarDays className="w-5 h-5 text-slate-300" />
-        </div>
+      <AdminEventCalendar />
 
-        <div className="space-y-6 flex-1">
-          <div className="flex gap-4">
-            <div className="bg-slate-800 rounded-lg p-2 text-center min-w-[50px] shrink-0">
-              <div className="text-lg font-bold leading-none">28</div>
-              <div className="text-[10px] font-semibold text-slate-400 uppercase mt-1">OCT</div>
-            </div>
-            <div>
-              <h4 className="font-bold text-[14px] mb-0.5">Annual Sports Meet</h4>
-              <p className="text-[12px] text-slate-400">Ground A • 09:00 AM</p>
-            </div>
-          </div>
-
-          <div className="flex gap-4">
-            <div className="bg-slate-800 rounded-lg p-2 text-center min-w-[50px] shrink-0">
-              <div className="text-lg font-bold leading-none">02</div>
-              <div className="text-[10px] font-semibold text-slate-400 uppercase mt-1">NOV</div>
-            </div>
-            <div>
-              <h4 className="font-bold text-[14px] mb-0.5">PTM - Middle Wing</h4>
-              <p className="text-[12px] text-slate-400">Main Hall • 02:00 PM</p>
-            </div>
-          </div>
-
-          <div className="flex gap-4">
-            <div className="bg-slate-800 rounded-lg p-2 text-center min-w-[50px] shrink-0">
-              <div className="text-lg font-bold leading-none">05</div>
-              <div className="text-[10px] font-semibold text-slate-400 uppercase mt-1">NOV</div>
-            </div>
-            <div>
-              <h4 className="font-bold text-[14px] mb-0.5">Inter-School Debate</h4>
-              <p className="text-[12px] text-slate-400">Auditorium • 10:30 AM</p>
-            </div>
-          </div>
-        </div>
-
-        <button className="w-full mt-6 py-2.5 bg-white text-slate-900 rounded-lg text-[13px] font-bold hover:bg-slate-100 transition-colors">
-          Manage All Events
-        </button>
-      </div>
+      <AdminMaintenanceTickets />
     </>
   );
 }

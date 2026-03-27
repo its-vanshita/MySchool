@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, Bell, HelpCircle } from 'lucide-react';
+import NotificationDropdown from './NotificationDropdown';
 
 export default function Topbar() {
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
+    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0 relative z-[100]">
       <div className="relative hidden md:block w-[360px]">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
         <input 
@@ -14,11 +17,20 @@ export default function Topbar() {
       </div>
 
       <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto justify-end">
-        <button className="text-slate-400 hover:text-slate-600 relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-        </button>
-        <button className="text-slate-400 hover:text-slate-600">
+        <div className="relative z-[110]">
+          <button 
+            onClick={() => setIsNotifOpen(!isNotifOpen)}
+            className="text-slate-400 hover:text-slate-600 relative p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+          </button>
+          <NotificationDropdown 
+            isOpen={isNotifOpen} 
+            onClose={() => setIsNotifOpen(false)} 
+          />
+        </div>
+        <button className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
           <HelpCircle className="w-5 h-5" />
         </button>
 

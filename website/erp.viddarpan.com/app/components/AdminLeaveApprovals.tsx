@@ -135,7 +135,7 @@ export default function AdminLeaveApprovals() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div 
           onClick={() => setActiveTab('pending')}
-          className={`bg-white rounded-xl p-5 shadow-sm border-l-[4px] border-orange-500 flex justify-between items-center relative overflow-hidden cursor-pointer hover:bg-slate-50 transition-colors ${activeTab === 'pending' ? 'ring-2 ring-orange-500 ring-offset-2' : ''}`}
+          className={`bg-white rounded-md p-5 shadow-sm border-l-[4px] border-orange-500 flex justify-between items-center relative overflow-hidden cursor-pointer hover:bg-slate-50 transition-colors ${activeTab === 'pending' ? 'ring-2 ring-orange-500 ring-offset-2' : ''}`}
         >
           <div>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Pending</p>
@@ -144,14 +144,14 @@ export default function AdminLeaveApprovals() {
               <Clock className="w-3.5 h-3.5" /> Awaiting review
             </p>
           </div>
-          <div className="bg-orange-50 p-3 rounded-xl text-orange-600">
+          <div className="bg-orange-50 p-3 rounded-md text-orange-600">
             <Clock className="w-6 h-6" />
           </div>
         </div>
 
         <div 
           onClick={() => setActiveTab('approved')}
-          className={`bg-white rounded-xl p-5 shadow-sm border-l-[4px] border-emerald-500 flex justify-between items-center relative overflow-hidden cursor-pointer hover:bg-slate-50 transition-colors ${activeTab === 'approved' ? 'ring-2 ring-emerald-500 ring-offset-2' : ''}`}
+          className={`bg-white rounded-md p-5 shadow-sm border-l-[4px] border-emerald-500 flex justify-between items-center relative overflow-hidden cursor-pointer hover:bg-slate-50 transition-colors ${activeTab === 'approved' ? 'ring-2 ring-emerald-500 ring-offset-2' : ''}`}
         >
           <div>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Approved</p>
@@ -160,14 +160,14 @@ export default function AdminLeaveApprovals() {
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> All clear
             </p>
           </div>
-          <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600">
+          <div className="bg-emerald-50 p-3 rounded-md text-emerald-600">
             <CheckCircle2 className="w-6 h-6" />
           </div>
         </div>
 
         <div 
           onClick={() => setActiveTab('rejected')}
-          className={`bg-white rounded-xl p-5 shadow-sm border-l-[4px] border-red-500 flex justify-between items-center relative overflow-hidden cursor-pointer hover:bg-slate-50 transition-colors ${activeTab === 'rejected' ? 'ring-2 ring-red-500 ring-offset-2' : ''}`}
+          className={`bg-white rounded-md p-5 shadow-sm border-l-[4px] border-red-500 flex justify-between items-center relative overflow-hidden cursor-pointer hover:bg-slate-50 transition-colors ${activeTab === 'rejected' ? 'ring-2 ring-red-500 ring-offset-2' : ''}`}
         >
           <div>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Rejected</p>
@@ -176,14 +176,14 @@ export default function AdminLeaveApprovals() {
               <X className="w-3.5 h-3.5 text-red-500" /> Declined requests
             </p>
           </div>
-          <div className="bg-red-50 p-3 rounded-xl text-red-600">
+          <div className="bg-red-50 p-3 rounded-md text-red-600">
             <X className="w-6 h-6" />
           </div>
         </div>
       </div>
 
       {/* Table Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+      <div className="bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden mb-6">
         <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="relative w-full md:w-80">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -204,7 +204,7 @@ export default function AdminLeaveApprovals() {
             </div>
             
             {showLeaveTypeDropdown && (
-              <div className="absolute top-12 left-0 w-48 bg-white border border-slate-200 shadow-xl rounded-lg overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
+              <div className="absolute top-12 left-0 w-48 bg-white border border-slate-200 shadow-md rounded-lg overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
                 {leaveTypes.map(type => (
                   <div 
                     key={type} 
@@ -327,7 +327,7 @@ export default function AdminLeaveApprovals() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* System Log */}
-        <div className="md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <div className="md:col-span-2 bg-white rounded-md shadow-sm border border-slate-200 p-6">
           <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
             <Clock className="w-5 h-5 text-slate-400" /> System Log
           </h3>
@@ -356,7 +356,7 @@ export default function AdminLeaveApprovals() {
         </div>
 
         {/* Policy Reminder */}
-        <div className="bg-[#0f172a] rounded-xl p-6 text-white shadow-sm flex flex-col justify-between relative overflow-hidden">
+        <div className="bg-[#0f172a] rounded-md p-6 text-white shadow-sm flex flex-col justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <CheckCircle2 className="w-32 h-32" />
           </div>

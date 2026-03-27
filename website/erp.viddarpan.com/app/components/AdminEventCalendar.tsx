@@ -1,123 +1,136 @@
-"use client";
-
-import React, { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Plus, MapPin, Clock, Tag, ExternalLink } from 'lucide-react';
-
-const EVENTS = [
-  { id: 1, title: "Annual Sports Day", date: "2026-03-25", time: "09:00 AM", location: "School Playground", type: "Main", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  { id: 2, title: "Half-Yearly Exams", date: "2026-03-27", time: "08:30 AM", location: "Senior Wing", type: "Academic", color: "bg-blue-100 text-blue-700 border-blue-200" },
-  { id: 3, title: "Teachers-Parent Meet", date: "2026-03-29", time: "10:00 AM", location: "Auditorium", type: "Institutional", color: "bg-purple-100 text-purple-700 border-purple-200" },
-  { id: 4, title: "Science Fair 2026", date: "2026-03-31", time: "11:00 AM", location: "Exhibition Hall", type: "Co-curricular", color: "bg-orange-100 text-orange-700 border-orange-200" },
-];
+import React from 'react';
+import { ChevronLeft, ChevronRight, ChevronRight as ChevronRightSmall } from 'lucide-react';
 
 export default function AdminEventCalendar() {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  
+  // Mock calendar array for March 2026 (starts on Sunday, 31 days)
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  // Visual dots directly matching the provided UI
+  const dots: Record<number, 'red' | 'green' | 'blue'> = {
+    9: 'red',
+    10: 'red',
+    13: 'green',
+    14: 'green',
+    16: 'blue',
+    17: 'blue',
+    18: 'blue',
+    19: 'blue',
+    20: 'blue',
+    21: 'blue'
+  };
+
+  const upcomingEvents = [
+    {
+      id: 1,
+      month: 'MAR',
+      day: '10',
+      title: 'Holi Holiday',
+      desc: 'Festival Holiday - School Closed',
+      color: 'text-red-500'
+    },
+    {
+      id: 2,
+      month: 'MAR',
+      day: '14',
+      title: 'Science Exhibition',
+      desc: '09:00 AM - 01:00 PM • School Auditorium',
+      color: 'text-emerald-500'
+    },
+    {
+      id: 3,
+      month: 'MAR',
+      day: '16',
+      title: 'Pre-Board Exams Begin',
+      desc: '10:00 AM - 01:00 PM • Examination Hall',
+      color: 'text-blue-600'
+    }
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50/50 gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-blue-600" />
-              Institutional Events Calendar
-            </h2>
-            <p className="text-[13px] text-slate-500 font-medium mt-1">Institutional schedule, holidays and key event tracking</p>
-          </div>
-          <div className="flex items-center gap-4 bg-white p-2 border border-slate-200 rounded-xl shadow-sm self-stretch md:self-auto">
-            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400">
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="text-[14px] font-bold text-slate-800 px-4 min-w-[140px] text-center">
-              {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-            </span>
-            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400">
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-[13px] hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 self-stretch md:self-auto uppercase tracking-wide">
-            <Plus className="w-4 h-4" />
-            New Event
+    <div className="flex flex-col gap-4 mt-6">
+      {/* Calendar Grid Card */}
+      <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-slate-100">
+        <div className="flex justify-between items-center mb-6">
+          <button className="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-800 transition-colors">
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <span className="font-bold text-slate-800 text-[15px]">March 2026</span>
+          <button className="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-800 transition-colors">
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Side: Mock Calendar View */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="grid grid-cols-7 gap-2">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                <div key={day} className="text-center py-2 text-[11px] font-black text-slate-400 uppercase tracking-widest">{day}</div>
-              ))}
-              
-              {/* Simple Mock Month Grid (March 2026 starts on Sunday) */}
-              {Array.from({ length: 31 }).map((_, i) => {
-                const dayNum = i + 1;
-                const dateStr = `2026-03-${dayNum.toString().padStart(2, '0')}`;
-                const hasEvent = EVENTS.some(e => e.date === dateStr);
-                const event = EVENTS.find(e => e.date === dateStr);
-                
-                return (
-                  <div key={i} className={`min-h-[100px] p-2 border border-slate-100 rounded-xl relative group transition-all ${hasEvent ? 'bg-blue-50/20 border-blue-100' : 'bg-white hover:bg-slate-50'}`}>
-                    <span className={`text-[13px] font-bold ${hasEvent ? 'text-blue-700' : 'text-slate-500'}`}>{dayNum}</span>
-                    {hasEvent && (
-                      <div className={`mt-2 p-1.5 rounded-lg border text-[10px] font-bold leading-tight ${event?.color} animate-in fade-in zoom-in duration-300`}>
-                        {event?.title}
-                      </div>
-                    )}
-                    {dayNum === 27 && (
-                      <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse" />
-                    )}
-                  </div>
-                );
-              })}
+        <div className="grid grid-cols-7 mb-3">
+          {daysOfWeek.map(day => (
+            <div key={day} className="text-center text-[10px] font-bold text-slate-400">
+              {day}
             </div>
-          </div>
+          ))}
+        </div>
 
-          {/* Right Side: Event Details list */}
-          <div className="space-y-6">
-            <h3 className="text-[14px] font-bold text-slate-700 border-b border-slate-100 pb-3 uppercase tracking-wider flex items-center justify-between">
-              Upcoming Events
-              <span className="bg-red-100 text-red-700 text-[10px] py-1 px-2.5 rounded-full font-black">4 Active</span>
-            </h3>
-            
-            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-              {EVENTS.map(event => (
-                <div key={event.id} className="p-4 border border-slate-100 rounded-2xl hover:border-blue-200 hover:shadow-md transition-all group">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${event.color}`}>{event.type}</span>
-                      <h4 className="text-[15px] font-bold text-slate-800 mt-2 leading-tight group-hover:text-blue-700 transition-colors">{event.title}</h4>
-                    </div>
-                    <ExternalLink className="w-4 h-4 text-slate-300 group-hover:text-slate-600 transition-colors cursor-pointer" />
-                  </div>
-                  
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-[12px] text-slate-500 font-medium">
-                      <Clock className="w-3.5 h-3.5 text-blue-500" />
-                      {event.time}
-                    </div>
-                    <div className="flex items-center gap-2 text-[12px] text-slate-500 font-medium">
-                      <MapPin className="w-3.5 h-3.5 text-emerald-500" />
-                      {event.location}
-                    </div>
-                    <div className="flex items-center gap-2 text-[12px] text-slate-500 font-medium pt-2">
-                      <Tag className="w-3.5 h-3.5 text-slate-400" />
-                      {event.date}
-                    </div>
-                  </div>
+        <div className="grid grid-cols-7 gap-y-1">
+          {days.map(day => {
+            const isToday = day === 27;
+            const dotColor = dots[day];
+
+            return (
+              <div key={day} className="flex flex-col items-center justify-start h-10 relative cursor-pointer group">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-[13px] font-semibold transition-colors ${
+                  isToday 
+                    ? 'bg-[#1565D8] text-white shadow-md' 
+                    : 'text-slate-800 hover:bg-slate-50'
+                }`}>
+                  {day}
                 </div>
-              ))}
-            </div>
-            
-            <div className="bg-blue-600 rounded-2xl p-6 text-white text-center shadow-xl shadow-blue-100 relative overflow-hidden group border border-blue-400/20">
-              <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-700" />
-              <h4 className="text-[14px] font-bold mb-1 relative z-10">Export Calendar</h4>
-              <p className="text-[11px] text-blue-100 font-medium mb-4 relative z-10">Sync with G-Suite or Outlook for institutional compliance</p>
-              <button className="bg-white text-blue-700 px-6 py-2 rounded-xl text-[12px] font-black uppercase tracking-wider hover:bg-blue-50 transition-colors relative z-10 shadow-sm shadow-blue-800/10">
-                Download ICS
-              </button>
-            </div>
+                {dotColor && !isToday && (
+                  <div className={`w-1 h-1 rounded-full absolute bottom-1 ${
+                    dotColor === 'red' ? 'bg-red-500' : 
+                    dotColor === 'green' ? 'bg-emerald-500' : 
+                    'bg-[#1565D8]'
+                  }`}></div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Legend Card */}
+      <div className="bg-white rounded-xl py-4 px-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-slate-100">
+        <span className="text-[10px] font-bold text-slate-400 tracking-widest mb-3 block uppercase">Legend</span>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 font-semibold text-[12px] text-slate-800">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#1565D8]"></div> Exams
           </div>
+          <div className="flex items-center gap-2 font-semibold text-[12px] text-slate-800">
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div> Holidays
+          </div>
+          <div className="flex items-center gap-2 font-semibold text-[12px] text-slate-800">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div> Events
+          </div>
+        </div>
+      </div>
+
+      {/* Upcoming Events List */}
+      <div className="mt-4">
+        <h3 className="text-[18px] font-bold text-slate-800 mb-4 px-1">Upcoming Events</h3>
+        <div className="space-y-3">
+          {upcomingEvents.map(event => (
+            <div key={event.id} className="bg-white rounded-[16px] p-4 flex items-center gap-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.08)] transition-all cursor-pointer">
+              <div className="flex flex-col items-center justify-center w-12 shrink-0">
+                <span className={`text-[10px] font-bold tracking-wider uppercase mb-0.5 ${event.color}`}>{event.month}</span>
+                <span className="text-[22px] font-bold text-slate-800 leading-none">{event.day}</span>
+              </div>
+              <div className="h-8 w-px bg-slate-200 shrink-0"></div>
+              <div className="flex-1 min-w-0 pl-1">
+                <h4 className="font-bold text-[14px] text-slate-800 truncate mb-0.5">{event.title}</h4>
+                <p className="text-[12px] text-slate-500 truncate">{event.desc}</p>
+              </div>
+              <ChevronRightSmall className="w-5 h-5 text-slate-300 shrink-0" />
+            </div>
+          ))}
         </div>
       </div>
     </div>

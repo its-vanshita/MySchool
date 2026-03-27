@@ -166,7 +166,7 @@ export default function AdminUploadDatesheet() {
       </div>
 
       {/* Main Content Area */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-170px)] min-h-[500px]">
+      <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-170px)] min-h-[500px]">
         
         {/* Toolbar */}
         <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50">
@@ -190,7 +190,7 @@ export default function AdminUploadDatesheet() {
         <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50/50">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDatesheets.map((doc) => (
-              <div key={doc.id} onClick={() => setViewingFile(doc)} className="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-blue-300 transition-all group relative flex flex-col cursor-pointer">
+              <div key={doc.id} onClick={() => setViewingFile(doc)} className="bg-white border border-slate-200 rounded-md p-5 hover:shadow-md hover:border-blue-300 transition-all group relative flex flex-col cursor-pointer">
                 <div className="flex justify-between items-start mb-4">
                   <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                     <FileText className="w-5 h-5" />
@@ -256,7 +256,7 @@ export default function AdminUploadDatesheet() {
       {/* Upload/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+          <div className="bg-white rounded-lg shadow-md w-full max-w-lg overflow-hidden flex flex-col">
             <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <UploadCloud className="w-5 h-5 text-blue-600" />
@@ -273,7 +273,7 @@ export default function AdminUploadDatesheet() {
             <form onSubmit={handleUploadSubmit} className="flex flex-col h-full max-h-[80vh]">
               <div className="p-6 space-y-5 overflow-y-auto">
                 {/* File Dropzone */}
-                <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-slate-50 hover:border-blue-400 transition-colors cursor-pointer bg-slate-50/50">
+                <div className="border-2 border-dashed border-slate-300 rounded-md p-8 flex flex-col items-center justify-center text-center hover:bg-slate-50 hover:border-blue-400 transition-colors cursor-pointer bg-slate-50/50">
                   <div className="w-12 h-12 bg-white border border-slate-200 rounded-full flex items-center justify-center text-blue-600 mb-3 shadow-sm">
                     <FileText className="w-6 h-6" />
                   </div>
@@ -340,7 +340,7 @@ export default function AdminUploadDatesheet() {
                 <div className="space-y-2.5">
                   <label className="text-sm font-semibold text-slate-700">Who can see this Datesheet?</label>
                   <div className="grid gap-3">
-                    <label className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-all ${newVisibility === 'both' ? 'border-blue-500 bg-blue-50/50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                    <label className={`flex items-start gap-3 p-3 border rounded-md cursor-pointer transition-all ${newVisibility === 'both' ? 'border-blue-500 bg-blue-50/50' : 'border-slate-200 hover:bg-slate-50'}`}>
                       <input 
                         type="radio" 
                         name="visibility" 
@@ -354,7 +354,7 @@ export default function AdminUploadDatesheet() {
                         <div className="text-xs text-slate-500 mt-0.5">Visible to all Teachers, Students, and Parents.</div>
                       </div>
                     </label>
-                    <label className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-all ${newVisibility === 'students' ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                    <label className={`flex items-start gap-3 p-3 border rounded-md cursor-pointer transition-all ${newVisibility === 'students' ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200 hover:bg-slate-50'}`}>
                       <input 
                         type="radio" 
                         name="visibility" 
@@ -368,7 +368,7 @@ export default function AdminUploadDatesheet() {
                         <div className="text-xs text-slate-500 mt-0.5">Published directly to student/parent portals.</div>
                       </div>
                     </label>
-                    <label className={`flex items-start gap-3 p-3 border rounded-xl cursor-pointer transition-all ${newVisibility === 'teachers' ? 'border-amber-500 bg-amber-50/50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                    <label className={`flex items-start gap-3 p-3 border rounded-md cursor-pointer transition-all ${newVisibility === 'teachers' ? 'border-amber-500 bg-amber-50/50' : 'border-slate-200 hover:bg-slate-50'}`}>
                       <input 
                         type="radio" 
                         name="visibility" 
@@ -390,13 +390,13 @@ export default function AdminUploadDatesheet() {
                 <button 
                   type="button" 
                   onClick={() => setIsModalOpen(false)} 
-                  className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-200 bg-slate-100 rounded-xl transition-colors"
+                  className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-200 bg-slate-100 rounded-md transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm rounded-xl transition-colors"
+                  className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm rounded-md transition-colors"
                 >
                   {editingId ? 'Save Changes' : 'Upload & Publish'}
                 </button>
@@ -409,7 +409,7 @@ export default function AdminUploadDatesheet() {
       {/* View & Edit Overlay Modal */}
       {viewingFile && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 lg:p-8">
-          <div className="bg-white rounded-2xl shadow-xl w-full h-full max-w-5xl overflow-hidden flex flex-col xl:flex-row relative">
+          <div className="bg-white rounded-lg shadow-md w-full h-full max-w-5xl overflow-hidden flex flex-col xl:flex-row relative">
             {/* Close Overlay Button */}
             <button 
               onClick={() => setViewingFile(null)} 
@@ -426,7 +426,7 @@ export default function AdminUploadDatesheet() {
               </div>
               <div className="flex-1 overflow-auto flex items-start justify-center p-4 lg:p-8">
                 {/* Mock PDF Document Rendering */}
-                <div className="bg-white shadow-xl shadow-slate-300 w-full max-w-[800px] aspect-[1/1.414] rounded-sm flex flex-col relative border border-slate-200">
+                <div className="bg-white shadow-md shadow-slate-300 w-full max-w-[800px] aspect-[1/1.414] rounded-sm flex flex-col relative border border-slate-200">
                   <div className="p-8 lg:p-12 border-b-2 border-double border-blue-900 mx-8 mt-8 pb-4">
                     <h1 className="text-2xl lg:text-3xl font-serif text-center font-bold text-slate-900 uppercase">VidDarpan Academy</h1>
                   </div>
@@ -526,7 +526,7 @@ export default function AdminUploadDatesheet() {
                    onClick={() => { 
                     handleEdit(viewingFile); 
                   }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-xl transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors"
                 >
                   <Edit2 className="w-4 h-4" />
                   Edit Settings
@@ -536,7 +536,7 @@ export default function AdminUploadDatesheet() {
                     handleDelete(viewingFile.id);
                     setViewingFile(null);
                   }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-red-700 bg-red-100 hover:bg-red-200 rounded-xl transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-red-700 bg-red-100 hover:bg-red-200 rounded-md transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete File

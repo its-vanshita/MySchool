@@ -164,7 +164,7 @@ export default function AdminManageCalendar() {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-md shadow-sm border border-slate-200 overflow-hidden">
         {/* Calendar Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-200">
           <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
@@ -249,7 +249,7 @@ export default function AdminManageCalendar() {
       {/* Add Event Modal */}
       {showAddEvent && (
         <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+          <div className="bg-white rounded-md shadow-md w-full max-w-md overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-slate-200">
               <h3 className="font-bold text-slate-800">Add New Event</h3>
               <button type="button" onClick={() => setShowAddEvent(false)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5"/></button>
@@ -300,7 +300,7 @@ export default function AdminManageCalendar() {
       {/* Day Details Modal */}
       {selectedDayEvents && (
         <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
+          <div className="bg-white rounded-md shadow-md w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
             <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-slate-50">
               <div>
                 <h3 className="font-bold text-slate-800 text-lg">Events List</h3>
@@ -317,7 +317,7 @@ export default function AdminManageCalendar() {
                 </div>
               ) : (
                 selectedDayEvents.events.map(event => (
-                  <div key={event.id} className={`p-4 rounded-xl border relative group ${getEventTypeColor(event.type)}`}>
+                  <div key={event.id} className={`p-4 rounded-md border relative group ${getEventTypeColor(event.type)}`}>
                     <div className="flex justify-between items-start pr-8">
                       <h4 className="font-bold text-sm mb-1">{event.title}</h4>
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/50 backdrop-blur-sm border border-black/5">
@@ -362,7 +362,7 @@ export default function AdminManageCalendar() {
       {/* Filter Modal */}
       {showFilter && (
         <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+          <div className="bg-white rounded-md shadow-md w-full max-w-sm overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-slate-200">
               <h3 className="font-bold text-slate-800">Filter Events</h3>
               <button onClick={() => setShowFilter(false)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5"/></button>

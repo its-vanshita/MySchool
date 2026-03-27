@@ -207,7 +207,7 @@ export default function AdminSyllabusTracking() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
+        <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
           <div className="p-6">
             <div className="space-y-6">
               {selectedTeacher.chapters.map((chapter, idx) => (
@@ -270,7 +270,7 @@ export default function AdminSyllabusTracking() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-180px)] min-h-[500px]">
+      <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-180px)] min-h-[500px]">
         {/* Toolbar */}
         <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50">
           <div className="relative w-full sm:w-72">

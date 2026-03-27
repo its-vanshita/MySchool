@@ -123,7 +123,7 @@ export default function AdminManageRecords() {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-230px)] min-h-[500px]">
+      <div className="bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-230px)] min-h-[500px]">
         {/* Toolbar */}
         <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50">
           <div className="relative w-full sm:w-80">
@@ -259,7 +259,7 @@ export default function AdminManageRecords() {
       {/* Add Student Modal */}
       {isStudentModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+          <div className="bg-white rounded-lg shadow-md w-full max-w-md overflow-hidden flex flex-col">
             <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-blue-600" />
@@ -308,7 +308,7 @@ export default function AdminManageRecords() {
       {/* Add Teacher Modal */}
       {isTeacherModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+          <div className="bg-white rounded-lg shadow-md w-full max-w-md overflow-hidden flex flex-col">
             <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-blue-600" />

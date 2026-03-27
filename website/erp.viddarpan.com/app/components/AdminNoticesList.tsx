@@ -20,7 +20,7 @@ export default function AdminNoticesList({ notices = [], onCreateNew }: { notice
       </div>
 
       {notices.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center bg-white/50 border-2 border-slate-200 border-dashed rounded-2xl min-h-[400px]">
+        <div className="flex-1 flex items-center justify-center bg-white/50 border-2 border-slate-200 border-dashed rounded-lg min-h-[400px]">
           <div className="text-center">
             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Megaphone className="w-8 h-8 text-slate-400" />
@@ -36,7 +36,7 @@ export default function AdminNoticesList({ notices = [], onCreateNew }: { notice
             const Icon = conf.icon;
             
             return (
-              <div key={index} className="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-start gap-4">
+              <div key={index} className="bg-white border border-slate-200 rounded-lg p-5 hover:shadow-md transition-shadow flex flex-col md:flex-row md:items-start gap-4">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${conf.bg}`}>
                   <Icon className={`w-6 h-6 ${conf.color}`} />
                 </div>

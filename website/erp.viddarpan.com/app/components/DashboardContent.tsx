@@ -116,7 +116,7 @@ export default function DashboardContent({ setActiveTab }: { setActiveTab?: (tab
                 </p>
                 {/* Now badge */}
                 {slot.now && (
-                  <span className="shrink-0 text-[9px] font-black uppercase tracking-widest bg-blue-600 text-white px-1.5 py-0.5 rounded">Now</span>
+                  <span className="shrink-0 text-[9px] font-bold uppercase tracking-widest bg-blue-600 text-white px-1.5 py-0.5 rounded">Now</span>
                 )}
               </div>
             ))}
@@ -157,14 +157,14 @@ export default function DashboardContent({ setActiveTab }: { setActiveTab?: (tab
             </div>
             <div className="px-5 py-4 flex gap-4 items-center">
               <div className="shrink-0 text-center w-12 border border-slate-200 rounded-md py-1 px-1 bg-slate-50">
-                <p className="text-[9px] font-black text-slate-400 uppercase">Oct</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase">Oct</p>
                 <p className="text-xl font-bold text-slate-800 leading-none mt-0.5">15</p>
               </div>
               <div>
                 <p className="text-sm font-bold text-slate-800">Mid-Term Examinations</p>
                 <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1"><MapPin className="w-3 h-3"/> Hall B</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="text-[9px] bg-purple-100 text-purple-700 font-black uppercase tracking-wider px-1.5 py-0.5 rounded">Primary Invigilator</span>
+                  <span className="text-[9px] bg-purple-100 text-purple-700 font-bold uppercase tracking-wider px-1.5 py-0.5 rounded">Primary Invigilator</span>
                 </div>
               </div>
               <button onClick={() => nav('Datesheet')} className="ml-auto shrink-0 p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
@@ -187,7 +187,7 @@ export default function DashboardContent({ setActiveTab }: { setActiveTab?: (tab
               {notices.map((n, i) => (
                 <button key={i} onClick={() => nav('Notices')} className="w-full text-left px-5 py-3.5 hover:bg-slate-50 transition-colors">
                   <div className="flex items-center justify-between mb-1">
-                    <span className={`text-[10px] font-black uppercase tracking-wider ${n.tag === 'Admin' ? 'text-blue-600' : 'text-emerald-600'}`}>{n.tag}</span>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${n.tag === 'Admin' ? 'text-blue-600' : 'text-emerald-600'}`}>{n.tag}</span>
                     <span className="text-[10px] text-slate-400">{n.time}</span>
                   </div>
                   <p className="text-xs font-semibold text-slate-800 leading-snug">{n.title}</p>

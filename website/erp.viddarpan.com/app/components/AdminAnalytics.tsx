@@ -103,7 +103,7 @@ export default function AdminAnalytics() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Pie Chart Card */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex flex-col items-center justify-center min-h-[300px]">
+          <div className="bg-white rounded-md border border-slate-200 shadow-sm p-6 flex flex-col items-center justify-center min-h-[300px]">
             <h3 className="text-lg font-bold text-slate-800 self-start w-full mb-6 text-center">Attendance Distribution</h3>
             
             {/* CSS Conic Gradient Pie/Donut Chart */}
@@ -142,7 +142,7 @@ export default function AdminAnalytics() {
           </div>
 
           {/* Student List */}
-          <div className="md:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="md:col-span-2 bg-white rounded-md border border-slate-200 shadow-sm flex flex-col">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-xl">
               <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Users className="w-5 h-5 text-blue-600" />
@@ -227,7 +227,7 @@ export default function AdminAnalytics() {
           
           {/* Main Stats Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-6 text-white shadow-md relative overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-md p-6 text-white shadow-md relative overflow-hidden">
               <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-20">
                 <Trophy className="w-32 h-32" />
               </div>
@@ -249,7 +249,7 @@ export default function AdminAnalytics() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-center shadow-sm">
+            <div className="bg-white rounded-md border border-slate-200 p-6 flex flex-col justify-center shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
                   <TrendingUp className="w-5 h-5" />
@@ -266,7 +266,7 @@ export default function AdminAnalytics() {
           </div>
 
           {/* Class Overview Progress Bars */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          <div className="bg-white rounded-md border border-slate-200 shadow-sm p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Users className="w-5 h-5 text-slate-400" />
@@ -303,7 +303,7 @@ export default function AdminAnalytics() {
 
         {/* Right Column: Class Leaders */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full">
+          <div className="bg-white rounded-md border border-slate-200 shadow-sm flex flex-col h-full">
             <div className="p-5 border-b border-slate-100 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                 <Medal className="w-5 h-5 text-amber-500" />
