@@ -3,8 +3,14 @@ import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import DashboardContent from './DashboardContent';
 import TeacherAttendance from './teacher/TeacherAttendance';
+import TeacherTimetable from './teacher/TeacherTimetable';
 import TeacherHomework from './teacher/TeacherHomework';
 import TeacherAcademicCalendar from './teacher/TeacherAcademicCalendar';
+import TeacherLeaveRequest from './teacher/TeacherLeaveRequest';
+import TeacherLessonPlan from './teacher/TeacherLessonPlan';
+import TeacherMarksEntry from './teacher/TeacherMarksEntry';
+import TeacherMyClass from './teacher/TeacherMyClass';
+import TeacherNotices from './teacher/TeacherNotices';
 
 export default function TeacherDashboard({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState('Dashboard');
@@ -13,10 +19,22 @@ export default function TeacherDashboard({ onLogout }: { onLogout: () => void })
     switch (activeTab) {
       case 'Attendance':
         return <TeacherAttendance />;
+      case 'Timetable':
+        return <TeacherTimetable setActiveTab={setActiveTab} />;
       case 'Homework':
         return <TeacherHomework />;
       case 'Academic Calendar':
         return <TeacherAcademicCalendar />;
+      case 'Request Leave':
+        return <TeacherLeaveRequest />;
+      case 'Lesson Plan':
+        return <TeacherLessonPlan />;
+      case 'Add Marks':
+        return <TeacherMarksEntry />;
+      case 'My Class':
+        return <TeacherMyClass />;
+      case 'Notices':
+        return <TeacherNotices />;
       case 'Dashboard':
       default:
         return <DashboardContent />;

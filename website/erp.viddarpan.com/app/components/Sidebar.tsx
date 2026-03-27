@@ -1,7 +1,9 @@
 import React from 'react';
-import { LayoutDashboard, CalendarCheck, Calendar as CalendarIcon, Megaphone, Users, Settings, GraduationCap, BookOpen } from 'lucide-react';
+import { LayoutDashboard, CalendarCheck, Calendar as CalendarIcon, Megaphone, Users, Settings, GraduationCap, BookOpen, FileText, X, BookOpenCheck, Clock } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab }: { activeTab?: string, setActiveTab?: (tab: string) => void }) {
+  const [showSupport, setShowSupport] = React.useState(true);
+
   const handleNavClick = (e: React.MouseEvent, label: string) => {
     e.preventDefault();
     if (setActiveTab) {
@@ -27,23 +29,37 @@ export default function Sidebar({ activeTab, setActiveTab }: { activeTab?: strin
         <nav className="mt-6 flex flex-col gap-1 px-4">
           <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" active={activeTab === 'Dashboard'} onClick={(e) => handleNavClick(e, 'Dashboard')} />
           <NavItem icon={<CalendarCheck size={20} />} label="Attendance" active={activeTab === 'Attendance'} onClick={(e) => handleNavClick(e, 'Attendance')} />
+          <NavItem icon={<Clock size={20} />} label="Timetable" active={activeTab === 'Timetable'} onClick={(e) => handleNavClick(e, 'Timetable')} />
           <NavItem icon={<BookOpen size={20} />} label="Homework" active={activeTab === 'Homework'} onClick={(e) => handleNavClick(e, 'Homework')} />
           <NavItem icon={<CalendarIcon size={20} />} label="Academic Calendar" active={activeTab === 'Academic Calendar'} onClick={(e) => handleNavClick(e, 'Academic Calendar')} />
+          <NavItem icon={<FileText size={20} />} label="Request Leave" active={activeTab === 'Request Leave'} onClick={(e) => handleNavClick(e, 'Request Leave')} />
+          <NavItem icon={<BookOpenCheck size={20} />} label="Lesson Plan" active={activeTab === 'Lesson Plan'} onClick={(e) => handleNavClick(e, 'Lesson Plan')} />
+          <NavItem icon={<GraduationCap size={20} />} label="Add Marks" active={activeTab === 'Add Marks'} onClick={(e) => handleNavClick(e, 'Add Marks')} />
+          <NavItem icon={<Users size={20} />} label="My Class" active={activeTab === 'My Class'} onClick={(e) => handleNavClick(e, 'My Class')} />
           <NavItem icon={<Megaphone size={20} />} label="Notices" active={activeTab === 'Notices'} onClick={(e) => handleNavClick(e, 'Notices')} />
           <NavItem icon={<Users size={20} />} label="Staff Management" active={activeTab === 'Staff Management'} onClick={(e) => handleNavClick(e, 'Staff Management')} />
           <NavItem icon={<Settings size={20} />} label="Settings" active={activeTab === 'Settings'} onClick={(e) => handleNavClick(e, 'Settings')} />
         </nav>
       </div>
 
-      <div className="p-4">
-        <div className="bg-slate-900 rounded-xl p-5 text-white">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Support</p>
-          <p className="text-sm font-medium mb-4">Need help with Grade 10-A reports?</p>
-          <button className="w-full py-2 bg-slate-800 hover:bg-slate-700 transition-colors rounded-lg text-sm font-medium">
-            Contact IT
-          </button>
+      {showSupport && (
+        <div className="p-4">
+          <div className="bg-slate-900 rounded-xl p-5 text-white relative">
+            <button 
+              onClick={() => setShowSupport(false)}
+              className="absolute top-2 right-2 text-slate-400 hover:text-white transition-colors p-1"
+              aria-label="Dismiss support"
+            >
+              <X size={14} />
+            </button>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Support</p>
+            <p className="text-sm font-medium mb-4">Need help with Grade 10-A reports?</p>
+            <button className="w-full py-2 bg-slate-800 hover:bg-slate-700 transition-colors rounded-lg text-sm font-medium">
+              Contact IT
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 }
