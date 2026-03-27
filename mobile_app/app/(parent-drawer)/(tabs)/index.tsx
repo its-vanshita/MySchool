@@ -104,7 +104,11 @@ export default function ParentDashboardScreen() {
 
       {/* Insights Section */}
       <Text style={styles.sectionTitle}>Academic Overview</Text>
-      <View style={styles.insightCard}>
+      <TouchableOpacity 
+        style={styles.insightCard} 
+        activeOpacity={0.8}
+        onPress={() => router.push('/(parent-drawer)/(tabs)/attendance')}
+      >
         <View style={styles.insightHeader}>
           <Text style={styles.insightTitle}>Attendance This Month</Text>
           <Ionicons name="calendar-outline" size={20} color="#94A3B8" />
@@ -118,7 +122,7 @@ export default function ParentDashboardScreen() {
         <View style={styles.progressBarWrap}>
            <View style={[styles.progressBarFill]} />
         </View>
-      </View>
+      </TouchableOpacity>
 
       <View style={{ height: 40 }} />
     </ScrollView>

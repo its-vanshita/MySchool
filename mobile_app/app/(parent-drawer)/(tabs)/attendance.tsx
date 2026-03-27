@@ -5,10 +5,25 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  Image,
+  Platform,
+  StatusBar
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../../src/theme/spacing';
+import { Tabs } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+
+// Premium Theme Variables
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const DARK_TEXT = '#1E293B';
+const SUCCESS_GREEN = '#10B981';
+const DANGER_RED = '#F43F5E';
+const LATE_ORANGE = '#F59E0B';
+const EXCUSED_BLUE = '#3B82F6';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -24,31 +39,7 @@ const DEMO_ATTENDANCE: Record<string, { date: string; status: 'present' | 'absen
     { date: '2026-03-09', status: 'present' },
     { date: '2026-03-10', status: 'present' },
   ],
-  'Feb 2026': [
-    { date: '2026-02-02', status: 'present' },
-    { date: '2026-02-03', status: 'present' },
-    { date: '2026-02-04', status: 'late' },
-    { date: '2026-02-05', status: 'present' },
-    { date: '2026-02-06', status: 'present' },
-    { date: '2026-02-09', status: 'absent' },
-    { date: '2026-02-10', status: 'present' },
-    { date: '2026-02-11', status: 'present' },
-    { date: '2026-02-12', status: 'present' },
-    { date: '2026-02-13', status: 'present' },
-    { date: '2026-02-16', status: 'present' },
-    { date: '2026-02-17', status: 'present' },
-    { date: '2026-02-18', status: 'excused' },
-    { date: '2026-02-19', status: 'present' },
-    { date: '2026-02-20', status: 'present' },
-    { date: '2026-02-23', status: 'present' },
-    { date: '2026-02-24', status: 'present' },
-    { date: '2026-02-25', status: 'present' },
-    { date: '2026-02-26', status: 'absent' },
-    { date: '2026-02-27', status: 'present' },
-  ],
 };
-
-
 
 const STATUS_LABELS: Record<string, string> = {
   present: 'Present',
@@ -57,15 +48,15 @@ const STATUS_LABELS: Record<string, string> = {
   excused: 'Excused',
 };
 
+const STATUS_COLORS: Record<string, string> = {
+  present: SUCCESS_GREEN,
+  absent: DANGER_RED,
+  late: LATE_ORANGE,
+  excused: EXCUSED_BLUE,
+};
+
 export default function ParentAttendanceScreen() {
-  const { colors, isDark } = useTheme();
-  const STATUS_COLORS: Record<string, string> = {
-    present: colors.success,
-    absent: colors.danger,
-    late: colors.warning,
-    excused: colors.info,
-  };
-  const styles = getStyles(colors);
+  const insets = useSafeAreaInsets();
   const now = new Date();
   const currentMonthKey = `${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
   const monthKeys = Object.keys(DEMO_ATTENDANCE);
@@ -80,294 +71,367 @@ export default function ParentAttendanceScreen() {
   const percentage = totalDays > 0 ? Math.round((presentCount / totalDays) * 100) : 0;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Child Header */}
-      <View style={styles.childHeader}>
-        <View style={styles.childAvatar}>
-          <Ionicons name="person" size={24} color={colors.primary} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.childName}>Arjun Sharma</Text>
-          <Text style={styles.childClass}>Class 10-A • Roll #12</Text>
-        </View>
-      </View>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <Tabs.Screen
+        options={{
+          headerShown: true,
+          headerStyle: { backgroundColor: BRAND_NAVY, elevation: 0, shadowOpacity: 0 },
+          headerTintColor: PURE_WHITE,
+          headerTitle: 'Attendance',
+          headerTitleStyle: {
+             fontWeight: '700',
+             fontSize: 20,
+             fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+          },
+        }}
+      />
 
-      {/* Month Selector */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.monthScroll}>
-        {monthKeys.map((key) => (
-          <TouchableOpacity
-            key={key}
-            style={[styles.monthPill, selectedMonth === key && styles.monthPillActive]}
-            onPress={() => setSelectedMonth(key)}
-          >
-            <Text style={[styles.monthPillText, selectedMonth === key && styles.monthPillTextActive]}>
-              {key}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {/* Overall Stats */}
-      <View style={styles.overviewCard}>
-        <View style={styles.percentageCircle}>
-          <Text style={styles.percentageText}>{percentage}%</Text>
-          <Text style={styles.percentageLabel}>Attendance</Text>
-        </View>
-        <View style={styles.statsGrid}>
-          <View style={styles.statItem}>
-            <View style={[styles.statDot, { backgroundColor: colors.success }]} />
-            <Text style={styles.statCount}>{presentCount}</Text>
-            <Text style={styles.statLabel}>Present</Text>
-          </View>
-          <View style={styles.statItem}>
-            <View style={[styles.statDot, { backgroundColor: colors.danger }]} />
-            <Text style={styles.statCount}>{absentCount}</Text>
-            <Text style={styles.statLabel}>Absent</Text>
-          </View>
-          <View style={styles.statItem}>
-            <View style={[styles.statDot, { backgroundColor: colors.warning }]} />
-            <Text style={styles.statCount}>{lateCount}</Text>
-            <Text style={styles.statLabel}>Late</Text>
-          </View>
-          <View style={styles.statItem}>
-            <View style={[styles.statDot, { backgroundColor: colors.info }]} />
-            <Text style={styles.statCount}>{excusedCount}</Text>
-            <Text style={styles.statLabel}>Excused</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Day-by-day list */}
-      <Text style={styles.sectionTitle}>Daily Records</Text>
-      {records.length === 0 ? (
-        <View style={styles.emptyCard}>
-          <Ionicons name="calendar-outline" size={40} color={colors.textLight} />
-          <Text style={styles.emptyText}>No attendance records for this month</Text>
-        </View>
-      ) : (
-        records.map((record) => {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
-const d = new Date(record.date + 'T00:00:00');
-          const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-          return (
-            <View key={record.date} style={styles.recordRow}>
-              <View style={styles.recordDate}>
-                <Text style={styles.recordDay}>{d.getDate()}</Text>
-                <Text style={styles.recordDayName}>{dayNames[d.getDay()]}</Text>
-              </View>
-              <View style={styles.recordLine} />
-              <View style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[record.status] + '20' }]}>
-                <View style={[styles.statusDotSmall, { backgroundColor: STATUS_COLORS[record.status] }]} />
-                <Text style={[styles.statusText, { color: STATUS_COLORS[record.status] }]}>
-                  {STATUS_LABELS[record.status]}
-                </Text>
-              </View>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        
+        {/* The Identity Card */}
+        <View style={styles.identityCard}>
+          <View style={styles.childInfoRow}>
+            <View style={styles.avatarWrap}>
+              <Image 
+                source={{ uri: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' }} 
+                style={styles.childAvatar} 
+              />
             </View>
-          );
-        })
-      )}
+            <View style={styles.childTextWrap}>
+              <Text style={styles.childName}>Arjun Sharma</Text>
+              <Text style={styles.childClass}>Class 8-B</Text>
+            </View>
+          </View>
+          <View style={styles.statusPill}>
+            <View style={styles.statusDot} />
+            <Text style={styles.statusText}>Campus Open</Text>
+          </View>
+        </View>
 
-      <View style={{ height: 30 }} />
-    </ScrollView>
+        {/* The Summary Card */}
+        <View style={styles.summaryCard}>
+          <View style={styles.heroSection}>
+            <View style={styles.ringWrapper}>
+               <View style={styles.ringGlow} />
+               <View style={styles.circularProgressContainer}>
+                  {/* Pseudo Circular Progress */}
+                  <View style={[styles.progressCircle, { borderColor: SUCCESS_GREEN + '40', borderWidth: 8 }]} />
+                  {/* We fake a partial circle for simplicity in normal React Native View without SVG, 
+                      for actual implementation one would use react-native-svg. We'll use a styled container to look like a ring. */}
+                  <View style={[styles.progressCircleInner, { borderColor: SUCCESS_GREEN, borderWidth: 8, borderLeftColor: 'transparent', borderBottomColor: 'transparent', transform: [{rotate: '45deg'}] }]} />
+                  <View style={styles.ringCenterText}>
+                     <Text style={styles.ringPercentageText}>88%</Text>
+                     <Text style={styles.ringPercentageLabel}>Attendance</Text>
+                  </View>
+               </View>
+            </View>
+          </View>
+          
+          <View style={styles.legendGrid}>
+             <View style={styles.legendCol}>
+                <Ionicons name="checkmark-circle" size={24} color={BRAND_NAVY} style={{ opacity: 0.8 }} />
+                <Text style={styles.legendCount}>{presentCount}</Text>
+                <Text style={styles.legendLabel}>Present</Text>
+             </View>
+             <View style={styles.legendCol}>
+                <Ionicons name="close-circle" size={24} color={BRAND_NAVY} style={{ opacity: 0.8 }} />
+                <Text style={styles.legendCount}>{absentCount}</Text>
+                <Text style={styles.legendLabel}>Absent</Text>
+             </View>
+             <View style={styles.legendCol}>
+                <Ionicons name="time" size={24} color={BRAND_NAVY} style={{ opacity: 0.8 }} />
+                <Text style={styles.legendCount}>{lateCount}</Text>
+                <Text style={styles.legendLabel}>Late</Text>
+             </View>
+             <View style={styles.legendCol}>
+                <Ionicons name="document-text" size={24} color={BRAND_NAVY} style={{ opacity: 0.8 }} />
+                <Text style={styles.legendCount}>{excusedCount}</Text>
+                <Text style={styles.legendLabel}>Excused</Text>
+             </View>
+          </View>
+        </View>
+
+        {/* Attendance Chronicle (List) */}
+        <Text style={styles.sectionTitle}>Attendance Chronicle</Text>
+        
+        <View style={styles.listContainer}>
+          {records.map((record) => {
+            const d = new Date(record.date + 'T00:00:00');
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dayName = dayNames[d.getDay()];
+            const color = STATUS_COLORS[record.status];
+
+            return (
+              <View key={record.date} style={styles.recordCard}>
+                <View style={[styles.cardAccent, { backgroundColor: color }]} />
+                
+                <View style={styles.recordContent}>
+                   <View style={styles.recordDateCol}>
+                      <Text style={styles.recordDayNum}>{d.getDate()}</Text>
+                      <Text style={styles.recordDayName}>{dayName}</Text>
+                   </View>
+                   
+                   <View style={styles.recordSpacer} />
+                   
+                   <View style={styles.glassPill}>
+                      <Text style={[styles.glassPillText, { color: BRAND_NAVY }]}>{STATUS_LABELS[record.status]}</Text>
+                   </View>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { paddingBottom: 100 },
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: BG_LIGHT,
+  },
+  content: {
+    padding: 16,
+    paddingBottom: 40,
+  },
 
-  childHeader: {
+  // Identity Card
+  identityCard: {
+    backgroundColor: PURE_WHITE,
+    borderRadius: 16,
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
-    padding: spacing.lg,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 3,
+    marginBottom: 20,
+  },
+  childInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatarWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    padding: 2,
+    borderWidth: 2,
+    borderColor: '#E2E8F0',
+    marginRight: 14,
   },
   childAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.primaryLight,
-    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+    borderRadius: 24,
+  },
+  childTextWrap: {
     justifyContent: 'center',
-    marginRight: spacing.md,
   },
   childName: {
-    fontSize: fontSize.md,
+    fontSize: 17,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: BRAND_NAVY,
+    marginBottom: 4,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
   childClass: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginTop: 2,
+    fontSize: 13,
+    color: '#64748B',
+    fontWeight: '500',
   },
-
-  monthScroll: {
-    paddingHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-    maxHeight: 44,
-  },
-  monthPill: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.white,
-    marginRight: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  monthPillActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  monthPillText: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  monthPillTextActive: {
-    color: colors.white,
-  },
-
-  overviewCard: {
+  statusPill: {
     flexDirection: 'row',
-    backgroundColor: colors.white,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-    borderRadius: borderRadius.lg,
-    padding: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9', // light-grey capsule
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: SUCCESS_GREEN, // Emerald Green dot
+    marginRight: 6,
+    shadowColor: SUCCESS_GREEN,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
     shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-  },
-  percentageCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.successLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.xl,
-  },
-  percentageText: {
-    fontSize: fontSize.xl,
-    fontWeight: '800',
-    color: colors.success,
-  },
-  percentageLabel: {
-    fontSize: fontSize.xs,
-    color: colors.success,
-    fontWeight: '600',
-  },
-  statsGrid: {
-    flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '45%',
-    gap: 6,
-  },
-  statDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  statCount: {
-    fontSize: fontSize.md,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  statLabel: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-  },
-
-  sectionTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    paddingHorizontal: spacing.xl,
-    marginTop: spacing.xl,
-    marginBottom: spacing.md,
-  },
-
-  recordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  recordDate: {
-    width: 44,
-    alignItems: 'center',
-  },
-  recordDay: {
-    fontSize: fontSize.lg,
-    fontWeight: '800',
-    color: colors.textPrimary,
-  },
-  recordDayName: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    fontWeight: '600',
-  },
-  recordLine: {
-    width: 1,
-    height: 30,
-    backgroundColor: colors.border,
-    marginHorizontal: spacing.md,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
-    gap: 6,
-  },
-  statusDotSmall: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    elevation: 2,
   },
   statusText: {
-    fontSize: fontSize.sm,
+    fontSize: 12,
+    color: BRAND_NAVY,
     fontWeight: '700',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
 
-  emptyCard: {
-    backgroundColor: colors.white,
-    marginHorizontal: spacing.lg,
-    borderRadius: borderRadius.lg,
-    padding: spacing.xxl,
+  // Summary Card
+  summaryCard: {
+    backgroundColor: PURE_WHITE,
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 4,
+    marginBottom: 24,
+  },
+  heroSection: {
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
+    marginBottom: 24,
   },
-  emptyText: {
-    color: colors.textLight,
-    fontSize: fontSize.md,
-    marginTop: spacing.sm,
+  ringWrapper: {
+    width: 140,
+    height: 140,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
   },
-});
+  ringGlow: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#34D399',
+    opacity: 0.15,
+    transform: [{ scale: 1.2 }],
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+  },
+  circularProgressContainer: {
+    width: 130,
+    height: 130,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  progressCircle: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    borderRadius: 65,
+  },
+  progressCircleInner: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    borderRadius: 65,
+  },
+  ringCenterText: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ringPercentageText: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: BRAND_NAVY,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  ringPercentageLabel: {
+    fontSize: 12,
+    color: SLATE_GREY,
+    fontWeight: '600',
+    marginTop: 2,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  legendGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  legendCol: {
+    alignItems: 'center',
+  },
+  legendCount: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: BRAND_NAVY,
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  legendLabel: {
+    fontSize: 11,
+    color: SLATE_GREY,
+    fontWeight: '600',
+  },
 
+  // Chronicle List
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: BRAND_NAVY,
+    marginBottom: 16,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  listContainer: {
+    gap: 12,
+  },
+  recordCard: {
+    flexDirection: 'row',
+    backgroundColor: PURE_WHITE,
+    borderRadius: 16,
+    height: 72,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  cardAccent: {
+    width: 4,
+    height: '100%',
+  },
+  recordContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  recordDateCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  recordDayNum: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: BRAND_NAVY,
+  },
+  recordDayName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: BRAND_NAVY,
+  },
+  recordSpacer: {
+    flex: 1,
+  },
+  glassPill: {
+    backgroundColor: 'rgba(241, 245, 249, 0.7)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  glassPillText: {
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  }
+});
