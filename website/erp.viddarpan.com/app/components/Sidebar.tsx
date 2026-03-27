@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, CalendarCheck, Megaphone, Users, Settings, GraduationCap, BookOpen } from 'lucide-react';
+import { LayoutDashboard, CalendarCheck, Calendar as CalendarIcon, Megaphone, Users, Settings, GraduationCap, BookOpen } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab }: { activeTab?: string, setActiveTab?: (tab: string) => void }) {
   const handleNavClick = (e: React.MouseEvent, label: string) => {
@@ -28,6 +28,7 @@ export default function Sidebar({ activeTab, setActiveTab }: { activeTab?: strin
           <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" active={activeTab === 'Dashboard'} onClick={(e) => handleNavClick(e, 'Dashboard')} />
           <NavItem icon={<CalendarCheck size={20} />} label="Attendance" active={activeTab === 'Attendance'} onClick={(e) => handleNavClick(e, 'Attendance')} />
           <NavItem icon={<BookOpen size={20} />} label="Homework" active={activeTab === 'Homework'} onClick={(e) => handleNavClick(e, 'Homework')} />
+          <NavItem icon={<CalendarIcon size={20} />} label="Academic Calendar" active={activeTab === 'Academic Calendar'} onClick={(e) => handleNavClick(e, 'Academic Calendar')} />
           <NavItem icon={<Megaphone size={20} />} label="Notices" active={activeTab === 'Notices'} onClick={(e) => handleNavClick(e, 'Notices')} />
           <NavItem icon={<Users size={20} />} label="Staff Management" active={activeTab === 'Staff Management'} onClick={(e) => handleNavClick(e, 'Staff Management')} />
           <NavItem icon={<Settings size={20} />} label="Settings" active={activeTab === 'Settings'} onClick={(e) => handleNavClick(e, 'Settings')} />

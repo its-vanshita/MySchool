@@ -4,6 +4,7 @@ import Topbar from './Topbar';
 import DashboardContent from './DashboardContent';
 import TeacherAttendance from './teacher/TeacherAttendance';
 import TeacherHomework from './teacher/TeacherHomework';
+import TeacherAcademicCalendar from './teacher/TeacherAcademicCalendar';
 
 export default function TeacherDashboard({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState('Dashboard');
@@ -14,6 +15,8 @@ export default function TeacherDashboard({ onLogout }: { onLogout: () => void })
         return <TeacherAttendance />;
       case 'Homework':
         return <TeacherHomework />;
+      case 'Academic Calendar':
+        return <TeacherAcademicCalendar />;
       case 'Dashboard':
       default:
         return <DashboardContent />;
