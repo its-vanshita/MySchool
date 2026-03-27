@@ -219,19 +219,19 @@ function ParentDrawerContent(props: any) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            key="notices-static"
+            key="documents-static"
             activeOpacity={0.7}
             onPress={() => {
               navigation.closeDrawer();
-              router.push('/(parent-drawer)/(tabs)/notices');
+              router.push('/(parent-drawer)/(tabs)/documents');
             }}
             style={drawerStyles.drawerItem}
           >
             <View style={drawerStyles.iconContainer}>
-              <Ionicons name="megaphone-outline" size={22} color="#FFFFFF" />
+              <Ionicons name="document-text-outline" size={22} color="#FFFFFF" />
             </View>
             <Text style={[drawerStyles.drawerLabel, { color: '#FFFFFF', fontWeight: '500', opacity: 0.85 }]}>
-              School Notices
+              Documents
             </Text>
           </TouchableOpacity>
 
@@ -253,6 +253,23 @@ function ParentDrawerContent(props: any) {
           </TouchableOpacity>
 
           <TouchableOpacity
+            key="settings-static"
+            activeOpacity={0.7}
+            onPress={() => {
+              navigation.closeDrawer();
+              navigation.navigate('settings');
+            }}
+            style={drawerStyles.drawerItem}
+          >
+            <View style={drawerStyles.iconContainer}>
+              <Ionicons name="settings-outline" size={22} color="#FFFFFF" />
+            </View>
+            <Text style={[drawerStyles.drawerLabel, { color: '#FFFFFF', fontWeight: '500', opacity: 0.85 }]}>
+              Settings
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             key="faq-static"
             activeOpacity={0.7}
             onPress={() => {
@@ -265,7 +282,7 @@ function ParentDrawerContent(props: any) {
               <Ionicons name="help-circle-outline" size={22} color="#FFFFFF" />
             </View>
             <Text style={[drawerStyles.drawerLabel, { color: '#FFFFFF', fontWeight: '500', opacity: 0.85 }]}>
-              Help & FAQs
+              Support Hub
             </Text>
           </TouchableOpacity>
 
@@ -328,6 +345,7 @@ export default function ParentDrawerLayout() {
         options={{
           title: 'Settings',
           drawerIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
+          drawerItemStyle: { display: 'none' },
         }}
       />
     </Drawer>
