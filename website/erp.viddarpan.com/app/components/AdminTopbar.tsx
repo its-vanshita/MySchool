@@ -1,5 +1,6 @@
 import React from 'react';
-import { Search, Bell, HelpCircle, LogOut } from 'lucide-react';
+import { Search, Bell, LogOut } from 'lucide-react';
+import HelpDropdown from './HelpDropdown';
 
 export default function AdminTopbar({ onLogout }: { onLogout: () => void }) {
   return (
@@ -19,9 +20,7 @@ export default function AdminTopbar({ onLogout }: { onLogout: () => void }) {
             <Bell className="w-5 h-5" />
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
-          <button className="hover:text-slate-700 transition-colors">
-            <HelpCircle className="w-5 h-5" />
-          </button>
+          <HelpDropdown />
         </div>
 
         <div className="flex items-center gap-3 pl-4 md:pl-6 border-l border-slate-200">

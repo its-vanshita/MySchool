@@ -9,6 +9,9 @@ import AdminNoticesList from './AdminNoticesList';
 import AdminLeaveApprovals from './AdminLeaveApprovals';
 import AdminTimetable from './AdminTimetable';
 import AdminManageCalendar from './AdminManageCalendar';
+import AdminEventCalendar from './AdminEventCalendar';
+import StaffProxyManager from './StaffProxyManager';
+import AdminMaintenanceTickets from './AdminMaintenanceTickets';
 import AdminSyllabusTracking from './AdminSyllabusTracking';
 import AdminAnalytics from './AdminAnalytics';
 import AdminUpdateMarks from './AdminUpdateMarks';
@@ -35,7 +38,9 @@ export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {activeTab === 'notices' && <AdminNoticesList notices={notices} onCreateNew={() => setActiveTab('assign-notice')} />}
           {activeTab === 'leave-approvals' && <AdminLeaveApprovals />}
           {activeTab === 'manage-timetable' && <AdminTimetable />}
-          {activeTab === 'manage-calendar' && <AdminManageCalendar />}
+          {activeTab === 'manage-calendar' && <AdminEventCalendar />}
+          {activeTab === 'proxy-manager' && <StaffProxyManager />}
+          {activeTab === 'maintenance' && <AdminMaintenanceTickets />}
           {activeTab === 'syllabus' && <AdminSyllabusTracking />}
           {activeTab === 'analytics' && <AdminAnalytics />}
           {activeTab === 'update-marks' && <AdminUpdateMarks />}
