@@ -8,7 +8,6 @@ import AssignNotice from './AssignNotice';
 import AdminNoticesList from './AdminNoticesList';
 import AdminLeaveApprovals from './AdminLeaveApprovals';
 import AdminTimetable from './AdminTimetable';
-import AdminManageCalendar from './AdminManageCalendar';
 import AdminEventCalendar from './AdminEventCalendar';
 import StaffProxyManager from './StaffProxyManager';
 import AdminMaintenanceTickets from './AdminMaintenanceTickets';
