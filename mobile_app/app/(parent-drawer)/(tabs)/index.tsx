@@ -72,10 +72,10 @@ export default function ParentDashboardScreen() {
               <Text style={styles.childClass}>{studentClass}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.switchBtn} activeOpacity={0.7}>
-            <Ionicons name="swap-horizontal" size={18} color={BRAND_NAVY} style={{ marginRight: 6 }} />
-            <Text style={styles.switchBtnText}>Switch</Text>
-          </TouchableOpacity>
+          <View style={styles.statusPill}>
+            <View style={styles.statusDot} />
+            <Text style={styles.statusText}>Campus Open</Text>
+          </View>
         </View>
       </View>
 
@@ -155,16 +155,16 @@ const styles = StyleSheet.create({
   },
   childCard: {
     backgroundColor: PURE_WHITE,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: BRAND_NAVY,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.05,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 3,
   },
   childInfoRow: {
     flexDirection: 'row',
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   childName: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1E293B',
+    color: BRAND_NAVY,
     marginBottom: 4,
     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
@@ -199,18 +199,31 @@ const styles = StyleSheet.create({
     color: '#64748B',
     fontWeight: '500',
   },
-  switchBtn: {
+  statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 14,
+    backgroundColor: '#F1F5F9', // light-grey capsule
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
-  switchBtnText: {
-    fontSize: 13,
-    color: BRAND_NAVY,
-    fontWeight: '600',
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981', // Emerald Green dot
+    marginRight: 6,
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  statusText: {
+    fontSize: 12, // 12sp
+    color: BRAND_NAVY, // bold navy
+    fontWeight: '700',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif', // Inter font emulation
   },
 
   sectionTitle: {
