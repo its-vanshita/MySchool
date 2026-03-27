@@ -92,12 +92,12 @@ export default function ParentTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="documents"
+        name="timetable"
         options={{
-          title: 'Documents',
+          title: 'Timetable',
           headerTitle: () => <HeaderTitle />,
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "document-text" : "document-text-outline"} size={26} color={color} />
+            <Ionicons name={focused ? "time" : "time-outline"} size={26} color={color} />
           ),
         }}
       />
@@ -121,6 +121,7 @@ export default function ParentTabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="documents" options={{ title: 'Documents', headerTitle: () => <HeaderTitle />, href: null }} />
       <Tabs.Screen name="attendance" options={{ title: 'Attendance', headerTitle: () => <HeaderTitle />, href: null }} />
       <Tabs.Screen name="homework" options={{ title: 'Homework', headerTitle: () => <HeaderTitle />, href: null }} />
       <Tabs.Screen name="notices" options={{ title: 'Notices', headerTitle: () => <HeaderTitle />, href: null }} />
