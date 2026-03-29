@@ -106,10 +106,7 @@ function RootLayoutNav() {
               name="(admin)/admin-lesson-plans"
               options={{
                 presentation: 'card',
-                headerShown: true,
-                headerTitle: 'Syllabus Tracking',
-                headerStyle: { backgroundColor: colors.primary },
-                headerTintColor: colors.white,
+                headerShown: false,
               }}
             />
             <Stack.Screen

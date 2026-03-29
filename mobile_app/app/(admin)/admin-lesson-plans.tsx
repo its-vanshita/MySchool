@@ -5,210 +5,502 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSharedLessonPlans } from '../../src/hooks/useSharedLessonPlans';
-import { useTheme } from '../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 
-export default function AdminLessonPlansScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const DARK_TEXT = '#1E293B';
+
+const STATUS_COLORS = {
+  'completed': '#10B981',
+  'in-progress': '#F59E0B',
+  'not-started': '#94A3B8'
+};
+
+const STATUS_ICONS = {
+  'completed': 'checkmark-circle',
+  'in-progress': 'time',
+  'not-started': 'ellipse-outline'
+};
+
+export default function AdminSyllabusTrackingScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { plans } = useSharedLessonPlans();
-  
-  // Extract unique teachers from plans
+
   const teachers = useMemo(() => {
-    const map = new Map<string, string>(); // teacherId -> teacherId
+    const map = new Map<string, string>();
     plans.forEach(p => map.set(p.teacherId, p.teacherId === 'demo-teacher' ? 'Demo Teacher' : p.teacherId));
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
   }, [plans]);
 
   const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(teachers.length > 0 ? teachers[0].id : null);
-  const [expandedPlanId, setExpandedPlanId] = useState<string | null>(null);
+  const [expandedUnitId, setExpandedUnitId] = useState<string | null>(null);
 
-  // Get plans for selected teacher
   const teacherPlans = useMemo(() => {
+    if (!selectedTeacherId) return [];
     return plans.filter(p => p.teacherId === selectedTeacherId);
   }, [plans, selectedTeacherId]);
 
+  const toggleUnit = (id: string) => {
+    setExpandedUnitId(prev => prev === id ? null : id);
+  };
+
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Teacher Selector */}
-        <Text style={styles.sectionLabel}>Select Teacher</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.teacherScroll}>
-          {teachers.map(t => (
-            <TouchableOpacity
-              key={t.id}
-              style={[
-                styles.teacherChip,
-                selectedTeacherId === t.id && styles.teacherChipSelected
-              ]}
-              onPress={() => setSelectedTeacherId(t.id)}
-            >
-              <Ionicons name="person-outline" size={16} color={selectedTeacherId === t.id ? colors.white : colors.textSecondary} />
-              <Text style={[styles.teacherChipText, selectedTeacherId === t.id && { color: colors.white }]}>
-                {t.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-          {teachers.length === 0 && (
-            <Text style={{ color: colors.textLight, fontStyle: 'italic', paddingVertical: 8 }}>No teachers with active plans.</Text>
-          )}
-        </ScrollView>
+      {/* Header Area */}
+      <View style={[styles.mainHeaderArea, { paddingTop: Math.max(insets.top, 20) + 12 }]}>
+        <View style={styles.mainHeaderTop}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={PURE_WHITE} />
+          </TouchableOpacity>
+          <View style={styles.headerTextWrap}>
+            <Text style={styles.headerTitle}>Syllabus Tracking</Text>
+            <Text style={styles.headerSubtitle}>Monitor academic progress</Text>
+          </View>
+        </View>
+      </View>
 
-        {/* Plans for Teacher */}
-        {teacherPlans.length > 0 && selectedTeacherId ? (
-          <View style={{ marginTop: spacing.xl }}>
-            <Text style={styles.sectionLabel}>Teacher Classes & Progress</Text>
-            
-            {teacherPlans.map((plan, idx) => {
-              const allTopics = plan.units.flatMap(u => u.topics);
-              const total = allTopics.length;
-              const completed = allTopics.filter(t => t.status === 'completed').length;
-              const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-              const id = `${plan.subject}-${plan.className}`;
-              const isExpanded = expandedPlanId === id;
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.teacherSection}>
+          <Text style={styles.sectionTitle}>Select Teacher</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll} contentContainerStyle={styles.chipScrollContent}>
+            {teachers.map(t => (
+              <TouchableOpacity
+                key={t.id}
+                style={[styles.chip, selectedTeacherId === t.id && styles.chipActive]}
+                onPress={() => setSelectedTeacherId(t.id)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.chipText, selectedTeacherId === t.id && styles.chipTextActive]}>
+                  {t.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            {teachers.length === 0 && (
+              <Text style={{ color: SLATE_GREY }}>No teachers found</Text>
+            )}
+          </ScrollView>
+        </View>
 
-              return (
-                <View key={idx} style={styles.planCard}>
-                  <TouchableOpacity
-                    style={styles.planHeader}
-                    onPress={() => setExpandedPlanId(isExpanded ? null : id)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.planInfo}>
-                      <Text style={styles.planTitle}>{plan.subject}</Text>
-                      <View style={styles.planMetaRow}>
-                        <Ionicons name="school-outline" size={14} color={colors.textLight} />
-                        <Text style={styles.planClassName}>{plan.className}</Text>
-                      </View>
-                    </View>
+        {teacherPlans.length === 0 && selectedTeacherId && (
+           <View style={styles.emptyCard}>
+             <View style={styles.emptyIconCircle}>
+               <Ionicons name="book-outline" size={40} color="#94A3B8" />
+             </View>
+             <Text style={styles.emptyTitle}>No Syllabus Data</Text>
+             <Text style={styles.emptySubtext}>
+               This teacher hasn't mapped out any lesson plans yet.
+             </Text>
+           </View>
+        )}
 
-                    <View style={styles.progressCircleContainer}>
-                      <Text style={styles.progressCirclePct}>{pct}%</Text>
-                      <Text style={styles.progressCircleLabel}>Done</Text>
-                    </View>
-                  </TouchableOpacity>
+        {teacherPlans.map((plan, planIndex) => {
+          // Calculate overall progress for this plan
+          let totalTopics = 0;
+          let completedTopics = 0;
+          plan.units.forEach(u => {
+            u.topics.forEach(t => {
+              totalTopics++;
+              if (t.status === 'completed') completedTopics++;
+            });
+          });
+          const progressPercent = totalTopics > 0 ? (completedTopics / totalTopics) * 100 : 0;
 
-                  {isExpanded && (
-                    <View style={styles.planDetails}>
-                      {plan.units.map(unit => {
-                        const unitTotal = unit.topics.length;
-                        const unitDone = unit.topics.filter(t => t.status === 'completed').length;
-                        
-                        return (
-                          <View key={unit.id} style={styles.unitRow}>
-                            <View style={styles.unitHeaderRow}>
-                              <Text style={styles.unitName}>Unit {unit.number}: {unit.name}</Text>
-                              <Text style={styles.unitProgressText}>{unitDone}/{unitTotal} topics</Text>
-                            </View>
-                            
-                            {/* Topics */}
-                            <View style={styles.topicsGrid}>
-                              {unit.topics.map((topic, tidx) => (
-                                <View key={topic.id} style={styles.topicItem}>
-                                  <Ionicons 
-                                    name={topic.status === 'completed' ? 'checkmark-circle' : 'time-outline'} 
-                                    size={16} 
-                                    color={topic.status === 'completed' ? colors.success : colors.textLight} 
-                                  />
-                                  <Text style={[styles.topicItemText, topic.status === 'completed' && { color: colors.textSecondary }]}>
-                                    {topic.name}
-                                  </Text>
-                                </View>
-                              ))}
-                            </View>
-                          </View>
-                        );
-                      })}
-                    </View>
-                  )}
+          return (
+            <View key={`${plan.subject}-${plan.className}-${planIndex}`} style={styles.planCard}>
+              <View style={styles.planHeader}>
+                <View style={styles.planSubjectBox}>
+                  <Text style={styles.planSubject}>{plan.subject}</Text>
+                  <View style={styles.classPill}>
+                    <Text style={styles.classPillText}>{plan.className}</Text>
+                  </View>
                 </View>
-              );
-            })}
-          </View>
-        ) : selectedTeacherId ? (
-          <View style={styles.emptyContainer}>
-            <Ionicons name="folder-open-outline" size={48} color={colors.textLight} />
-            <Text style={styles.emptyText}>No syllabus data for this teacher</Text>
-          </View>
-        ) : null}
+                
+                <View style={styles.progressContainer}>
+                  <View style={styles.progressTextRow}>
+                    <Text style={styles.progressLabel}>Overall Progress</Text>
+                    <Text style={styles.progressValue}>{Math.round(progressPercent)}%</Text>
+                  </View>
+                  <View style={styles.progressBarBg}>
+                    <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
+                  </View>
+                  <Text style={styles.progressCountInfo}>{completedTopics} of {totalTopics} topics completed</Text>
+                </View>
+              </View>
 
-        <View style={{ height: 60 }} />
+              <View style={styles.unitsContainer}>
+                {plan.units.map((unit) => {
+                  const isExpanded = expandedUnitId === unit.id;
+                  const uTotal = unit.topics.length;
+                  const uCompleted = unit.topics.filter(t => t.status === 'completed').length;
+                  
+                  return (
+                    <View key={unit.id} style={styles.unitCard}>
+                      <TouchableOpacity 
+                        style={[styles.unitHeader, isExpanded && styles.unitHeaderExpanded]} 
+                        onPress={() => toggleUnit(unit.id)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={styles.unitHeaderLeft}>
+                          <View style={styles.unitNumberBox}>
+                            <Text style={styles.unitNumber}>U{unit.number}</Text>
+                          </View>
+                          <View>
+                            <Text style={styles.unitTitle} numberOfLines={1}>{unit.name}</Text>
+                            <Text style={styles.unitMeta}>{uCompleted}/{uTotal} Topics</Text>
+                          </View>
+                        </View>
+                        <Ionicons 
+                          name={isExpanded ? 'chevron-up' : 'chevron-down'} 
+                          size={20} 
+                          color={SLATE_GREY} 
+                        />
+                      </TouchableOpacity>
+
+                      {isExpanded && (
+                        <View style={styles.topicsContainer}>
+                          {unit.topics.map((topic, index) => {
+                            const isLast = index === unit.topics.length - 1;
+                            const statusColor = STATUS_COLORS[topic.status];
+                            return (
+                              <View key={topic.id} style={styles.topicRow}>
+                                {/* Timeline line */}
+                                <View style={styles.timelineCol}>
+                                  <Ionicons 
+                                    name={STATUS_ICONS[topic.status] as any} 
+                                    size={18} 
+                                    color={statusColor} 
+                                    style={{ zIndex: 2, backgroundColor: PURE_WHITE }}
+                                  />
+                                  {!isLast && <View style={styles.timelineLine} />}
+                                </View>
+                                
+                                <View style={[styles.topicContent, !isLast && styles.topicContentBorder]}>
+                                  <Text style={styles.topicName}>{topic.name}</Text>
+                                  <View style={styles.topicMetaRow}>
+                                    <Text style={[styles.topicStatusText, { color: statusColor }]}>
+                                      {topic.status === 'completed' ? 'Completed' : topic.status === 'in-progress' ? 'In Progress' : 'Not Started'}
+                                    </Text>
+                                    {topic.completedDate && (
+                                      <Text style={styles.topicDateText}> • {topic.completedDate}</Text>
+                                    )}
+                                    {topic.nextDate && (
+                                      <Text style={styles.topicDateText}> • Due {topic.nextDate}</Text>
+                                    )}
+                                  </View>
+                                </View>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          );
+        })}
+        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F9FB' },
-  content: { padding: spacing.lg, paddingBottom: 100 },
-  
-  headerTitle: { fontSize: fontSize.xl, fontWeight: '800', color: colors.textPrimary },
-  subTitle: { fontSize: fontSize.sm, color: colors.textSecondary, marginTop: 4, marginBottom: spacing.lg },
-  
-  sectionLabel: { fontSize: fontSize.sm, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', marginBottom: spacing.sm, letterSpacing: 0.5 },
-  
-  teacherScroll: { flexDirection: 'row', marginBottom: spacing.md },
-  teacherChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: spacing.lg, paddingVertical: 10,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.white,
-    borderWidth: 1, borderColor: colors.border,
-    marginRight: spacing.sm,
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: BG_LIGHT,
   },
-  teacherChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-  teacherChipText: { fontSize: fontSize.sm, fontWeight: '600', color: colors.textPrimary },
-  
+  mainHeaderArea: {
+    backgroundColor: BRAND_NAVY,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+    zIndex: 10,
+  },
+  mainHeaderTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,    paddingVertical: 12,
+  },
+  backButton: {
+    width: 44,    height: 44,
+    justifyContent: 'center',    alignItems: 'center',
+    marginRight: 4,
+  },
+  headerTextWrap: {
+    flex: 1,    marginLeft: 4,
+  },
+  headerTitle: {
+    color: PURE_WHITE,
+    fontSize: 22,    fontWeight: '800',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  headerSubtitle: {
+    color: '#93C5FD',
+    fontSize: 14,
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  content: {
+    padding: 20,
+  },
+  teacherSection: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: SLATE_GREY,
+    marginBottom: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  chipScroll: {
+    marginHorizontal: -20,
+  },
+  chipScrollContent: {
+    paddingHorizontal: 20,
+    gap: 10,
+  },
+  chip: {
+    backgroundColor: PURE_WHITE,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  chipActive: {
+    backgroundColor: BRAND_NAVY,
+    borderColor: BRAND_NAVY,
+  },
+  chipText: {
+    fontSize: 14,
+    color: SLATE_GREY,
+    fontWeight: '600',
+  },
+  chipTextActive: {
+    color: PURE_WHITE,
+    fontWeight: '700',
+  },
+  emptyCard: {
+    backgroundColor: PURE_WHITE,
+    borderRadius: 20,    alignItems: 'center',
+    padding: 40,    marginTop: 20,
+    shadowColor: '#000',    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,    shadowRadius: 12,
+    elevation: 2,    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.02)',
+  },
+  emptyIconCircle: {
+    width: 72,    height: 72,
+    borderRadius: 36,    backgroundColor: '#F1F5F9',
+    alignItems: 'center',    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,    fontWeight: '700',
+    color: DARK_TEXT,    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,    color: SLATE_GREY,
+    textAlign: 'center',    lineHeight: 20,
+  },
   planCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.md,
-    overflow: 'hidden',
-    elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5, shadowOffset: { width: 0, height: 2 },
-    borderWidth: 1, borderColor: colors.border,
+    backgroundColor: PURE_WHITE,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.02)',
   },
   planHeader: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    padding: spacing.lg,
+    marginBottom: 20,
   },
-  planInfo: { flex: 1 },
-  planTitle: { fontSize: fontSize.md, fontWeight: '700', color: colors.textPrimary, marginBottom: 4 },
-  planMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  planClassName: { fontSize: fontSize.sm, color: colors.textSecondary, fontWeight: '500' },
-  
-  progressCircleContainer: {
-    width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#E3F2FD',
-    alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2, borderColor: '#fff',
-    elevation: 1,
+  planSubjectBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
-  progressCirclePct: { fontSize: fontSize.md, fontWeight: '800', color: colors.primary, marginTop: -2 },
-  progressCircleLabel: { fontSize: 9, fontWeight: '600', color: colors.primary, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: -2 },
-  
-  planDetails: {
-    borderTopWidth: 1, borderTopColor: colors.divider,
-    backgroundColor: '#F9FAFB',
-    padding: spacing.lg,
+  planSubject: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: DARK_TEXT,
+    flex: 1,
+    paddingRight: 10,
   },
-  unitRow: { marginBottom: spacing.md },
-  unitHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: spacing.sm },
-  unitName: { fontSize: fontSize.sm, fontWeight: '700', color: colors.textPrimary, flex: 1 },
-  unitProgressText: { fontSize: 11, fontWeight: '600', color: colors.primary },
-  
-  topicsGrid: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    borderWidth: 1, borderColor: colors.border,
+  classPill: {
+    backgroundColor: '#EEF2FF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0E7FF',
   },
-  topicItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
-  topicItemText: { fontSize: fontSize.sm, color: colors.textPrimary, flex: 1 },
-  
-  emptyContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xxxl, opacity: 0.6 },
-  emptyText: { marginTop: spacing.md, fontSize: fontSize.md, fontWeight: '500', color: colors.textLight },
+  classPillText: {
+    color: '#4F46E5',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  progressContainer: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  progressTextRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginBottom: 8,
+  },
+  progressLabel: {
+    fontSize: 13,
+    color: SLATE_GREY,
+    fontWeight: '600',
+  },
+  progressValue: {
+    fontSize: 18,
+    color: BRAND_NAVY,
+    fontWeight: '800',
+  },
+  progressBarBg: {
+    height: 8,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#10B981',
+    borderRadius: 4,
+  },
+  progressCountInfo: {
+    fontSize: 12,
+    color: SLATE_GREY,
+    fontWeight: '500',
+  },
+  unitsContainer: {
+    gap: 12,
+  },
+  unitCard: {
+    backgroundColor: PURE_WHITE,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    overflow: 'hidden',
+  },
+  unitHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#F8FAFC',
+  },
+  unitHeaderExpanded: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+    backgroundColor: PURE_WHITE,
+  },
+  unitHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 12,
+    paddingRight: 12,
+  },
+  unitNumberBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unitNumber: {
+    color: '#4F46E5',
+    fontWeight: '800',
+    fontSize: 14,
+  },
+  unitTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: DARK_TEXT,
+    marginBottom: 2,
+  },
+  unitMeta: {
+    fontSize: 12,
+    color: SLATE_GREY,
+    fontWeight: '500',
+  },
+  topicsContainer: {
+    padding: 16,
+  },
+  topicRow: {
+    flexDirection: 'row',
+  },
+  timelineCol: {
+    width: 24,
+    alignItems: 'center',
+  },
+  timelineLine: {
+    width: 2,
+    flex: 1,
+    backgroundColor: '#E2E8F0',
+    marginTop: -2,
+    marginBottom: -2,
+    zIndex: 1,
+  },
+  topicContent: {
+    flex: 1,
+    paddingBottom: 20,
+    paddingLeft: 8,
+  },
+  topicContentBorder: {
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#F1F5F9',
+  },
+  topicName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: DARK_TEXT,
+    marginBottom: 4,
+  },
+  topicMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  topicStatusText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  topicDateText: {
+    fontSize: 12,
+    color: SLATE_GREY,
+    fontWeight: '500',
+  },
 });
-

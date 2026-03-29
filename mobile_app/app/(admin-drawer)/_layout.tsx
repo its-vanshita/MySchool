@@ -278,6 +278,7 @@ export default function AdminDrawerLayout() {
       <Drawer.Screen
         name="admin-datesheet"
         options={{
+          headerShown: false,
           title: 'Upload Datesheet',
           drawerIcon: ({ color, size }) => <Ionicons name="cloud-upload-outline" size={size} color={color} />,
         }}
