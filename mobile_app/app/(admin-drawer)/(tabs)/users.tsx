@@ -28,14 +28,21 @@ type TabType = 'Personal' | 'Academic' | 'Attendance' | 'Documents';
 
 const MOCK_USERS = {
     Students: [
-        { id: 1, name: 'Aarav Sharma', section: 'Section A', avatar: 'https://i.pravatar.cc/150?img=11', status: 'Active' },
-        { id: 2, name: 'Priya Patel', section: 'Section A', avatar: 'https://i.pravatar.cc/150?img=12', status: 'Active' },
-        { id: 3, name: 'Rahul Singh', section: 'Section B', avatar: 'https://i.pravatar.cc/150?img=13', status: 'Active' },
-        { id: 4, name: 'Sneha Gupta', section: 'Section B', avatar: 'https://i.pravatar.cc/150?img=14', status: 'Active' },
+        { id: 1, name: 'Aarav Sharma', className: 'Class 10', section: 'Section A', avatar: 'https://i.pravatar.cc/150?img=11', status: 'Active' },
+        { id: 2, name: 'Priya Patel', className: 'Class 10', section: 'Section A', avatar: 'https://i.pravatar.cc/150?img=12', status: 'Active' },
+        { id: 3, name: 'Rahul Singh', className: 'Class 10', section: 'Section B', avatar: 'https://i.pravatar.cc/150?img=13', status: 'Active' },
+        { id: 4, name: 'Sneha Gupta', className: 'Class 10', section: 'Section B', avatar: 'https://i.pravatar.cc/150?img=14', status: 'Active' },
+        { id: 5, name: 'Karan Mehra', className: 'Class 9', section: 'Section A', avatar: 'https://i.pravatar.cc/150?img=15', status: 'Active' },
+        { id: 6, name: 'Aditi Desai', className: 'Class 9', section: 'Section B', avatar: 'https://i.pravatar.cc/150?img=16', status: 'Active' },
+        { id: 7, name: 'Vikram Bose', className: 'Class 11', section: 'Section A', avatar: 'https://i.pravatar.cc/150?img=17', status: 'Active' },
+        { id: 8, name: 'Nisha Thakur', className: 'Class 11', section: 'Section C', avatar: 'https://i.pravatar.cc/150?img=18', status: 'Active' },
     ],
     Staff: [
-        { id: 101, name: 'Dr. Anita Verma', section: 'Mathematics', avatar: 'https://i.pravatar.cc/150?img=21', status: 'Active' },
-        { id: 102, name: 'Mr. Rajesh Kumar', section: 'Physics', avatar: 'https://i.pravatar.cc/150?img=22', status: 'Active' },
+        { id: 101, name: 'Dr. Anita Verma', subject: 'Mathematics', classGroup: '9-12th', assignedClasses: 'Class 9, Class 10', avatar: 'https://i.pravatar.cc/150?img=21', status: 'Active' },       
+        { id: 102, name: 'Mr. Rajesh Kumar', subject: 'Physics', classGroup: '9-12th', assignedClasses: 'Class 11, Class 12', avatar: 'https://i.pravatar.cc/150?img=22', status: 'Active' },       
+        { id: 103, name: 'Ms. Priya Sharma', subject: 'Hindi', classGroup: '3rd - 8th', assignedClasses: 'Class 6, Class 7, Class 8', avatar: 'https://i.pravatar.cc/150?img=23', status: 'Active' },      
+        { id: 104, name: 'Mrs. Kavita Singh', subject: 'English', classGroup: 'Nursery-2nd', assignedClasses: 'LKG, UKG, Class 1, Class 2', avatar: 'https://i.pravatar.cc/150?img=24', status: 'Active' }, 
+        { id: 105, name: 'Mr. Ajay Tiwari', subject: 'Science', classGroup: '3rd - 8th', assignedClasses: 'Class 3, Class 4, Class 5', avatar: 'https://i.pravatar.cc/150?img=25', status: 'Active' },     
     ]
 };
 
@@ -43,11 +50,50 @@ export default function ManageRecordsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [activeRole, setActiveRole] = useState<RoleType>('Students');
-  const [activeClass, setActiveClass] = useState('Class 10');
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [activeProfileTab, setActiveProfileTab] = useState<TabType>('Personal');
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+
+  // Student Filters
+  const [studentClass, setStudentClass] = useState('Class 10');
+  const [studentSection, setStudentSection] = useState('All');
+  const [studentAlphabet, setStudentAlphabet] = useState('All');
+
+  // Staff Filters
+  const [staffSubject, setStaffSubject] = useState('All');
+  const [staffClassGroup, setStaffClassGroup] = useState('All');
+  const [staffAlphabet, setStaffAlphabet] = useState('All');
 
   const classes = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'];
+  const sections = ['All', 'Section A', 'Section B', 'Section C'];
+  const subjects = ['All', 'Mathematics', 'Physics', 'Science', 'English', 'Hindi'];
+  const classGroups = ['All', 'Nursery-2nd', '3rd - 8th', '9-12th'];
+  const alphabets = ['All', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
+
+  const filteredStudents = MOCK_USERS.Students.filter(user => {
+    let match = true;
+    if (user.className !== studentClass) match = false;
+    if (studentSection !== 'All' && user.section !== studentSection) match = false;
+    if (studentAlphabet !== 'All' && !user.name.toUpperCase().startsWith(studentAlphabet)) {
+      match = false;
+    }
+    return match;
+  });
+
+  const filteredStaff = MOCK_USERS.Staff.filter(user => {
+    let match = true;
+    if (staffSubject !== 'All' && user.subject !== staffSubject) match = false;
+    if (staffClassGroup !== 'All' && user.classGroup !== staffClassGroup) match = false;
+    if (staffAlphabet !== 'All' && !user.name.toUpperCase().startsWith(staffAlphabet)) {
+      // Note: name might have prefix like 'Dr.', 'Mr.', 'Mrs.', 'Ms.'
+      // Let's strip prefixes for alphabet matching
+      const cleanName = user.name.replace(/^(Dr\.|Mr\.|Mrs\.|Ms\.)\s+/i, '');
+      if (!cleanName.toUpperCase().startsWith(staffAlphabet)) {
+        match = false;
+      }
+    }
+    return match;
+  });
 
   const renderMonthCalendar = () => {
     return (
@@ -97,25 +143,88 @@ export default function ManageRecordsScreen() {
         </View>
       </View>
 
-      {/* ── Class Filter Chip Bar ── */}
+      {/* ── Student Filters ── */}
       {activeRole === 'Students' && (
-          <View>
+          <View style={styles.filterBarWrap}>
+              <TouchableOpacity
+                  style={styles.filterIconBtn}
+                  onPress={() => setFilterModalVisible(true)}
+              >
+                  <Ionicons name="filter" size={20} color={BRAND_NAVY} />
+                  <Text style={styles.filterIconText}>Filter</Text>
+              </TouchableOpacity>
+              
               <ScrollView 
                  horizontal 
                  showsHorizontalScrollIndicator={false}
-                 contentContainerStyle={styles.chipBarScroll}
+                 contentContainerStyle={styles.activeFiltersScroll}
               >
-                  {classes.map(cls => (
-                      <TouchableOpacity 
-                         key={cls}
-                         style={[styles.chip, activeClass === cls && styles.chipActive]}
-                         onPress={() => setActiveClass(cls)}
-                      >
-                         <Text style={[styles.chipText, activeClass === cls && styles.chipTextActive]}>
-                             {cls}
-                         </Text>
-                      </TouchableOpacity>
-                  ))}
+                  <View style={styles.activeFilterPill}>
+                      <Text style={styles.activeFilterPillText}>{studentClass}</Text>
+                  </View>
+                  {studentSection !== 'All' && (
+                      <View style={styles.activeFilterPill}>
+                          <Text style={styles.activeFilterPillText}>{studentSection}</Text>
+                          <TouchableOpacity onPress={() => setStudentSection('All')} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                              <Ionicons name="close-circle" size={16} color={BRAND_NAVY} />
+                          </TouchableOpacity>
+                      </View>
+                  )}
+                  {studentAlphabet !== 'All' && (
+                      <View style={styles.activeFilterPill}>
+                          <Text style={styles.activeFilterPillText}>{studentAlphabet}</Text>
+                          <TouchableOpacity onPress={() => setStudentAlphabet('All')} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                              <Ionicons name="close-circle" size={16} color={BRAND_NAVY} />
+                          </TouchableOpacity>
+                      </View>
+                  )}
+              </ScrollView>
+          </View>
+      )}
+
+      {/* ── Staff Filters ── */}
+      {activeRole === 'Staff' && (
+          <View style={styles.filterBarWrap}>
+              <TouchableOpacity
+                  style={styles.filterIconBtn}
+                  onPress={() => setFilterModalVisible(true)}
+              >
+                  <Ionicons name="filter" size={20} color={BRAND_NAVY} />
+                  <Text style={styles.filterIconText}>Filter</Text>
+              </TouchableOpacity>
+              
+              <ScrollView 
+                 horizontal 
+                 showsHorizontalScrollIndicator={false}
+                 contentContainerStyle={styles.activeFiltersScroll}
+              >
+                  {staffSubject !== 'All' && (
+                      <View style={styles.activeFilterPill}>
+                          <Text style={styles.activeFilterPillText}>{staffSubject}</Text>
+                          <TouchableOpacity onPress={() => setStaffSubject('All')} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                              <Ionicons name="close-circle" size={16} color={BRAND_NAVY} />
+                          </TouchableOpacity>
+                      </View>
+                  )}
+                  {staffClassGroup !== 'All' && (
+                      <View style={styles.activeFilterPill}>
+                          <Text style={styles.activeFilterPillText}>{staffClassGroup}</Text>
+                          <TouchableOpacity onPress={() => setStaffClassGroup('All')} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                              <Ionicons name="close-circle" size={16} color={BRAND_NAVY} />
+                          </TouchableOpacity>
+                      </View>
+                  )}
+                  {staffAlphabet !== 'All' && (
+                      <View style={styles.activeFilterPill}>
+                          <Text style={styles.activeFilterPillText}>{staffAlphabet}</Text>
+                          <TouchableOpacity onPress={() => setStaffAlphabet('All')} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                              <Ionicons name="close-circle" size={16} color={BRAND_NAVY} />
+                          </TouchableOpacity>
+                      </View>
+                  )}
+                  {staffSubject === 'All' && staffClassGroup === 'All' && staffAlphabet === 'All' && (
+                      <Text style={styles.noFilterText}>All staff showing</Text>
+                  )}
               </ScrollView>
           </View>
       )}
@@ -124,64 +233,59 @@ export default function ManageRecordsScreen() {
       <ScrollView contentContainerStyle={styles.listContent}>
          {activeRole === 'Students' ? (
              <>
-                 <Text style={styles.sectionHeader}>SECTION A</Text>
-                 {MOCK_USERS.Students.filter(s => s.section === 'Section A').map(user => (
-                     <TouchableOpacity 
-                         key={user.id} 
-                         style={styles.userCard}
-                         activeOpacity={0.7}
-                         onPress={() => setSelectedUser(user)}
-                     >
-                         <Image source={{ uri: user.avatar }} style={styles.avatar} />
-                         <View style={styles.userInfo}>
-                             <Text style={styles.userName}>{user.name}</Text>
-                             <Text style={styles.userSub}>{user.section}</Text>
-                         </View>
-                         <TouchableOpacity style={styles.menuHit}>
-                             <Ionicons name="ellipsis-vertical" size={20} color={SLATE_GREY} />
-                         </TouchableOpacity>
-                     </TouchableOpacity>
-                 ))}
-                 
-                 <Text style={[styles.sectionHeader, { marginTop: 12 }]}>SECTION B</Text>
-                 {MOCK_USERS.Students.filter(s => s.section === 'Section B').map(user => (
-                     <TouchableOpacity 
-                         key={user.id} 
-                         style={styles.userCard}
-                         activeOpacity={0.7}
-                         onPress={() => setSelectedUser(user)}
-                     >
-                         <Image source={{ uri: user.avatar }} style={styles.avatar} />
-                         <View style={styles.userInfo}>
-                             <Text style={styles.userName}>{user.name}</Text>
-                             <Text style={styles.userSub}>{user.section}</Text>
-                         </View>
-                         <TouchableOpacity style={styles.menuHit}>
-                             <Ionicons name="ellipsis-vertical" size={20} color={SLATE_GREY} />
-                         </TouchableOpacity>
-                     </TouchableOpacity>
-                 ))}
+                 {filteredStudents.length === 0 ? (
+                     <Text style={{ textAlign: 'center', marginTop: 20, color: SLATE_GREY }}>No students found matching the filters.</Text>
+                 ) : (
+                     <View>
+                        {Array.from(new Set(filteredStudents.map(s => s.section))).sort().map(sectionName => (
+                            <View key={sectionName}>
+                                <Text style={[styles.sectionHeader, { marginTop: 12 }]}>{sectionName.toUpperCase()}</Text>
+                                {filteredStudents.filter(s => s.section === sectionName).map(user => (
+                                    <TouchableOpacity 
+                                        key={user.id} 
+                                        style={styles.userCard}
+                                        activeOpacity={0.7}
+                                        onPress={() => setSelectedUser(user)}
+                                    >
+                                        <Image source={{ uri: user.avatar }} style={styles.avatar} />
+                                        <View style={styles.userInfo}>
+                                            <Text style={styles.userName}>{user.name}</Text>
+                                            <Text style={styles.userSub}>{user.className} • {user.section}</Text>
+                                        </View>
+                                        <TouchableOpacity style={styles.menuHit}>
+                                            <Ionicons name="ellipsis-vertical" size={20} color={SLATE_GREY} />
+                                        </TouchableOpacity>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        ))}
+                     </View>
+                 )}
              </>
          ) : (
              <>
                  <Text style={styles.sectionHeader}>FACULTY</Text>
-                 {MOCK_USERS.Staff.map(user => (
-                     <TouchableOpacity 
-                         key={user.id} 
-                         style={styles.userCard}
-                         activeOpacity={0.7}
-                         onPress={() => setSelectedUser(user)}
-                     >
-                         <Image source={{ uri: user.avatar }} style={styles.avatar} />
-                         <View style={styles.userInfo}>
-                             <Text style={styles.userName}>{user.name}</Text>
-                             <Text style={styles.userSub}>{user.section}</Text>
-                         </View>
-                         <TouchableOpacity style={styles.menuHit}>
-                             <Ionicons name="ellipsis-vertical" size={20} color={SLATE_GREY} />
+                 {filteredStaff.length === 0 ? (
+                     <Text style={{ textAlign: 'center', marginTop: 20, color: SLATE_GREY }}>No staff found matching the filters.</Text>
+                 ) : (
+                     filteredStaff.map(user => (
+                         <TouchableOpacity 
+                             key={user.id} 
+                             style={styles.userCard}
+                             activeOpacity={0.7}
+                             onPress={() => setSelectedUser(user)}
+                         >
+                             <Image source={{ uri: user.avatar }} style={styles.avatar} />
+                             <View style={styles.userInfo}>
+                                 <Text style={styles.userName}>{user.name}</Text>
+                                 <Text style={styles.userSub}>{user.subject} • {user.assignedClasses}</Text>
+                             </View>
+                             <TouchableOpacity style={styles.menuHit}>
+                                 <Ionicons name="ellipsis-vertical" size={20} color={SLATE_GREY} />
+                             </TouchableOpacity>
                          </TouchableOpacity>
-                     </TouchableOpacity>
-                 ))}
+                     ))
+                 )}
              </>
          )}
       </ScrollView>
@@ -270,19 +374,137 @@ export default function ManageRecordsScreen() {
                       
                       {activeProfileTab === 'Academic' && (
                           <View style={styles.detailCard}>
-                              <View style={styles.infoRow}>
-                                  <Text style={styles.infoLabel}>CURRENT GRADE</Text>
-                                  <Text style={styles.infoVal}>Class 10 - {selectedUser?.section}</Text>
-                              </View>
+                              {activeRole === 'Students' ? (
+                                  <View style={styles.infoRow}>
+                                      <Text style={styles.infoLabel}>CURRENT GRADE</Text>
+                                      <Text style={styles.infoVal}>{selectedUser?.className} - {selectedUser?.section}</Text>
+                                  </View>
+                              ) : (
+                                  <>
+                                      <View style={styles.infoRow}>
+                                          <Text style={styles.infoLabel}>SUBJECT</Text>
+                                          <Text style={styles.infoVal}>{selectedUser?.subject}</Text>
+                                      </View>
+                                      <View style={styles.divider} />
+                                      <View style={styles.infoRow}>
+                                          <Text style={styles.infoLabel}>ASSIGNED CLASSES</Text>
+                                          <Text style={styles.infoVal}>{selectedUser?.assignedClasses || selectedUser?.classGroup}</Text>
+                                      </View>
+                                  </>
+                              )}
                               <View style={styles.divider} />
                               <View style={styles.infoRow}>
-                                  <Text style={styles.infoLabel}>GPA</Text>
-                                  <Text style={styles.infoVal}>3.8 / 4.0</Text>
+                                  <Text style={styles.infoLabel}>GPA / RATING</Text>
+                                  <Text style={styles.infoVal}>{activeRole === 'Students' ? '3.8 / 4.0' : '4.6 / 5.0'}</Text>
                               </View>
                           </View>
                       )}
                   </View>
               </ScrollView>
+          </View>
+      </Modal>
+
+      {/* ── Filter Modal ── */}
+      <Modal visible={filterModalVisible} animationType="fade" transparent={true} onRequestClose={() => setFilterModalVisible(false)}>
+          <View style={styles.bottomSheetWrap}>
+              <View style={styles.bottomSheet}>
+                  <View style={styles.sheetHeader}>
+                      <Text style={styles.sheetTitle}>Filter {activeRole}</Text>
+                      <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
+                          <Ionicons name="close" size={24} color={SLATE_GREY} />
+                      </TouchableOpacity>
+                  </View>
+
+                  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 16 }}>
+                      {activeRole === 'Students' ? (
+                          <>
+                              <Text style={styles.filterGroupTitle}>Class</Text>
+                              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterChipRow}>
+                                  {classes.map(cls => (
+                                      <TouchableOpacity 
+                                         key={`cls-${cls}`}
+                                         style={[styles.smallChip, studentClass === cls && styles.smallChipActive]}
+                                         onPress={() => setStudentClass(cls)}
+                                      >
+                                         <Text style={[styles.smallChipText, studentClass === cls && styles.smallChipTextActive]}>{cls}</Text>
+                                      </TouchableOpacity>
+                                  ))}
+                              </ScrollView>
+
+                              <Text style={styles.filterGroupTitle}>Section</Text>
+                              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterChipRow}>
+                                  {sections.map(sec => (
+                                      <TouchableOpacity 
+                                         key={`sec-${sec}`}
+                                         style={[styles.smallChip, studentSection === sec && styles.smallChipActive]}
+                                         onPress={() => setStudentSection(sec)}
+                                      >
+                                         <Text style={[styles.smallChipText, studentSection === sec && styles.smallChipTextActive]}>{sec}</Text>
+                                      </TouchableOpacity>
+                                  ))}
+                              </ScrollView>
+
+                              <Text style={styles.filterGroupTitle}>Alphabet</Text>
+                              <View style={styles.alphabetGrid}>
+                                  {alphabets.map(alpha => (
+                                      <TouchableOpacity 
+                                         key={`alpha-${alpha}`}
+                                         style={[styles.alphaChip, studentAlphabet === alpha && styles.smallChipActive]}
+                                         onPress={() => setStudentAlphabet(alpha)}
+                                      >
+                                         <Text style={[styles.alphaChipText, studentAlphabet === alpha && styles.smallChipTextActive]}>{alpha}</Text>
+                                      </TouchableOpacity>
+                                  ))}
+                              </View>
+                          </>
+                      ) : (
+                          <>
+                              <Text style={styles.filterGroupTitle}>Subject</Text>
+                              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterChipRow}>
+                                  {subjects.map(sub => (
+                                      <TouchableOpacity 
+                                         key={`sub-${sub}`}
+                                         style={[styles.smallChip, staffSubject === sub && styles.smallChipActive]}
+                                         onPress={() => setStaffSubject(sub)}
+                                      >
+                                         <Text style={[styles.smallChipText, staffSubject === sub && styles.smallChipTextActive]}>{sub}</Text>
+                                      </TouchableOpacity>
+                                  ))}
+                              </ScrollView>
+
+                              <Text style={styles.filterGroupTitle}>Class Group</Text>
+                              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterChipRow}>
+                                  {classGroups.map(cg => (
+                                      <TouchableOpacity 
+                                         key={`cg-${cg}`}
+                                         style={[styles.smallChip, staffClassGroup === cg && styles.smallChipActive]}
+                                         onPress={() => setStaffClassGroup(cg)}
+                                      >
+                                         <Text style={[styles.smallChipText, staffClassGroup === cg && styles.smallChipTextActive]}>{cg}</Text>
+                                      </TouchableOpacity>
+                                  ))}
+                              </ScrollView>
+
+                              <Text style={styles.filterGroupTitle}>Alphabet</Text>
+                              <View style={styles.alphabetGrid}>
+                                  {alphabets.map(alpha => (
+                                      <TouchableOpacity 
+                                         key={`alpha-${alpha}`}
+                                         style={[styles.alphaChip, staffAlphabet === alpha && styles.smallChipActive]}
+                                         onPress={() => setStaffAlphabet(alpha)}
+                                      >
+                                         <Text style={[styles.alphaChipText, staffAlphabet === alpha && styles.smallChipTextActive]}>{alpha}</Text>
+                                      </TouchableOpacity>
+                                  ))}
+                              </View>
+                          </>
+                      )}
+                  </ScrollView>
+
+                  <TouchableOpacity style={styles.applyFilterBtn} onPress={() => setFilterModalVisible(false)}>
+                      <Text style={styles.applyFilterBtnText}>Apply Filters</Text>
+                  </TouchableOpacity>
+              </View>
           </View>
       </Modal>
 
@@ -612,5 +834,134 @@ const styles = StyleSheet.create({
       width: 4,
       height: 4,
       borderRadius: 2,
+  },
+  filterBarWrap: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 4,
+  },
+  filterIconBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#E8EDF2',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 8,
+      marginRight: 12,
+  },
+  filterIconText: {
+      color: BRAND_NAVY,
+      fontWeight: '600',
+      fontSize: 13,
+      marginLeft: 4,
+  },
+  activeFiltersScroll: {
+      alignItems: 'center',
+      paddingRight: 20,
+  },
+  activeFilterPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#E8EDF2',
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 16,
+      marginRight: 8,
+  },
+  activeFilterPillText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: BRAND_NAVY,
+      marginRight: 4,
+  },
+  noFilterText: {
+      fontSize: 13,
+      color: SLATE_GREY,
+      fontStyle: 'italic',
+  },
+  bottomSheetWrap: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  bottomSheet: {
+      backgroundColor: PURE_WHITE,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      padding: 20,
+      maxHeight: height * 0.8,
+  },
+  sheetHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderBottomWidth: 1,
+      borderBottomColor: '#F1F5F9',
+      paddingBottom: 16,
+  },
+  sheetTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: BRAND_NAVY,
+  },
+  filterGroupTitle: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: SLATE_GREY,
+      marginTop: 16,
+      marginBottom: 10,
+  },
+  filterChipRow: {
+      paddingBottom: 8,
+  },
+  smallChip: {
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      backgroundColor: '#F1F5F9',
+      borderRadius: 8,
+      marginRight: 8,
+  },
+  smallChipActive: {
+      backgroundColor: BRAND_NAVY,
+  },
+  smallChipText: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: SLATE_GREY,
+  },
+  smallChipTextActive: {
+      color: PURE_WHITE,
+  },
+  alphabetGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+  },
+  alphaChip: {
+      width: 40,
+      height: 40,
+      borderRadius: 8,
+      backgroundColor: '#F1F5F9',
+      alignItems: 'center',
+      justifyContent: 'center',
+  },
+  alphaChipText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: SLATE_GREY,
+  },
+  applyFilterBtn: {
+      backgroundColor: BRAND_NAVY,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+      marginTop: 16,
+  },
+  applyFilterBtnText: {
+      color: PURE_WHITE,
+      fontSize: 16,
+      fontWeight: '700',
   }
 });
