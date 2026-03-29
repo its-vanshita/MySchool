@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/vansh/OneDrive/Desktop/VidDarpan/website/erp.viddarpan.com/app/page.tsx"],"sourcesContent":["'use client';\n\nimport React, { useState } from 'react';\nimport Login from './components/Login';\nimport TeacherDashboard from './components/TeacherDashboard';\nimport AdminDashboard from './components/AdminDashboard';\n\nexport default function App() {\n  const [userRole, setUserRole] = useState<'teacher' | 'admin' | null>(null);\n\n  if (!userRole) {\n    return <Login onLogin={(role) => setUserRole(role)} />;\n  }\n\n  if (userRole === 'admin') {\n    return <AdminDashboard onLogout={() => setUserRole(null)} />;\n  }\n\n  return <TeacherDashboard onLogout={() => setUserRole(null)} />;\n}\n"],"names":["App","userRole","setUserRole","onLogin","role","onLogout"],"mappings":";;;;;AAEA;AACA;AACA;AACA;AALA;;;;;;AAOe,SAASA;IACtB,MAAM,CAACC,UAAUC,YAAY,GAAG,IAAA,iNAAQ,EAA6B;IAErE,IAAI,CAACD,UAAU;QACb,qBAAO,8OAAC,sIAAK;YAACE,SAAS,CAACC,OAASF,YAAYE;;;;;;IAC/C;IAEA,IAAIH,aAAa,SAAS;QACxB,qBAAO,8OAAC,+IAAc;YAACI,UAAU,IAAMH,YAAY;;;;;;IACrD;IAEA,qBAAO,8OAAC,iJAAgB;QAACG,UAAU,IAAMH,YAAY;;;;;;AACvD"}}]
-}

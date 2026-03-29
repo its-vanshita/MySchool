@@ -8,7 +8,7 @@ export default function AdminTopbar({ onLogout }: { onLogout: () => void }) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0 w-full relative z-[100]">
+    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0 w-full relative z-30">
       <div className="relative hidden md:block w-full max-w-[400px]">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
         <input 

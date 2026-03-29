@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ClipboardList, Plus, Search, Calendar, Clock, MapPin, Trash2, Edit2, Users, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ClipboardList, Plus, Search, Calendar, Clock, MapPin, Trash2, Edit2, Users, AlertCircle, CheckCircle2, X } from 'lucide-react';
 
 interface Duty {
   id: string;
@@ -22,48 +22,70 @@ const mockTeachers = [
 const mockDuties: Duty[] = [
   {
     id: 'D001',
-    type: 'Exam Invigilation',
-    teachers: ['Sarah Johnson', 'Michael Chen'],
+    type: 'Assembly Duty',
+    teachers: ['Emily Davis', 'Sneha Gupta'],
     date: '2023-10-25',
-    startTime: '08:30 AM',
-    endTime: '11:30 AM',
-    location: 'Exam Hall A',
-    notes: 'Mid-term Mathematics exam',
+    startTime: '07:45 AM',
+    endTime: '08:15 AM',
+    location: 'Main Courtyard',
+    notes: 'Morning assembly coordination and discipline',
     status: 'upcoming'
   },
   {
     id: 'D002',
-    type: 'Assembly Duty',
-    teachers: ['Emily Davis'],
+    type: 'Bus Duty',
+    teachers: ['Robert Wilson'],
     date: '2023-10-20',
-    startTime: '07:45 AM',
-    endTime: '08:15 AM',
-    location: 'Main Courtyard',
-    notes: 'Morning assembly coordination',
+    startTime: '02:30 PM',
+    endTime: '03:15 PM',
+    location: 'School Gate 1',
+    notes: 'Ensure safe boarding for buses 1–5',
     status: 'completed'
   },
   {
     id: 'D003',
-    type: 'Bus Duty',
-    teachers: ['Robert Wilson'],
+    type: 'Playground Supervision',
+    teachers: ['Vikram Malhotra', 'Sneha Gupta'],
     date: '2023-10-24',
-    startTime: '02:30 PM',
-    endTime: '03:15 PM',
-    location: 'School Gate 1',
-    notes: 'Ensure safe boarding for buses 1-5',
+    startTime: '10:15 AM',
+    endTime: '10:45 AM',
+    location: 'Sports Ground',
+    notes: 'Recess supervision — monitor class 6 to 10',
     status: 'upcoming'
   },
   {
     id: 'D004',
-    type: 'Playground Supervision',
-    teachers: ['Vikram Malhotra', 'Sneha Gupta'],
+    type: 'Gate Duty',
+    teachers: ['Aisha Patel'],
     date: '2023-10-22',
-    startTime: '10:15 AM',
-    endTime: '10:45 AM',
-    location: 'Sports Ground',
-    notes: 'Recess supervision',
+    startTime: '07:30 AM',
+    endTime: '08:00 AM',
+    location: 'Main Entrance Gate',
+    notes: 'Student arrival monitoring & uniform check',
     status: 'completed'
-  }
+  },
+  {
+    id: 'D005',
+    type: 'Library Duty',
+    teachers: ['Sarah Johnson'],
+    date: '2023-10-26',
+    startTime: '11:00 AM',
+    endTime: '12:00 PM',
+    location: 'School Library',
+    notes: 'Supervise free reading period',
+    status: 'upcoming'
+  },
+  {
+    id: 'D006',
+    type: 'Cafeteria Monitor',
+    teachers: ['Michael Chen'],
+    date: '2023-10-27',
+    startTime: '12:30 PM',
+    endTime: '01:15 PM',
+    location: 'School Cafeteria',
+    notes: 'Lunch break discipline and hygiene supervision',
+    status: 'upcoming'
+  },
 ];
 
 export default function AdminAssignDuties() {
@@ -72,7 +94,7 @@ export default function AdminAssignDuties() {
   const [searchQuery, setSearchQuery] = useState('');
   
   // Form State
-  const [dutyType, setDutyType] = useState('Exam Invigilation');
+  const [dutyType, setDutyType] = useState('Assembly Duty');
   const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -107,7 +129,7 @@ export default function AdminAssignDuties() {
     setDuties([newDuty, ...duties]);
     
     // Reset and close
-    setDutyType('Exam Invigilation');
+    setDutyType('Assembly Duty');
     setSelectedTeachers([]);
     setDate('');
     setStartTime('');
@@ -136,7 +158,7 @@ export default function AdminAssignDuties() {
             <ClipboardList className="w-6 h-6 text-blue-600" />
             Assign Duties
           </h2>
-          <p className="text-sm text-slate-500 mt-1">Manage and assign teacher responsibilities across the school</p>
+          <p className="text-sm text-slate-500 mt-1">Assign and manage daily, weekly, and special school duties for teaching staff</p>
         </div>
         
         <button 
@@ -179,10 +201,12 @@ export default function AdminAssignDuties() {
                 
                 <div className="flex items-center gap-3 mb-4 pr-12">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                    duty.type.includes('Exam') ? 'bg-purple-100 text-purple-600' :
-                    duty.type.includes('Assembly') ? 'bg-amber-100 text-amber-600' :
-                    duty.type.includes('Bus') ? 'bg-emerald-100 text-emerald-600' :
-                    'bg-blue-100 text-blue-600'
+                  duty.type === 'Assembly Duty'    ? 'bg-amber-100 text-amber-600' :
+                    duty.type === 'Bus Duty'          ? 'bg-emerald-100 text-emerald-600' :
+                    duty.type === 'Playground Supervision' ? 'bg-blue-100 text-blue-600' :
+                    duty.type === 'Gate Duty'         ? 'bg-rose-100 text-rose-600' :
+                    duty.type === 'Library Duty'      ? 'bg-violet-100 text-violet-600' :
+                    'bg-slate-100 text-slate-600'
                   }`}>
                     <ClipboardList className="w-5 h-5" />
                   </div>
@@ -246,7 +270,7 @@ export default function AdminAssignDuties() {
 
       {/* Create Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-md w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
               <h2 className="text-lg font-bold text-slate-900">Create New Duty Assignment</h2>
@@ -268,12 +292,17 @@ export default function AdminAssignDuties() {
                     onChange={(e) => setDutyType(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
                   >
-                    <option value="Exam Invigilation">Exam Invigilation</option>
                     <option value="Assembly Duty">Assembly Duty</option>
                     <option value="Bus Duty">Bus Duty</option>
+                    <option value="Gate Duty">Gate Duty</option>
                     <option value="Playground Supervision">Playground Supervision</option>
+                    <option value="Library Duty">Library Duty</option>
+                    <option value="Lab Supervision">Lab Supervision</option>
                     <option value="Cafeteria Monitor">Cafeteria Monitor</option>
                     <option value="Event Coordination">Event Coordination</option>
+                    <option value="Sports Meet Duty">Sports Meet Duty</option>
+                    <option value="Parent-Teacher Meeting">Parent-Teacher Meeting</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 

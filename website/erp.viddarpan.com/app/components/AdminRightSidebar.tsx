@@ -1,6 +1,5 @@
 import React from 'react';
 import { CheckCircle2, XCircle, Hourglass, CalendarDays } from 'lucide-react';
-import AdminMaintenanceTickets from './AdminMaintenanceTickets';
 import AdminEventCalendar from './AdminEventCalendar';
 
 export default function AdminRightSidebar() {
@@ -71,8 +70,6 @@ export default function AdminRightSidebar() {
       </div>
 
       <AdminEventCalendar />
-
-      <AdminMaintenanceTickets />
     </>
   );
 }

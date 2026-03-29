@@ -12,28 +12,12 @@ export default function PendingApprovals() {
       detail: '3 Days (Oct 24 - Oct 26)',
     },
     {
-      id: 2,
-      type: 'supply',
-      name: 'Anil Kapoor',
-      role: 'Lab In-charge',
-      request: 'Supply Request: Chemistry Lab',
-      detail: 'Ref: REQ-9902 • ₹12,400',
-    },
-    {
       id: 3,
       type: 'event',
       name: 'Priya Sharma',
       role: 'Cultural Head',
       request: 'Diwali Fest Event Permission',
       detail: 'Main Auditorium • 500 Attendees',
-    },
-    {
-      id: 4,
-      type: 'maintenance',
-      name: 'Rajiv Singh',
-      role: 'Facilities Team',
-      request: 'AC Repair Ticket',
-      detail: 'Room 102 • High Priority',
     }
   ]);
 
@@ -80,7 +64,7 @@ export default function PendingApprovals() {
         
         {/* Filters */}
         <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0 custom-scrollbar shrink-0">
-          {['all', 'leave', 'supply', 'event', 'maintenance'].map(filter => (
+          {['all', 'leave', 'event'].map(filter => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}

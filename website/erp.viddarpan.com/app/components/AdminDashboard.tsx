@@ -14,7 +14,7 @@ import AdminAnalytics from './AdminAnalytics';
 import AdminUpdateMarks from './AdminUpdateMarks';
 import AdminAssignDuties from './AdminAssignDuties';
 import AdminManageRecords from './AdminManageRecords';
-import AdminUploadDatesheet from './AdminUploadDatesheet';
+import AdminExamController from './AdminExamController';
 import AdminSettings from './AdminSettings';
 
 export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
@@ -42,7 +42,7 @@ export default function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {activeTab === 'update-marks' && <AdminUpdateMarks />}
           {activeTab === 'assign-duties' && <AdminAssignDuties />}
           {activeTab === 'manage-records' && <AdminManageRecords />}
-          {activeTab === 'upload-datesheet' && <AdminUploadDatesheet />}
+          {activeTab === 'exam-ops' && <AdminExamController />}
           {activeTab === 'settings' && <AdminSettings />}
           {activeTab === 'assign-notice' && (
             <AssignNotice 
