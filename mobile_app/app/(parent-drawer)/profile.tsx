@@ -62,7 +62,7 @@ export default function PremiumParentProfileScreen() {
       <Stack.Screen
         options={{
           headerShown: true,
-          headerStyle: { backgroundColor: BRAND_NAVY, elevation: 0, shadowOpacity: 0 },
+          headerStyle: { backgroundColor: BRAND_NAVY, shadowOpacity: 0 } as any,
           headerTintColor: PURE_WHITE,
           headerTitle: 'Profile',
           headerTitleStyle: {

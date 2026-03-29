@@ -8,21 +8,30 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUser } from '../../src/context/UserContext';
 import { useAllLeaveRequests } from '../../src/hooks/useLeaveRequests';
 import { useNotificationBadge } from '../../src/context/NotificationContext';
 import { updateLeaveStatus } from '../../src/services/supabaseService';
-import { useTheme } from '../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { LeaveRequest, LeaveStatus } from '../../src/types';
 
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const DARK_TEXT = '#1E293B';
+const { width } = Dimensions.get('window');
+
 const STATUS_CONFIG: Record<LeaveStatus, { color: string; bg: string; border: string; icon: string; label: string }> = {
-  pending:  { color: '#F59E0B', bg: '#FFFBEB', border: '#FDE68A', icon: 'time-outline',     label: 'Pending' },
-  approved: { color: '#059669', bg: '#ECFDF5', border: '#A7F3D0', icon: 'checkmark-circle', label: 'Approved' },
-  rejected: { color: '#DC2626', bg: '#FEF2F2', border: '#FECACA', icon: 'close-circle',     label: 'Rejected' },
+  pending:  { color: '#D97706', bg: '#FEF3C7', border: '#FDE68A', icon: 'time-outline',     label: 'Pending' },
+  approved: { color: '#059669', bg: '#D1FAE5', border: '#A7F3D0', icon: 'checkmark-circle', label: 'Approved' },
+  rejected: { color: '#DC2626', bg: '#FEE2E2', border: '#FECACA', icon: 'close-circle',     label: 'Rejected' },
 };
 
 function daysBetween(from: string, to: string): number {
@@ -53,8 +62,8 @@ function timeAgo(dateStr: string): string {
 }
 
 export default function AdminLeaveApprovalsScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { profile } = useUser();
   const { addNotification } = useNotificationBadge();
   const { leaves: allLeaves, loading, refreshing, refresh } = useAllLeaveRequests();
@@ -89,7 +98,7 @@ export default function AdminLeaveApprovalsScreen() {
       {
         text: 'Approve',
         onPress: async () => {
-          await updateLeaveStatus(item.id, 'approved', profile?.id ?? '');
+          await updateLeaveStatus(item.id, 'approved', profile?.id ?? '');      
           addNotification({
             title: 'Leave Approved',
             message: `You approved ${item.teacher_name}'s leave from ${formatDateShort(item.from_date)} to ${formatDateShort(item.to_date)}.`,
@@ -108,7 +117,7 @@ export default function AdminLeaveApprovalsScreen() {
         text: 'Reject',
         style: 'destructive',
         onPress: async () => {
-          await updateLeaveStatus(item.id, 'rejected', profile?.id ?? '');
+          await updateLeaveStatus(item.id, 'rejected', profile?.id ?? '');      
           addNotification({
             title: 'Leave Rejected',
             message: `You rejected ${item.teacher_name}'s leave from ${formatDateShort(item.from_date)} to ${formatDateShort(item.to_date)}.`,
@@ -126,13 +135,13 @@ export default function AdminLeaveApprovalsScreen() {
     const ago = item.created_at ? timeAgo(item.created_at) : '';
 
     return (
-      <View style={[styles.card, { borderLeftColor: config.color }]}>
+      <View style={[styles.card, { borderLeftColor: config.color, borderLeftWidth: 4 }]}>
         {/* Header */}
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
             <View style={styles.nameRow}>
-              <View style={[styles.avatarCircle, { backgroundColor: config.color + '20' }]}>
-                <Text style={[styles.avatarText, { color: config.color }]}>
+              <View style={[styles.avatarCircle, { backgroundColor: config.bg, borderColor: config.border, borderWidth: 1 }]}>
+                <Text style={[styles.avatarText, { color: config.color }]}>     
                   {(item.teacher_name || 'T').charAt(0).toUpperCase()}
                 </Text>
               </View>
@@ -143,7 +152,7 @@ export default function AdminLeaveApprovalsScreen() {
             </View>
           </View>
           <View style={[styles.statusChip, { backgroundColor: config.bg, borderColor: config.border }]}>
-            <Ionicons name={config.icon as any} size={14} color={config.color} />
+            <View style={[styles.statusDot, { backgroundColor: config.color }]} />
             <Text style={[styles.statusLabel, { color: config.color }]}>{config.label}</Text>
           </View>
         </View>
@@ -169,7 +178,7 @@ export default function AdminLeaveApprovalsScreen() {
 
         {/* Reason */}
         <View style={styles.reasonSection}>
-          <Ionicons name="chatbox-ellipses-outline" size={14} color={colors.textLight} style={{ marginTop: 2 }} />
+          <Ionicons name="chatbox-ellipses-outline" size={16} color={SLATE_GREY} style={{ marginTop: 2 }} />
           <Text style={styles.reasonText} numberOfLines={2}>{item.reason}</Text>
         </View>
 
@@ -179,15 +188,17 @@ export default function AdminLeaveApprovalsScreen() {
             <TouchableOpacity
               style={[styles.actionBtn, styles.approveBtn]}
               onPress={() => handleApprove(item)}
+              activeOpacity={0.8}
             >
-              <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
+              <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />    
               <Text style={styles.approveBtnText}>Approve</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.actionBtn, styles.rejectBtn]}
               onPress={() => handleReject(item)}
+              activeOpacity={0.8}
             >
-              <Ionicons name="close-circle" size={18} color="#DC2626" />
+              <Ionicons name="close-circle" size={18} color="#DC2626" />        
               <Text style={styles.rejectBtnText}>Reject</Text>
             </TouchableOpacity>
           </View>
@@ -200,391 +211,443 @@ export default function AdminLeaveApprovalsScreen() {
     <View style={styles.headerSection}>
       {/* Stats */}
       <View style={styles.statsGrid}>
-        <View style={[styles.statBox, styles.statBoxPending]}>
-          <View style={[styles.statIconCircle, { backgroundColor: '#FFFBEB' }]}>
-            <Ionicons name="time" size={20} color="#D97706" />
+        <View style={styles.statBox}>
+          <View style={[styles.statIconCircle, { backgroundColor: '#FEF3C7' }]}>
+            <Ionicons name="time" size={24} color="#D97706" />
           </View>
-          <Text style={[styles.statBoxNum, { color: '#D97706' }]}>{stats.pendingCount}</Text>
-          <Text style={styles.statBoxLabel}>Pending</Text>
+          <View>
+            <Text style={[styles.statBoxNum, { color: '#D97706' }]}>{stats.pendingCount}</Text>
+            <Text style={styles.statBoxLabel}>Pending</Text>
+          </View>
         </View>
-        <View style={[styles.statBox, styles.statBoxApproved]}>
-          <View style={[styles.statIconCircle, { backgroundColor: '#ECFDF5' }]}>
-            <Ionicons name="checkmark-circle" size={20} color="#059669" />
+        <View style={styles.statBox}>
+          <View style={[styles.statIconCircle, { backgroundColor: '#D1FAE5' }]}>
+            <Ionicons name="checkmark-circle" size={24} color="#059669" />      
           </View>
-          <Text style={[styles.statBoxNum, { color: '#059669' }]}>{stats.approvedCount}</Text>
-          <Text style={styles.statBoxLabel}>Approved</Text>
+          <View>
+            <Text style={[styles.statBoxNum, { color: '#059669' }]}>{stats.approvedCount}</Text>
+            <Text style={styles.statBoxLabel}>Approved</Text>
+          </View>
         </View>
-        <View style={[styles.statBox, styles.statBoxRejected]}>
-          <View style={[styles.statIconCircle, { backgroundColor: '#FEF2F2' }]}>
-            <Ionicons name="close-circle" size={20} color="#DC2626" />
+        <View style={styles.statBox}>
+          <View style={[styles.statIconCircle, { backgroundColor: '#FEE2E2' }]}>
+            <Ionicons name="close-circle" size={24} color="#DC2626" />
           </View>
-          <Text style={[styles.statBoxNum, { color: '#DC2626' }]}>{stats.rejectedCount}</Text>
-          <Text style={styles.statBoxLabel}>Rejected</Text>
+          <View>
+            <Text style={[styles.statBoxNum, { color: '#DC2626' }]}>{stats.rejectedCount}</Text>
+            <Text style={styles.statBoxLabel}>Rejected</Text>
+          </View>
         </View>
       </View>
 
       {/* Filter chips */}
       <View style={styles.filterRow}>
-        {(['all', 'pending', 'approved', 'rejected'] as const).map((f) => {
+        {(['all', 'pending', 'approved', 'rejected'] as const).map((f) => {     
           const active = statusFilter === f;
-          const count = f === 'all' ? stats.total : f === 'pending' ? stats.pendingCount : f === 'approved' ? stats.approvedCount : stats.rejectedCount;
-          const chipColor = f === 'pending' ? '#D97706' : f === 'approved' ? '#059669' : f === 'rejected' ? '#DC2626' : colors.primary;
+          const count = f === 'all' ? stats.total : f === 'pending' ? stats.pendingCount : f === 'approved' ? stats.approvedCount : stats.rejectedCount;        
+          const chipColor = f === 'pending' ? '#D97706' : f === 'approved' ? '#059669' : f === 'rejected' ? '#DC2626' : BRAND_NAVY;
           return (
             <TouchableOpacity
               key={f}
-              style={[styles.filterChip, active && { backgroundColor: chipColor }]}
+              style={[styles.filterChip, active && { backgroundColor: chipColor, borderColor: chipColor }]}
               onPress={() => setStatusFilter(f)}
+              activeOpacity={0.7}
             >
               <Text style={[styles.filterChipText, active && { color: '#fff' }]}>
                 {f.charAt(0).toUpperCase() + f.slice(1)}
               </Text>
               {count > 0 && (
-                <View style={[styles.filterChipBadge, active && { backgroundColor: 'rgba(255,255,255,0.3)' }]}>
-                  <Text style={[styles.filterChipBadgeText, active && { color: '#fff' }]}>{count}</Text>
+                <View style={[styles.filterChipBadge, active ? { backgroundColor: 'rgba(255,255,255,0.3)' } : { backgroundColor: '#E2E8F0' }]}>
+                  <Text style={[styles.filterChipBadgeText, active ? { color: '#fff' } : { color: SLATE_GREY }]}>{count}</Text>
                 </View>
               )}
             </TouchableOpacity>
           );
         })}
       </View>
-
-      <View style={styles.requestsTitleRow}>
-        <Text style={styles.requestsTitle}>Teacher Leave Requests</Text>
-        <Text style={styles.requestsCount}>{filteredLeaves.length} showing</Text>
-      </View>
     </View>
   );
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <FlatList
-        data={filteredLeaves}
-        keyExtractor={(item) => item.id}
-        renderItem={renderLeave}
-        ListHeaderComponent={ListHeader}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={refresh}
-            colors={[colors.primary]}
-            tintColor={colors.primary}
-          />
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconCircle}>
-              <Ionicons name="document-text-outline" size={40} color={colors.textLight} />
-            </View>
-            <Text style={styles.emptyTitle}>
-              {statusFilter !== 'all'
-                ? `No ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)} Requests`
-                : 'No Leave Requests Yet'}
-            </Text>
-            <Text style={styles.emptySubtext}>
-              {statusFilter !== 'all'
-                ? 'Try a different filter to see other requests.'
-                : 'When teachers apply for leave, their requests will appear here for your review.'}
-            </Text>
+      {/* Header Area */}
+      <View style={[styles.mainHeaderArea, { paddingTop: Math.max(insets.top, 20) + 12 }]}>
+        <View style={styles.mainHeaderTop}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={PURE_WHITE} />
+          </TouchableOpacity>
+          <View style={styles.headerTextWrap}>
+            <Text style={styles.headerTitle}>Leave Approvals</Text>
           </View>
-        }
-      />
+        </View>
+      </View>
+
+      {loading && !refreshing ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color={BRAND_NAVY} />
+        </View>
+      ) : (
+        <FlatList
+          data={filteredLeaves}
+          keyExtractor={(item) => item.id}
+          renderItem={renderLeave}
+          ListHeaderComponent={ListHeader}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={refresh} colors={[BRAND_NAVY]} tintColor={BRAND_NAVY} />
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIconCircle}>
+                <Ionicons name="document-text-outline" size={32} color="#94A3B8" />
+              </View>
+              <Text style={styles.emptyTitle}>No Leave Requests</Text>
+              <Text style={styles.emptySubtext}>
+                {statusFilter === 'all' 
+                  ? 'There are no leave requests at this time.' 
+                  : `There are no ${statusFilter} leave requests.`}
+              </Text>
+            </View>
+          }
+        />
+      )}
     </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F7FA' },
-  loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  list: { paddingBottom: 100 },
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: BG_LIGHT,
+  },
+  mainHeaderArea: {
+    backgroundColor: BRAND_NAVY,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+    zIndex: 10,
+  },
+  mainHeaderTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  headerTextWrap: {
+    flex: 1,
+    marginLeft: 4,
+  },
+  headerTitle: {
+    color: PURE_WHITE,
+    fontSize: 22,
+    fontWeight: '800',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  headerSubtitle: {
+    color: '#93C5FD',
+    fontSize: 14,
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  listContent: {
+    padding: 20,
+    paddingBottom: 100,
+  },
 
+  // Stats Grid matching modern style
   headerSection: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
+    marginBottom: 20,
   },
   statsGrid: {
     flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 20,
   },
   statBox: {
     flex: 1,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.sm,
-    alignItems: 'center',
-    elevation: 2,
+    backgroundColor: PURE_WHITE,
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
     shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.02)',
+    gap: 12,
   },
-  statBoxApproved: { borderBottomWidth: 3, borderBottomColor: '#059669' },
-  statBoxPending:  { borderBottomWidth: 3, borderBottomColor: '#D97706' },
-  statBoxRejected: { borderBottomWidth: 3, borderBottomColor: '#DC2626' },
   statIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
   },
   statBoxNum: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
-    marginTop: 2,
   },
   statBoxLabel: {
-    fontSize: 10,
+    fontSize: 13,
+    color: SLATE_GREY,
     fontWeight: '600',
-    color: colors.textSecondary,
     marginTop: 2,
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
 
+  // Filter Chips Custom
   filterRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
+    flexWrap: 'wrap',
+    gap: 8,
   },
   filterChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    gap: 5,
+    backgroundColor: PURE_WHITE,
     borderWidth: 1,
-    borderColor: colors.border,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
   },
   filterChipText: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '600',
-    color: colors.textSecondary,
+    color: SLATE_GREY,
   },
   filterChipBadge: {
-    backgroundColor: '#F3F4F6',
-    borderRadius: 8,
-    minWidth: 18,
-    paddingHorizontal: 4,
-    paddingVertical: 1,
+    marginLeft: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    minWidth: 20,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   filterChipBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: colors.textSecondary,
-  },
-
-  requestsTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  requestsTitle: {
-    fontSize: fontSize.md,
+    fontSize: 11,
     fontWeight: '800',
-    color: colors.textPrimary,
-  },
-  requestsCount: {
-    fontSize: fontSize.xs,
-    fontWeight: '600',
-    color: colors.textSecondary,
   },
 
-  // Card
+  // Cards
   card: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-    borderLeftWidth: 4,
-    elevation: 2,
+    backgroundColor: PURE_WHITE,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
     shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.02)',
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.md,
+    alignItems: 'center',
+    marginBottom: 16,
   },
   cardHeaderLeft: {
     flex: 1,
-    marginRight: spacing.sm,
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: 12,
   },
   avatarCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
-    fontSize: fontSize.sm,
+    fontSize: 18,
     fontWeight: '800',
   },
   teacherName: {
-    fontSize: fontSize.md,
+    fontSize: 16,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: DARK_TEXT,
   },
   agoText: {
-    fontSize: fontSize.xs,
-    color: colors.textLight,
-    marginTop: 1,
+    fontSize: 12,
+    color: SLATE_GREY,
+    fontWeight: '500',
+    marginTop: 2,
   },
   statusChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 12,
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    gap: 4,
+    paddingVertical: 6,
+    gap: 6,
     borderWidth: 1,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   statusLabel: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
-
   dateSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F9FB',
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   dateCol: {
     flex: 1,
   },
   dateMeta: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '700',
-    color: colors.textLight,
+    color: SLATE_GREY,
     letterSpacing: 1,
-    marginBottom: 3,
+    marginBottom: 4,
   },
   dateMain: {
-    fontSize: fontSize.md,
+    fontSize: 15,
     fontWeight: '700',
-    color: colors.textPrimary,
+    color: DARK_TEXT,
   },
   dateArrow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: spacing.xs,
+    marginHorizontal: 8,
   },
   arrowLine: {
     width: 12,
-    height: 1.5,
-    backgroundColor: colors.border,
+    height: 2,
+    backgroundColor: '#E2E8F0',
   },
   daysPill: {
-    backgroundColor: colors.primaryLight,
+    backgroundColor: PURE_WHITE,
     borderRadius: 12,
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   daysPillText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '800',
-    color: colors.primary,
+    color: SLATE_GREY,
   },
-
   reasonSection: {
     flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
+    gap: 8,
+    marginBottom: 16,
+    backgroundColor: '#F8FAFC',
+    padding: 12,
+    borderRadius: 12,
   },
   reasonText: {
     flex: 1,
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
+    fontSize: 14,
+    color: SLATE_GREY,
     lineHeight: 20,
+    fontWeight: '500',
   },
-
   actionRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
-    marginTop: spacing.md,
+    gap: 12,
+    marginTop: 4,
   },
   actionBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: borderRadius.md,
-    paddingVertical: 10,
-    gap: 6,
+    borderRadius: 12,
+    paddingVertical: 12,
+    gap: 8,
   },
   approveBtn: {
     backgroundColor: '#059669',
+    shadowColor: '#059669',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  approveBtnText: { fontSize: fontSize.sm, fontWeight: '700', color: '#FFFFFF' },
+  approveBtnText: { 
+    fontSize: 14, 
+    fontWeight: '700', 
+    color: '#FFFFFF' 
+  },
   rejectBtn: {
     backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
   },
-  rejectBtnText: { fontSize: fontSize.sm, fontWeight: '700', color: '#DC2626' },
-
+  rejectBtnText: { 
+    fontSize: 14, 
+    fontWeight: '700', 
+    color: '#DC2626' 
+  },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 60,
-    paddingHorizontal: spacing.xxl,
+    paddingVertical: 80,
+    paddingHorizontal: 40,
   },
   emptyIconCircle: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F1F5F9',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: 20,
   },
   emptyTitle: {
-    color: colors.textPrimary,
-    fontSize: fontSize.lg,
+    color: DARK_TEXT,
+    fontSize: 18,
     fontWeight: '700',
-    marginBottom: spacing.xs,
+    marginBottom: 8,
     textAlign: 'center',
   },
   emptySubtext: {
-    color: colors.textSecondary,
-    fontSize: fontSize.sm,
+    color: SLATE_GREY,
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 22,
+    fontWeight: '500',
   },
 });

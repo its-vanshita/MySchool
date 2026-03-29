@@ -138,24 +138,23 @@ export default function AdminDashboardScreen() {
       
       {/* Secondary Overview Card - Teachers */}
        <TouchableOpacity activeOpacity={0.8} onPress={() => router.push('/admin-attendance-list?type=teachers' as any)}>
-        <View style={[styles.scheduleCard, styles.scheduleCardDimmed]}>
-            <View style={[styles.timelineStatus, { backgroundColor: '#E2E8F0' }]} />
-            <View style={styles.scheduleInfo}>
-            <View style={styles.scheduleHeaderRow}>
-                <Text style={[styles.timeText, styles.textDimmed]}>Teachers & Staff</Text>
-                <Text style={[styles.timeText, { color: '#059669', fontSize: 12 }]}>{dailyStats.teacherAttendance}% Present</Text>
+        <View style={[styles.featuredClassCard, { marginTop: 16 }]}>
+            <View style={styles.featuredClassHeader}>
+            <Text style={styles.timeText}>Teachers & Staff</Text>
+            <View style={[styles.liveBadge, { backgroundColor: '#E0F2FE' }]}>
+                <View style={[styles.liveDotAnimated, { backgroundColor: '#0284C7' }]} />
+                <Text style={[styles.liveText, { color: '#0284C7' }]}>{dailyStats.teacherAttendance}% Present</Text>
             </View>
-            <Text style={[styles.subjectText, styles.textDimmed]}>Total Faculty: {dailyStats.totalTeachers}</Text>
-            <View style={styles.scheduleMeta}>
-                <View style={styles.metaBadge}>
-                <Ionicons name="briefcase-outline" size={14} color="#64748B" />
-                <Text style={styles.metaLabel}>Academic Staff</Text>
-                </View>
+            </View>
+            <View style={styles.featuredClassBody}>
+            <View style={[styles.accentLine, { backgroundColor: '#0284C7' }]} />
+            <View style={styles.featuredClassInfo}>
+                <Text style={styles.featuredSubjectText}>Total Faculty: {dailyStats.totalTeachers}</Text>
+                <Text style={styles.featuredMetaText}>Academic Staff & Support</Text>
             </View>
             </View>
         </View>
        </TouchableOpacity>
-
 
       {/* Reminders Tile */}
       <Text style={styles.sectionTitle}>Priority Reminders</Text>

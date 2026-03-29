@@ -78,20 +78,14 @@ function RootLayoutNav() {
               name="(teacher)/assign-notice"
               options={{
                 presentation: 'modal',
-                headerShown: true,
-                headerTitle: 'Assign Notice',
-                headerStyle: { backgroundColor: colors.primary },
-                headerTintColor: colors.white,
+                headerShown: false,
               }}
             />
             <Stack.Screen
               name="(admin)/admin-leave-approvals"
               options={{
                 presentation: 'card',
-                headerShown: true,
-                headerTitle: 'Leave Approvals',
-                headerStyle: { backgroundColor: colors.primary },
-                headerTintColor: colors.white,
+                headerShown: false,
               }}
             />
             <Stack.Screen
