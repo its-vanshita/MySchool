@@ -7,35 +7,58 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Platform,
+  Dimensions,
+  KeyboardAvoidingView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAdminCalendarSetup, type AdminCalendarTarget } from '../../src/hooks/useAdminCalendar';
-import { useTheme } from '../../src/context/ThemeContext';
-import { spacing, borderRadius, fontSize } from '../../src/theme/spacing';
 import type { CalendarEventType } from '../../src/types';
 
-const EVENT_TYPES: { key: CalendarEventType; label: string; icon: string; color: string }[] = [
-  { key: 'event', label: 'Event', icon: 'star', color: '#10B981' },
-  { key: 'exam', label: 'Exam', icon: 'school', color: '#F59E0B' },
-  { key: 'meeting', label: 'Meeting', icon: 'people', color: '#7C3AED' },
-  { key: 'holiday', label: 'Holiday', icon: 'sunny', color: '#EF4444' },
+const BRAND_NAVY = '#153462';
+const BG_LIGHT = '#F8F9FB';
+const PURE_WHITE = '#FFFFFF';
+const SLATE_GREY = '#64748B';
+const DARK_TEXT = '#1E293B';
+const STATUS_RED = '#DC2626';
+
+const { width } = Dimensions.get('window');
+
+const EVENT_TYPES: { key: CalendarEventType; label: string; icon: any; color: string; bg: string }[] = [
+  { key: 'event', label: 'Event', icon: 'star', color: '#0ea5e9', bg: '#e0f2fe' },
+  { key: 'exam', label: 'Exam', icon: 'school', color: '#f59e0b', bg: '#fef3c7' },
+  { key: 'meeting', label: 'Meeting', icon: 'people', color: '#8b5cf6', bg: '#ede9fe' },
+  { key: 'holiday', label: 'Holiday', icon: 'sunny', color: '#ef4444', bg: '#fee2e2' },
 ];
 
-const TARGET_OPTIONS: { key: 'teacher' | 'student' | 'both'; label: string; icon: string }[] = [
+const TARGET_OPTIONS: { key: AdminCalendarTarget; label: string; icon: any }[] = [
   { key: 'both', label: 'All (School)', icon: 'business' },
-  { key: 'teacher', label: 'Teachers Only', icon: 'school' },
-  { key: 'student', label: 'Students Only', icon: 'people' },
+  { key: 'teacher', label: 'Teachers', icon: 'school' },
+  { key: 'student', label: 'Students', icon: 'people' },
 ];
+
+function formatDateShort(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${d.getDate()} ${months[d.getMonth()]}, ${d.getFullYear()}`;
+  } catch {
+    return dateStr;
+  }
+}
 
 export default function AdminManageCalendarScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = getStyles(colors);
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { events, addEvent, deleteEvent } = useAdminCalendarSetup();
-  
+
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
   const [type, setType] = useState<CalendarEventType>('event');
-  const [targetAudience, setTargetAudience] = useState<'teacher' | 'student' | 'both'>('both');
+  const [targetAudience, setTargetAudience] = useState<AdminCalendarTarget>('both');
   const [date, setDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [description, setDescription] = useState('');
@@ -93,306 +116,669 @@ export default function AdminManageCalendarScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Manage Calendar Events</Text>
-          <Text style={styles.headerCount}>{events.length} added events</Text>
-        </View>
-
-        {/* List Events */}
-        {events.length === 0 ? (
-          <View style={styles.emptyState}>
-            <View style={styles.emptyIconCircle}>
-              <Ionicons name="calendar" size={32} color={colors.textLight} />
-            </View>
-            <Text style={styles.emptyTitle}>No custom events</Text>
-            <Text style={styles.emptySubtext}>Add events to make them available in the teacher and parent dashboards.</Text>
+      {/* Header Area */}
+      <View style={[styles.headerArea, { paddingTop: Math.max(insets.top, 20) + 12 }]}>
+        <View style={styles.headerTop}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={PURE_WHITE} />
+          </TouchableOpacity>
+          <View style={styles.headerTextWrap}>
+            <Text style={styles.headerTitle}>Manage Calendar</Text>
           </View>
-        ) : (
-          events.map((ev) => {
-            const evConfig = EVENT_TYPES.find((t) => t.key === ev.type)!;
-            const tgtConfig = TARGET_OPTIONS.find((t) => t.key === ev.target_audience)!;
-            
-            return (
-              <View key={ev.id} style={[styles.eventCard, { borderLeftColor: evConfig.color }]}>
-                <View style={styles.eventTop}>
-                  <View style={styles.eventTopLeft}>
-                    <View style={[styles.typeBadge, { backgroundColor: evConfig.color + '20' }]}>
-                      <Ionicons name={evConfig.icon as any} size={12} color={evConfig.color} />
-                      <Text style={[styles.typeBadgeText, { color: evConfig.color }]}>{evConfig.label}</Text>
+        </View>
+      </View>
+
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 20}
+      >
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Shared Events</Text>
+            <View style={styles.badgeWrap}>
+              <Text style={styles.sectionCount}>{events.length}</Text>
+            </View>
+          </View>
+
+          {/* Event List */}
+          {events.length === 0 && !showForm ? (
+             <View style={styles.emptyCard}>
+               <View style={styles.emptyIconCircle}>
+                 <Ionicons name="calendar-outline" size={40} color="#94A3B8" />
+               </View>
+               <Text style={styles.emptyTitle}>No custom events</Text>
+               <Text style={styles.emptySubtext}>
+                 Add events to broadcast them to teacher and student calendars.
+               </Text>
+             </View>
+          ) : (
+            events.map((ev) => {
+              const evConfig = EVENT_TYPES.find((t) => t.key === ev.type)!;
+              const tgtConfig = TARGET_OPTIONS.find((t) => t.key === ev.target_audience)!;
+              const isMultiDay = ev.date !== ev.end_date;
+
+              return (
+                <View key={ev.id} style={[styles.eventCard, { borderLeftColor: evConfig.color, borderLeftWidth: 4 }]}>
+                  <View style={styles.eventHeader}>
+                    <View style={styles.eventHeaderLeft}>
+                      <View style={[styles.typeBadge, { backgroundColor: evConfig.bg }]}>
+                        <Ionicons name={evConfig.icon} size={12} color={evConfig.color} />
+                        <Text style={[styles.typeBadgeText, { color: evConfig.color }]}>
+                          {evConfig.label}
+                        </Text>
+                      </View>
+                      <Text style={styles.eventTitle}>{ev.title}</Text>
                     </View>
-                    <View style={styles.targetBadge}>
-                      <Ionicons name={tgtConfig.icon as any} size={10} color={colors.textSecondary} />
-                      <Text style={styles.targetBadgeText}>{tgtConfig.label}</Text>
-                    </View>
+                    <TouchableOpacity
+                      style={styles.deleteBtn}
+                      onPress={() => handleDelete(ev.id)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="trash-outline" size={18} color={STATUS_RED} />
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity onPress={() => handleDelete(ev.id)} style={{ padding: 4 }}>
-                    <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                  </TouchableOpacity>
-                </View>
-                
-                <Text style={styles.eventTitle}>{ev.title}</Text>
-                
-                <View style={styles.dateRow}>
-                  <Ionicons name="calendar-outline" size={14} color={colors.textLight} />
-                  <Text style={styles.dateText}>
-                    {ev.date}
-                    {ev.end_date && ev.end_date !== ev.date ? ` — ${ev.end_date}` : ''}
-                  </Text>
-                </View>
-                {ev.time || ev.venue ? (
-                  <View style={styles.dateRow}>
-                    <Ionicons name="location-outline" size={14} color={colors.textLight} />
+
+                  <View style={styles.dateBlock}>
+                    <Ionicons name="calendar" size={16} color={SLATE_GREY} />
                     <Text style={styles.dateText}>
-                      {[ev.time, ev.venue].filter(Boolean).join(' • ')}
+                      {formatDateShort(ev.date)}
+                      {isMultiDay ? ` - ${formatDateShort(ev.end_date)}` : ''}
                     </Text>
                   </View>
-                ) : null}
-                
-                {ev.description ? (
-                  <Text style={styles.eventDesc}>{ev.description}</Text>
-                ) : null}
+
+                  {(ev.time || ev.venue) && (
+                    <View style={styles.timeVenueRow}>
+                      {ev.time && (
+                        <View style={styles.tvItem}>
+                          <Ionicons name="time-outline" size={14} color={SLATE_GREY} />
+                          <Text style={styles.tvText}>{ev.time}</Text>
+                        </View>
+                      )}
+                      {ev.time && ev.venue && <View style={styles.tvDot} />}
+                      {ev.venue && (
+                        <View style={styles.tvItem}>
+                          <Ionicons name="location-outline" size={14} color={SLATE_GREY} />
+                          <Text style={styles.tvText}>{ev.venue}</Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+
+                  {ev.description ? (
+                    <Text style={styles.descriptionText} numberOfLines={2}>
+                      {ev.description}
+                    </Text>
+                  ) : null}
+
+                  <View style={styles.targetRow}>
+                    <Text style={styles.targetLabel}>Visible to:</Text>
+                    <View style={styles.targetChip}>
+                      <Ionicons name={tgtConfig.icon} size={12} color={BRAND_NAVY} />
+                      <Text style={styles.targetChipText}>{tgtConfig.label}</Text>
+                    </View>
+                  </View>
+                </View>
+              );
+            })
+          )}
+
+          {/* Form */}
+          {showForm && (
+            <View style={styles.formCard}>
+              <View style={styles.formHeader}>
+                <Ionicons name="add-circle" size={24} color={BRAND_NAVY} />
+                <Text style={styles.formTitle}>Create New Event</Text>
               </View>
-            );
-          })
-        )}
 
-        {/* Add Event Form */}
-        {showForm && (
-          <View style={styles.formCard}>
-            <Text style={styles.formTitle}>Add New Event</Text>
-            
-            <Text style={styles.label}>Title</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. Science Fair"
-              placeholderTextColor={colors.textLight}
-              value={title}
-              onChangeText={setTitle}
-            />
+              <Text style={styles.label}>Event Title</Text>
+              <View style={styles.inputWrap}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g. Annual Sports Day"
+                  placeholderTextColor="#94A3B8"
+                  value={title}
+                  onChangeText={setTitle}
+                />
+              </View>
 
-            <Text style={styles.label}>Event Type</Text>
-            <View style={styles.typeRow}>
-              {EVENT_TYPES.map((t) => (
+              <Text style={styles.label}>Event Type</Text>
+              <View style={styles.typeRow}>
+                {EVENT_TYPES.map(t => (
+                  <TouchableOpacity
+                    key={t.key}
+                    style={[styles.typeSelectChip, type === t.key && { backgroundColor: t.bg, borderColor: t.color }]}
+                    onPress={() => setType(t.key)}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name={t.icon} size={16} color={type === t.key ? t.color : SLATE_GREY} />
+                    <Text style={[styles.typeSelectText, type === t.key && { color: t.color, fontWeight: '700' }]}>
+                      {t.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.label}>Target Audience</Text>
+              <View style={styles.targetSelectRow}>
+                {TARGET_OPTIONS.map(tg => (
+                  <TouchableOpacity
+                    key={tg.key}
+                    style={[styles.targetSelectBtn, targetAudience === tg.key && styles.targetSelectBtnActive]}
+                    onPress={() => setTargetAudience(tg.key)}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name={tg.icon} size={16} color={targetAudience === tg.key ? PURE_WHITE : SLATE_GREY} />
+                    <Text style={[styles.targetSelectText, targetAudience === tg.key && styles.targetSelectTextActive]}>
+                      {tg.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <View style={styles.dateInputRow}>
+                <View style={styles.dateCol}>
+                  <Text style={styles.label}>Start Date</Text>
+                  <View style={styles.inputWrap}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="YYYY-MM-DD"
+                      placeholderTextColor="#94A3B8"
+                      value={date}
+                      onChangeText={setDate}
+                      maxLength={10}
+                    />
+                  </View>
+                </View>
+                <View style={styles.dateCol}>
+                  <Text style={styles.label}>End Date (Optional)</Text>
+                  <View style={styles.inputWrap}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="YYYY-MM-DD"
+                      placeholderTextColor="#94A3B8"
+                      value={endDate}
+                      onChangeText={setEndDate}
+                      maxLength={10}
+                    />
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.dateInputRow}>
+                <View style={styles.dateCol}>
+                  <Text style={styles.label}>Time (Optional)</Text>
+                  <View style={styles.inputWrap}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="e.g. 10:00 AM"
+                      placeholderTextColor="#94A3B8"
+                      value={time}
+                      onChangeText={setTime}
+                    />
+                  </View>
+                </View>
+                <View style={styles.dateCol}>
+                  <Text style={styles.label}>Venue (Optional)</Text>
+                  <View style={styles.inputWrap}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="e.g. Main Hall"
+                      placeholderTextColor="#94A3B8"
+                      value={venue}
+                      onChangeText={setVenue}
+                    />
+                  </View>
+                </View>
+              </View>
+
+              <Text style={styles.label}>Description (Optional)</Text>
+              <View style={[styles.inputWrap, { minHeight: 80 }]}>
+                <TextInput
+                  style={[styles.input, { minHeight: 80, paddingTop: 12 }]}
+                  placeholder="Additional details..."
+                  placeholderTextColor="#94A3B8"
+                  value={description}
+                  onChangeText={setDescription}
+                  multiline
+                  textAlignVertical="top"
+                />
+              </View>
+
+              <View style={styles.formActions}>
                 <TouchableOpacity
-                  key={t.key}
-                  style={[styles.typeOption, type === t.key && { backgroundColor: t.color, borderColor: t.color }]}
-                  onPress={() => setType(t.key)}
+                  style={styles.cancelFormBtn}
+                  onPress={() => {
+                    setShowForm(false);
+                    resetForm();
+                  }}
+                  activeOpacity={0.7}
                 >
-                  <Ionicons name={t.icon as any} size={14} color={type === t.key ? '#fff' : t.color} />
-                  <Text style={[styles.typeOptionText, { color: type === t.key ? '#fff' : colors.textSecondary }]}>
-                    {t.label}
-                  </Text>
+                  <Text style={styles.cancelFormBtnText}>Cancel</Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.label}>Target Audience</Text>
-            <View style={styles.targetRow}>
-              {TARGET_OPTIONS.map((t) => (
-                <TouchableOpacity
-                  key={t.key}
-                  style={[styles.targetOption, targetAudience === t.key && styles.targetOptionActive]}
-                  onPress={() => setTargetAudience(t.key)}
-                >
-                  <Ionicons name={t.icon as any} size={16} color={targetAudience === t.key ? colors.primary : colors.textSecondary} />
-                  <Text style={[styles.targetOptionText, targetAudience === t.key && styles.targetOptionTextActive]}>
-                    {t.label}
-                  </Text>
+                <TouchableOpacity style={styles.submitFormBtn} onPress={handleAddEvent} activeOpacity={0.8}>
+                  <Ionicons name="save" size={16} color={PURE_WHITE} />
+                  <Text style={styles.submitFormBtnText}>Add Event</Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-
-            <View style={styles.row}>
-              <View style={styles.col}>
-                <Text style={styles.label}>Start Date</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor={colors.textLight}
-                  value={date}
-                  onChangeText={setDate}
-                />
-              </View>
-              <View style={styles.col}>
-                <Text style={styles.label}>End Date (Optional)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor={colors.textLight}
-                  value={endDate}
-                  onChangeText={setEndDate}
-                />
               </View>
             </View>
+          )}
 
-            <View style={styles.row}>
-              <View style={styles.col}>
-                <Text style={styles.label}>Time (Optional)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. 09:00 AM"
-                  placeholderTextColor={colors.textLight}
-                  value={time}
-                  onChangeText={setTime}
-                />
-              </View>
-              <View style={styles.col}>
-                <Text style={styles.label}>Venue (Optional)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. Auditorium"
-                  placeholderTextColor={colors.textLight}
-                  value={venue}
-                  onChangeText={setVenue}
-                />
-              </View>
-            </View>
+          {!showForm && (
+            <TouchableOpacity 
+              style={styles.fabBtn} 
+              onPress={() => setShowForm(true)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="add" size={24} color={PURE_WHITE} />
+              <Text style={styles.fabBtnText}>Add Event</Text>
+            </TouchableOpacity>
+          )}
 
-            <Text style={styles.label}>Description</Text>
-            <TextInput
-              style={[styles.input, { height: 80 }]}
-              placeholder="Event details..."
-              placeholderTextColor={colors.textLight}
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              textAlignVertical="top"
-            />
-
-            <View style={styles.formActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={resetForm}>
-                <Text style={styles.cancelBtnText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.submitBtn} onPress={handleAddEvent}>
-                <Ionicons name="add" size={20} color={colors.white} />
-                <Text style={styles.submitBtnText}>Add Event</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-        
-        <View style={{ height: 100 }} />
-      </ScrollView>
-
-      {/* FAB */}
-      {!showForm && (
-        <TouchableOpacity style={styles.fab} onPress={() => setShowForm(true)}>
-          <Ionicons name="add" size={28} color={colors.white} />
-        </TouchableOpacity>
-      )}
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
 
-const getStyles = (colors: any) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F9FB' },
-  content: { padding: spacing.lg, paddingBottom: 100 },
-  
-  header: {
+const styles = StyleSheet.create({
+  container: { 
+    flex: 1, 
+    backgroundColor: BG_LIGHT,
+  },
+  headerArea: {
+    backgroundColor: BRAND_NAVY,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+    zIndex: 10,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  headerTextWrap: {
+    flex: 1,
+    marginLeft: 4,
+  },
+  headerTitle: {
+    color: PURE_WHITE,
+    fontSize: 22,
+    fontWeight: '800',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
+  },
+  content: {
+    padding: 20,
+  },
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: 16,
+    marginTop: 8,
   },
-  headerTitle: { fontSize: fontSize.lg, fontWeight: '800', color: colors.textPrimary },
-  headerCount: { fontSize: fontSize.sm, fontWeight: '600', color: colors.textSecondary },
-  
-  emptyState: {
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: DARK_TEXT,
+  },
+  badgeWrap: {
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  sectionCount: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: SLATE_GREY,
+  },
+  emptyCard: {
+    backgroundColor: PURE_WHITE,
+    borderRadius: 20,
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xxxl,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
+    padding: 40,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 12,
+    elevation: 2,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(0,0,0,0.02)',
   },
   emptyIconCircle: {
-    width: 64, height: 64, borderRadius: 32,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: spacing.md,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
-  emptyTitle: { fontSize: fontSize.md, fontWeight: '700', color: colors.textPrimary, marginBottom: 4 },
-  emptySubtext: { fontSize: fontSize.sm, color: colors.textSecondary, textAlign: 'center' },
-  
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: DARK_TEXT,
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: SLATE_GREY,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+
+  // Event Card
   eventCard: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
-    borderLeftWidth: 4,
-    elevation: 2,
-    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 },
-  },
-  eventTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
-  eventTopLeft: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  typeBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20, gap: 4 },
-  typeBadgeText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
-  targetBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20, backgroundColor: '#F3F4F6', gap: 4 },
-  targetBadgeText: { fontSize: 10, fontWeight: '600', color: colors.textSecondary },
-  eventTitle: { fontSize: fontSize.lg, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 },
-  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  dateText: { fontSize: fontSize.sm, color: colors.textSecondary, fontWeight: '500' },
-  eventDesc: { fontSize: fontSize.sm, color: colors.textSecondary, marginTop: 8, lineHeight: 20 },
-  
-  formCard: {
-    backgroundColor: colors.white,
-    padding: spacing.lg,
-    borderRadius: borderRadius.xl,
-    marginTop: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    elevation: 4,
-    shadowColor: colors.primary, shadowOpacity: 0.1, shadowRadius: 10, shadowOffset: { width: 0, height: 4 },
-  },
-  formTitle: { fontSize: fontSize.lg, fontWeight: '800', color: colors.textPrimary, marginBottom: spacing.md },
-  label: { fontSize: 12, fontWeight: '700', color: colors.textPrimary, marginTop: spacing.md, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
-  input: {
-    backgroundColor: '#F3F4F6',
-    borderWidth: 1, borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.md, paddingVertical: 12,
-    fontSize: fontSize.sm, color: colors.textPrimary,
-  },
-  typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  typeOption: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 16, paddingVertical: 8,
+    backgroundColor: PURE_WHITE,
     borderRadius: 20,
-    borderWidth: 1, borderColor: colors.border,
-    backgroundColor: '#fff',
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3,
+    borderRightWidth: 1,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: 'rgba(0,0,0,0.02)',
   },
-  typeOptionText: { fontSize: 13, fontWeight: '600' },
-  targetRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  targetOption: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    paddingVertical: 12,
-    borderRadius: borderRadius.md,
-    borderWidth: 1, borderColor: colors.border,
-    backgroundColor: '#fff',
+  eventHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
   },
-  targetOptionActive: { backgroundColor: colors.primaryLight, borderColor: colors.primary },
-  targetOptionText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
-  targetOptionTextActive: { color: colors.primary, fontWeight: '700' },
-  
-  row: { flexDirection: 'row', gap: spacing.md },
-  col: { flex: 1 },
-  
-  formActions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.xl },
-  cancelBtn: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: borderRadius.md, backgroundColor: '#F3F4F6' },
-  cancelBtnText: { fontSize: fontSize.md, fontWeight: '600', color: colors.textSecondary },
-  submitBtn: { flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: borderRadius.md, backgroundColor: colors.primary },
-  submitBtnText: { fontSize: fontSize.md, fontWeight: '700', color: colors.white },
-  
-  fab: {
-    position: 'absolute', bottom: 24, right: 24,
-    width: 56, height: 56, borderRadius: 28,
-    backgroundColor: colors.primary,
-    alignItems: 'center', justifyContent: 'center',
-    elevation: 4, shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 6, shadowOffset: { width: 0, height: 3 },
+  eventHeaderLeft: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  typeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginBottom: 8,
+    gap: 4,
+  },
+  typeBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  eventTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: DARK_TEXT,
+  },
+  deleteBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FEF2F2',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dateBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  dateText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: DARK_TEXT,
+  },
+  timeVenueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  tvItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  tvText: {
+    fontSize: 13,
+    color: SLATE_GREY,
+    fontWeight: '500',
+  },
+  tvDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#CBD5E1',
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: SLATE_GREY,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  targetRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingTop: 12,
+    gap: 8,
+  },
+  targetLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: SLATE_GREY,
+  },
+  targetChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    gap: 6,
+  },
+  targetChipText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: BRAND_NAVY,
+  },
+
+  // Form
+  formCard: {
+    backgroundColor: PURE_WHITE,
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.03)',
+  },
+  formHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  formTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: DARK_TEXT,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: DARK_TEXT,
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  inputWrap: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 16,
+  },
+  input: {
+    padding: 16,
+    fontSize: 15,
+    color: DARK_TEXT,
+    fontWeight: '500',
+  },
+  typeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  typeSelectChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: PURE_WHITE,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 6,
+  },
+  typeSelectText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: SLATE_GREY,
+  },
+  targetSelectRow: {
+    flexDirection: 'row',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    padding: 6,
+    marginBottom: 16,
+  },
+  targetSelectBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 6,
+  },
+  targetSelectBtnActive: {
+    backgroundColor: BRAND_NAVY,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  targetSelectText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: SLATE_GREY,
+  },
+  targetSelectTextActive: {
+    color: PURE_WHITE,
+    fontWeight: '700',
+  },
+  dateInputRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  dateCol: {
+    flex: 1,
+  },
+  formActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 12,
+  },
+  cancelFormBtn: {
+    flex: 1,
+    backgroundColor: PURE_WHITE,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelFormBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: SLATE_GREY,
+  },
+  submitFormBtn: {
+    flex: 1.5,
+    flexDirection: 'row',
+    backgroundColor: BRAND_NAVY,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    shadowColor: BRAND_NAVY,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  submitFormBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: PURE_WHITE,
+  },
+
+  // FAB
+  fabBtn: {
+    flexDirection: 'row',
+    backgroundColor: BRAND_NAVY,
+    height: 56,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    shadowColor: BRAND_NAVY,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+    gap: 8,
+  },
+  fabBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: PURE_WHITE,
   },
 });
-

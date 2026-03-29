@@ -92,20 +92,14 @@ function RootLayoutNav() {
               name="(admin)/admin-manage-timetable"
               options={{
                 presentation: 'card',
-                headerShown: true,
-                headerTitle: 'Manage Timetable',
-                headerStyle: { backgroundColor: colors.primary },
-                headerTintColor: colors.white,
+                headerShown: false,
               }}
             />
             <Stack.Screen
               name="(admin)/admin-manage-calendar"
               options={{
                 presentation: 'card',
-                headerShown: true,
-                headerTitle: 'Manage Calendar',
-                headerStyle: { backgroundColor: colors.primary },
-                headerTintColor: colors.white,
+                headerShown: false,
               }}
             />
             <Stack.Screen
